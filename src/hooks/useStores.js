@@ -9,8 +9,8 @@ export function useStores(stores, searchKeyword) {
     return stores.filter(
       (store) =>
         store.name?.toLowerCase().includes(keyword) ||
-        store.address?.toLowerCase().includes(keyword) ||
-        store.store_contacts?.[0]?.phone?.includes(keyword),
+        (Array.isArray(store.keyword) &&
+          store.keyword.some((k) => k.toLowerCase().includes(keyword))),
     );
   }, [stores, searchKeyword]);
 }
