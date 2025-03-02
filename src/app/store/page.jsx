@@ -31,6 +31,11 @@ function StorePage() {
     fetchStores();
   }, []);
 
+  const handleSearch = (keyword) => {
+    console.log('검색어:', keyword);
+    setSearchKeyWord(keyword);
+  };
+
   // 로딩 시 표시방법에 대해 의논할 것
   if (isLoading) {
     return <div>로딩 중...</div>;
@@ -39,8 +44,12 @@ function StorePage() {
   // 테이블은 이름만 오름차순/내림차순 정렬
   return (
     <>
-      <Search />
-      {isLoading ? <div>로딩 중...</div> : <StoreList stores={stores} />}
+      <Search onSearch={handleSearch} />
+      {isLoading ? (
+        <div>로딩 중...</div>
+      ) : (
+        <StoreList stores={filteredStores} />
+      )}
     </>
   );
 }
