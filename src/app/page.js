@@ -1,5 +1,6 @@
 'use client';
 
+import Map3D from '@/components/Map3D';
 import styled from '@emotion/styled';
 
 const ExampleFont = styled.div`
@@ -7,5 +8,7 @@ const ExampleFont = styled.div`
 `;
 
 export default function Home() {
-  return <ExampleFont>Welcome</ExampleFont>;
+  return (
+    <Map3D />
+  );
 }
