@@ -1,8 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import useWindowSize from '@/hooks/useWindowSize';
+import { useEffect, useRef } from 'react';
 
 const Map3D = () => {
+  const { width, height } = useWindowSize();
+
   useEffect(() => {
     const script = document.createElement('script');
     script.src = 'https://cdn.xdworld.kr/latest/XDWorldEM.js';
@@ -70,6 +73,12 @@ const Map3D = () => {
       document.body.removeChild(script);
     };
   }, []);
+
+  useEffect(() => {
+    if (typeof Module !== 'undefined' && Module.Resize) {
+      Module.Resize(width, height);
+    }
+  }, [width, height]);
 
   return (
     <div id="map3D" style={{ width: '100dvw', height: '100dvh' }}></div>
