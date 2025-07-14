@@ -1,16 +1,16 @@
-import localFont from 'next/font/local';
+import { Gothic_A1, Noto_Serif_KR } from 'next/font/google';
 import './globals.css';
 import Providers from '@/app/providers';
 
-const geistSans = localFont({
-  src: './fonts/GeistVF.woff',
-  variable: '--font-geist-sans',
-  weight: '100 900',
+const gothic = Gothic_A1({
+  weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+  subsets: ['latin'],
+  variable: '--font-gothic',
 });
-const geistMono = localFont({
-  src: './fonts/GeistMonoVF.woff',
-  variable: '--font-geist-mono',
-  weight: '100 900',
+const noto = Noto_Serif_KR({
+  weight: ['200', '300', '400', '500', '600', '700', '900'],
+  subsets: ['latin'],
+  variable: '--font-noto',
 });
 
 export const metadata = {
@@ -20,8 +20,10 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="ko">
+      <body
+        className={`${gothic.className} ${noto.className}`}
+      >
         <Providers>{children}</Providers>
       </body>
     </html>
