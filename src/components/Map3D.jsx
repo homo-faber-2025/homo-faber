@@ -57,7 +57,7 @@ const Map3D = ({ stores }) => {
         google.zerolevelOffset = 1;
 
 
-        Module.getTileLayerList().createXDServerLayer({
+        const layer = Module.getTileLayerList().createXDServerLayer({
           url: 'https://xdworld.vworld.kr',
           servername: 'XDServer3d',
           name: 'facility_build',
@@ -65,7 +65,10 @@ const Map3D = ({ stores }) => {
           minLevel: 0,
           maxLevel: 15,
         });
-      };
+
+        layer.setUseRecoverHsv(true);
+        layer.setRecoverHsvValue(1, 1, 1);
+      }
 
       document.body.appendChild(script);
     };

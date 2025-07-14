@@ -8,16 +8,16 @@ export function usePOI(stores) {
     const layerList = new Module.JSLayerList(true);
     const layer = layerList.createLayer("STORE_POI_LAYER", Module.ELT_3DPOINT);
 
-    const SIZE_OPTIONS = [120, 150, 180, 200];
-    const LINE_HEIGHT_OPTIONS = [10, 20, 30, 40];
+    const SIZE_OPTIONS = [120, 150, 180];
+    const LINE_HEIGHT_OPTIONS = [10, 20, 30];
     const LINE_COLOR = new Module.JSColor(255, 255, 255);
 
     // 그림자 설정
-    const SHADOW_COLOR = 'rgba(255, 255, 255, 0.8)';
+    const SHADOW_COLOR = 'rgba(255, 255, 255, 0.3)';
     const SHADOW_BLUR = 10;
     const SHADOW_OFFSET_X = 1;
     const SHADOW_OFFSET_Y = 2;
-    const PADDING = SHADOW_BLUR + Math.max(SHADOW_OFFSET_X, SHADOW_OFFSET_Y); 
+    const PADDING = SHADOW_BLUR + Math.max(SHADOW_OFFSET_X, SHADOW_OFFSET_Y);
 
     // stores가 변경될 때마다 모든 POI를 새로 생성
     stores.forEach(store => {
@@ -50,7 +50,6 @@ export function usePOI(stores) {
           const ctx = canvas.getContext('2d');
           canvas.width = newWidth + (PADDING * 2);
           canvas.height = newHeight + (PADDING * 2);
-
           // 그림자 설정
           ctx.shadowColor = SHADOW_COLOR;
           ctx.shadowBlur = SHADOW_BLUR;
@@ -66,6 +65,17 @@ export function usePOI(stores) {
             newHeight
           );
 
+          // blend style
+          ctx.globalCompositeOperation = 'lighten';
+          ctx.fillStyle = 'rgba(65,255,138,0.7)';
+          ctx.fillRect(PADDING, PADDING, newWidth, newHeight);
+          ctx.globalCompositeOperation = 'source-over';
+
+          //stroke
+          ctx.lineWidth = 0.5;
+          ctx.strokeStyle = '#000000';
+          ctx.strokeRect(PADDING, PADDING, newWidth, newHeight);
+
           // POI 설정
           poi.setImage(
             ctx.getImageData(0, 0, canvas.width, canvas.height).data,
@@ -73,13 +83,29 @@ export function usePOI(stores) {
             canvas.height
           );
           poi.setText(store.name);
+          poi.setFontStyle(
+            "Gothic A1",
+            15,
+            200,
+            new Module.JSColor(255, 255, 255),
+            new Module.JSColor(0, 0, 0)
+          );
           poi.setPositionLine(randomLineHeight, LINE_COLOR);
           layer.addObject(poi, 0);
         };
 
         img.src = store.thumbnail_img;
+
+
       } else {
         poi.setText(store.name);
+        poi.setFontStyle(
+          "Gothic A1",
+          15,
+          200,
+          new Module.JSColor(255, 255, 255),
+          new Module.JSColor(0, 0, 0)
+        );
         poi.setPositionLine(randomLineHeight, LINE_COLOR);
         layer.addObject(poi, 0);
       }
