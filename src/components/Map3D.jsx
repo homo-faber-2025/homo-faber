@@ -1,10 +1,12 @@
 'use client';
 
 import useWindowSize from '@/hooks/useWindowSize';
-import { useEffect, useRef } from 'react';
+import { usePOI } from '@/hooks/usePOI';
+import { useEffect } from 'react';
 
-const Map3D = () => {
+const Map3D = ({ stores }) => {
   const { width, height } = useWindowSize();
+  usePOI(stores);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -37,15 +39,15 @@ const Map3D = () => {
             count: 5,
           },
           defaultKey:
-            'DFG~EpIREQDmdJe1E9QpdBca#FBSDJFmdzHoe(fB4!e1E(JS1I==',
+            'dJe!e!iaEpHmEpCrD5QpEQf2#FBrdzDmd(BQDQEQDJdaE(iB',
         });
 
         Module.getViewCamera().setLocation(
-          new Module.JSVector3D(126.9958537267327, 37.56628736129694, 40.496476641856134)
+          new Module.JSVector3D(126.99514470317824, 37.568451978489975, 46)
         );
-        Module.getViewCamera().setDirect(24);
+        Module.getViewCamera().setDirect(124);
         Module.getViewCamera().setFov(45);
-        Module.getViewCamera().setTilt(10);
+        Module.getViewCamera().setTilt(11);
 
         // 구글 배경지도가 로딩속도가 빠름
         // 구글은 푸른색감 기본지도는 초록색감 -> 최종 디자인보고 결정
@@ -53,6 +55,7 @@ const Map3D = () => {
         google.layername = "satellite";
         google.quality = "middle";
         google.zerolevelOffset = 1;
+
 
         Module.getTileLayerList().createXDServerLayer({
           url: 'https://xdworld.vworld.kr',
