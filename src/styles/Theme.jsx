@@ -8,10 +8,7 @@ const theme = {
   color: {
     default: '#222',
     primary: '#524fa1',
-  },
-  lineHeight: {
-    normal: 1.6,
-  },
+  }
 };
 
 export default theme;
