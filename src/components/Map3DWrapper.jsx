@@ -1,15 +1,11 @@
 'use client';
 
-import Map3D from '@/components/Map3D';
+import Map3D from './Map3D';
 import { getStores } from '@/utils/supabase/stores';
-import styled from '@emotion/styled';
+import { usePOI } from '@/hooks/usePOI';
 import { useEffect, useState } from 'react';
 
-const ExampleFont = styled.div`
-  font-size: ${(props) => props.theme.fontSize.xlg};
-`;
-
-export default function Home() {
+export default function Map3DWrapper() {
   const [stores, setStores] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -24,15 +20,13 @@ export default function Home() {
         setIsLoading(false);
       }
     }
-
     fetchStores();
   }, []);
+
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  return (
-    <></>
-  );
-}
+  return <Map3D stores={stores} />
+} 

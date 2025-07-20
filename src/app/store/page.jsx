@@ -85,21 +85,23 @@ function StorePage() {
 
   return (
     <>
-      <Search onSearch={handleSearch} />
+      <div style={{ width: '80vw', position: 'absolute', right: '0px', top: '0px', zIndex: '5' }}>
+        <Search onSearch={handleSearch} />
 
-      <StoreFilters
-        allTags={allTags}
-        selectedTags={selectedTags}
-        onTagClick={handleTagClick}
-      />
+        <StoreFilters
+          allTags={allTags}
+          selectedTags={selectedTags}
+          onTagClick={handleTagClick}
+        />
 
-      <StoreSorting sortBy={sortBy} onSortChange={handleSortChange} />
+        <StoreSorting sortBy={sortBy} onSortChange={handleSortChange} />
 
-      {isLoading ? (
-        <div>로딩 중...</div>
-      ) : (
-        <StoreList stores={filteredStores} />
-      )}
+        {isLoading ? (
+          <div>로딩 중...</div>
+        ) : (
+          <StoreList stores={filteredStores} />
+        )}
+      </div>
     </>
   );
 }
