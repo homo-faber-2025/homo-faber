@@ -1,38 +1,41 @@
 'use client';
 
-import Map3D from '@/components/Map3D';
-import { getStores } from '@/utils/supabase/stores';
+import StorePageContent from '@/components/StorePageContent';
+import { useApp } from '@/contexts/AppContext';
+import { useRouter } from 'next/navigation';
 import styled from '@emotion/styled';
-import { useEffect, useState } from 'react';
+import StorePage from '@/app/store/page';
 
-const ExampleFont = styled.div`
-  font-size: ${(props) => props.theme.fontSize.xlg};
+const PreviewContent = styled.div`
+  cursor: pointer;
 `;
 
 export default function Home() {
-  const [stores, setStores] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { stores, isLoading } = useApp();
+  const router = useRouter();
 
-  useEffect(() => {
-    async function fetchStores() {
-      try {
-        const data = await getStores();
-        setStores(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
+  const handlePreviewClick = () => {
+    router.push('/store', { scroll: false });
+  };
 
-    fetchStores();
-  }, []);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const handleStoreSelect = (store) => {
+    router.push(`/store/${store.id}`, { scroll: false });
+  };
 
   return (
-    <Map3D stores={stores} />
+    <>
+      {/* 30% 미리보기 표시 */}
+      <PreviewContent onClick={handlePreviewClick}>
+        {isLoading ? (
+          <div
+            style={{ padding: '8px', textAlign: 'center', fontSize: '0.75rem' }}
+          >
+            로딩 중...
+          </div>
+        ) : (
+          <StorePage />
+        )}
+      </PreviewContent>
+    </>
   );
 }
