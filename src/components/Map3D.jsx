@@ -33,17 +33,12 @@ const Map3D = ({ stores }) => {
               servername: 'XDServer3d',
             },
           },
-          worker: {
-            use: true,
-            path: '/worker/XDWorldWorker.js',
-            count: 5,
-          },
-          defaultKey:
-            'dJe!e!iaEpHmEpCrD5QpEQf2#FBrdzDmd(BQDQEQDJdaE(iB',
+          worker: { use: true, path: '/worker/XDWorldWorker.js', count: 5 },
+          defaultKey: 'dJe!e!iaEpHmEpCrD5QpEQf2#FBrdzDmd(BQDQEQDJdaE(iB',
         });
 
         Module.getViewCamera().setLocation(
-          new Module.JSVector3D(126.99514470317824, 37.568451978489975, 46)
+          new Module.JSVector3D(126.99514470317824, 37.568451978489975, 46),
         );
         Module.getViewCamera().setDirect(124);
         Module.getViewCamera().setFov(45);
@@ -52,12 +47,11 @@ const Map3D = ({ stores }) => {
         // 구글 배경지도가 로딩속도가 빠름
         // 구글은 푸른색감 기본지도는 초록색감 -> 최종 디자인보고 결정
         var google = Module.GoogleMap();
-        google.layername = "satellite";
-        google.quality = "middle";
+        google.layername = 'satellite';
+        google.quality = 'middle';
         google.zerolevelOffset = 1;
 
-
-        const layer = Module.getTileLayerList().createXDServerLayer({
+        Module.getTileLayerList().createXDServerLayer({
           url: 'https://xdworld.vworld.kr',
           servername: 'XDServer3d',
           name: 'facility_build',
@@ -65,10 +59,7 @@ const Map3D = ({ stores }) => {
           minLevel: 0,
           maxLevel: 15,
         });
-
-        layer.setUseRecoverHsv(true);
-        layer.setRecoverHsvValue(1, 1, 1);
-      }
+      };
 
       document.body.appendChild(script);
     };
@@ -86,9 +77,7 @@ const Map3D = ({ stores }) => {
     }
   }, [width, height]);
 
-  return (
-    <div id="map3D" style={{ width: '100dvw', height: '100dvh' }}></div>
-  );
+  return <div id="map3D" style={{ width: '100dvw', height: '100dvh' }}></div>;
 };
 
 export default Map3D;
