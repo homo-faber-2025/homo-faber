@@ -85,7 +85,7 @@ function StoreWrapper() {
 
   return (
     <>
-      <div style={{ width: '80vw', position: 'absolute', right: '0px', top: '0px', zIndex: '5', backgroundColor: 'white' }}>
+      <div style={{ width: '80vw', position: 'absolute', right: '0px', top: '0px', zIndex: '5', backgroundColor: 'var(--yellow)' }}>
         <Search onSearch={handleSearch} />
 
         <StoreFilters

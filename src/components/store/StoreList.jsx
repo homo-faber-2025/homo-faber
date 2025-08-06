@@ -11,7 +11,7 @@ const TableWrapper = styled.div`
 const StoreTable = styled.table`
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
+  background-color: var(--yellow);
 `;
 
 const TableHeader = styled.thead`
