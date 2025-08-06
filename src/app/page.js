@@ -1,6 +1,6 @@
 'use client';
 
-import Map3D from '@/components/Map3D';
+import Map3D from '@/components/common/Map3D';
 import { getStores } from '@/utils/supabase/stores';
 import styled from '@emotion/styled';
 import { useEffect, useState } from 'react';
