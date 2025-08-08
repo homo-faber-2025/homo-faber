@@ -2,7 +2,6 @@ import { Gothic_A1, Noto_Serif_KR } from 'next/font/google';
 import './globals.css';
 import Providers from '@/app/providers';
 import Map3DWrapper from '@/container/Map3DWrapper';
-import TopNavButton from '@/components/common/TopNavButton';
 
 const gothic = Gothic_A1({
   weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
@@ -26,7 +25,6 @@ export default function RootLayout({ children }) {
       <body
         className={`${gothic.className} ${noto.className}`}
       >
-        <TopNavButton />
         <Providers>
           <Map3DWrapper />
           {children}

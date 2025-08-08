@@ -1,38 +1,10 @@
-'use client';
-
-import Map3D from '@/components/common/Map3D';
-import { getStores } from '@/utils/supabase/stores';
-import styled from '@emotion/styled';
-import { useEffect, useState } from 'react';
-
-const ExampleFont = styled.div`
-  font-size: ${(props) => props.theme.fontSize.xlg};
-`;
+import StoreWrapper from '@/container/StoreWrapper';
 
 export default function Home() {
-  const [stores, setStores] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchStores() {
-      try {
-        const data = await getStores();
-        setStores(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchStores();
-  }, []);
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
-    <></>
+    <>
+      <StoreWrapper />
+    </>
   );
 }

@@ -3,10 +3,20 @@
 import useWindowSize from '@/hooks/useWindowSize';
 import { usePOI } from '@/hooks/usePOI';
 import { useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 
 const Map3D = ({ stores }) => {
   const { width, height } = useWindowSize();
+  const pathname = usePathname();
+  const router = useRouter();
   usePOI(stores);
+
+  // /store 페이지에서 Map3D 클릭 시 홈으로 이동
+  const handleMapClick = () => {
+    if (pathname === '/store') {
+      router.push('/');
+    }
+  };
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -77,7 +87,17 @@ const Map3D = ({ stores }) => {
     }
   }, [width, height]);
 
-  return <div id="map3D" style={{ width: '100dvw', height: '100dvh' }}></div>;
+  return (
+    <div
+      id="map3D"
+      style={{
+        width: '100dvw',
+        height: '100dvh',
+        cursor: pathname === '/store' ? 'pointer' : 'default'
+      }}
+      onClick={handleMapClick}
+    />
+  );
 };
 
 export default Map3D;

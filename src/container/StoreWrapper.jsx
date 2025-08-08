@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import Search from '@/components/store/Search';
 import StoreFilters from '@/components/store/StoreFilters';
 import StoreSorting from '@/components/store/StoreSorting';
@@ -9,6 +10,8 @@ import { getStores } from '@/utils/supabase/stores';
 import { useStores, extractAllTags } from '@/hooks/useStores';
 
 function StoreWrapper() {
+  const pathname = usePathname();
+  const router = useRouter();
   const [stores, setStores] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -33,6 +36,13 @@ function StoreWrapper() {
 
   // 확장된 useStores 훅 사용 (정렬 포함)
   const filteredStores = useStores(stores, searchKeyword, selectedTags, sortBy);
+
+  // 홈 페이지에서 StoreWrapper 클릭 시 /store로 이동
+  const handleStoreWrapperClick = () => {
+    if (pathname === '/') {
+      router.push('/store');
+    }
+  };
 
   useEffect(() => {
     async function fetchStores() {
@@ -85,7 +95,20 @@ function StoreWrapper() {
 
   return (
     <>
-      <div style={{ width: '80vw', position: 'absolute', right: '0px', top: '0px', zIndex: '5', backgroundColor: 'var(--yellow)' }}>
+      <div
+        style={{
+          width: pathname === '/store' ? '80vw' : '10vw',
+          position: 'absolute',
+          right: '0px',
+          top: '0px',
+          zIndex: '5',
+          backgroundColor: 'var(--yellow)',
+          cursor: pathname === '/' ? 'pointer' : 'default',
+          transition: 'width 3s ease-in-out',
+          overflow: 'hidden'
+        }}
+        onClick={handleStoreWrapperClick}
+      >
         <Search onSearch={handleSearch} />
 
         <StoreFilters
