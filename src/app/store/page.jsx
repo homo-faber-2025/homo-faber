@@ -1,4 +1,4 @@
-import StoreWrapper from '@/container/StoreWrapper';
+import StoreWrapper from '@/container/StoreContainer';
 
 function StorePage() {
   return (

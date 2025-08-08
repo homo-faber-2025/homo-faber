@@ -1,4 +1,4 @@
-import StoreWrapper from '@/container/StoreWrapper';
+import StoreWrapper from '@/container/StoreContainer';
 
 export default function Home() {
 

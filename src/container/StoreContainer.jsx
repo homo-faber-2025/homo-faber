@@ -8,8 +8,36 @@ import StoreSorting from '@/components/store/StoreSorting';
 import StoreList from '@/components/store/StoreList';
 import { getStores } from '@/utils/supabase/stores';
 import { useStores, extractAllTags } from '@/hooks/useStores';
+import styled from '@emotion/styled';
 
-function StoreWrapper() {
+const StoreWrapper = styled.main`
+  width: ${(props) => (props.pathname === '/store' ? '80vw' : '10vw')};
+  height: 100dvh;
+  padding-left: 50px;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  z-index: 1;
+  background-color: var(--yellow);
+  cursor: ${(props) => (props.pathname === '/' ? 'pointer' : 'default')};
+  transition: 3s ease-in-out;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 15px;
+    height: 100%;
+    background: linear-gradient(270deg, rgba(69, 67, 43, 1) 0%, rgba(239, 232, 168, 1) 12%, rgba(239, 232, 168, 1) 35%, rgba(69, 67, 43, 1) 41%, rgba(217, 212, 166, 1) 47%, rgba(217, 212, 166, 1) 73%, rgba(69, 67, 43, 1) 78%, rgba(192, 189, 158, 1) 86%, rgba(192, 189, 158, 1) 99%, rgba(69, 67, 43, 1) 100%);
+  }
+`;
+
+
+function StoreContainer() {
   const pathname = usePathname();
   const router = useRouter();
   const [stores, setStores] = useState([]);
@@ -25,7 +53,7 @@ function StoreWrapper() {
   });
 
   // 정렬 방식을 위한 상태
-  const [sortBy, setSortBy] = useState('nameAsc');
+  const [sortBy, setSortBy] = useState('recommended');
 
   // 모든 가능한 태그 목록
   const [allTags, setAllTags] = useState({
@@ -95,18 +123,8 @@ function StoreWrapper() {
 
   return (
     <>
-      <div
-        style={{
-          width: pathname === '/store' ? '80vw' : '10vw',
-          position: 'absolute',
-          right: '0px',
-          top: '0px',
-          zIndex: '5',
-          backgroundColor: 'var(--yellow)',
-          cursor: pathname === '/' ? 'pointer' : 'default',
-          transition: 'width 3s ease-in-out',
-          overflow: 'hidden'
-        }}
+      <StoreWrapper
+        pathname={pathname}
         onClick={handleStoreWrapperClick}
       >
         <Search onSearch={handleSearch} />
@@ -115,18 +133,18 @@ function StoreWrapper() {
           allTags={allTags}
           selectedTags={selectedTags}
           onTagClick={handleTagClick}
+          sortBy={sortBy}
+          onSortChange={handleSortChange}
         />
-
-        <StoreSorting sortBy={sortBy} onSortChange={handleSortChange} />
 
         {isLoading ? (
           <div>로딩 중...</div>
         ) : (
           <StoreList stores={filteredStores} />
         )}
-      </div>
+      </StoreWrapper>
     </>
   );
 }
 
-export default StoreWrapper; 
+export default StoreContainer; 

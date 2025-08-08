@@ -4,57 +4,51 @@ import styled from '@emotion/styled';
 
 const SortingWrapper = styled.div`
   display: flex;
-  align-items: center;
-  margin-bottom: 16px;
-`;
-
-const SortingLabel = styled.span`
-  margin-right: 12px;
-  font-size: ${(props) => props.theme.fontSize.sm};
-  color: ${(props) => props.theme.color.text};
+  align-items: left;
+  justify-contents: left;
+  flex-direction: column;
+  gap: 5px;
 `;
 
 const SortButton = styled.button`
-  padding: 6px 12px;
-  margin-right: 8px;
-  border: 1px solid
-    ${(props) =>
-      props.active ? props.theme.color.primary : props.theme.color.border};
-  border-radius: 4px;
-  background-color: ${(props) =>
-    props.active ? props.theme.color.primary : 'transparent'};
-  color: ${(props) => (props.active ? 'white' : props.theme.color.text)};
-  font-size: ${(props) => props.theme.fontSize.sm};
+  border: none;
+  background: none;
+  color: ${(props) => (props.active ? 'rgba(0,0,0,1)' : 'rgba(0,0,0,0.3)')};
   cursor: pointer;
+  text-align: left;
   transition: all 0.2s;
+  font-size: 1.1rem;
 
   &:hover {
-    background-color: ${(props) =>
-      props.active ? props.theme.color.primary : props.theme.color.background};
-  }
+    background-color: black;
 `;
+
+const SortTxt = styled.div`
+  font-family: var(--font-gothic);
+  font-weight: 800;
+  transform: scaleX(0.8);
+`
 
 const StoreSorting = ({ sortBy, onSortChange }) => {
   return (
     <SortingWrapper>
-      <SortingLabel>정렬:</SortingLabel>
       <SortButton
         active={sortBy === 'nameAsc'}
         onClick={() => onSortChange('nameAsc')}
       >
-        오름차순
+        <SortTxt>오름차순</SortTxt>
       </SortButton>
       <SortButton
         active={sortBy === 'nameDesc'}
         onClick={() => onSortChange('nameDesc')}
       >
-        내림차순
+        <SortTxt>내림차순</SortTxt>
       </SortButton>
       <SortButton
         active={sortBy === 'recommended'}
         onClick={() => onSortChange('recommended')}
       >
-        추천순
+        <SortTxt>추천순</SortTxt>
       </SortButton>
     </SortingWrapper>
   );

@@ -1,16 +1,15 @@
 'use client';
 
 import styled from '@emotion/styled';
+import StoreSorting from '@/components/store/StoreSorting';
 
-const FilterWrapper = styled.div`
-  width: 100%;
-  margin-bottom: 24px;
-`;
-
-const FilterTitle = styled.h3`
-  margin-bottom: 12px;
-  font-size: ${(props) => props.theme.fontSize.md};
-  font-weight: 600;
+const FilterWrapper = styled.aside`
+  width: 100vw;
+  background-color: #FAF8DB;
+  padding: 14px 11px;
+  border-top: 2px solid #363315;
+  // box-shadow: 0 0 20px 20px blue;
+  display: flex;
 `;
 
 const TagsContainer = styled.div`
@@ -37,15 +36,15 @@ const Tag = styled.span`
   }
 `;
 
-const StoreFilters = ({ allTags, selectedTags, onTagClick }) => {
+const StoreFilters = ({ allTags, selectedTags, onTagClick, sortBy, onSortChange }) => {
   if (!allTags) return null;
 
   return (
     <FilterWrapper>
       {/* 업종 필터 */}
+      <StoreSorting sortBy={sortBy} onSortChange={onSortChange} />
       {allTags.industry.length > 0 && (
         <>
-          <FilterTitle>업종</FilterTitle>
           <TagsContainer>
             {allTags.industry.map((tag) => (
               <Tag
@@ -63,7 +62,6 @@ const StoreFilters = ({ allTags, selectedTags, onTagClick }) => {
       {/* 수용 인원 필터 */}
       {allTags.capacity.length > 0 && (
         <>
-          <FilterTitle>수용 인원</FilterTitle>
           <TagsContainer>
             {allTags.capacity.map((tag) => (
               <Tag
@@ -81,7 +79,6 @@ const StoreFilters = ({ allTags, selectedTags, onTagClick }) => {
       {/* 재료 필터 */}
       {allTags.material.length > 0 && (
         <>
-          <FilterTitle>재료</FilterTitle>
           <TagsContainer>
             {allTags.material.map((tag) => (
               <Tag

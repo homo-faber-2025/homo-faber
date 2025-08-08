@@ -1,4 +1,4 @@
-import { Gothic_A1, Noto_Serif_KR } from 'next/font/google';
+import { Gothic_A1, Noto_Serif_KR, ABeeZee } from 'next/font/google';
 import './globals.css';
 import Providers from '@/app/providers';
 import Map3DWrapper from '@/container/Map3DWrapper';
@@ -13,6 +13,12 @@ const noto = Noto_Serif_KR({
   subsets: ['latin'],
   variable: '--font-noto',
 });
+const abeezee = ABeeZee({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-abeezee',
+});
+
 
 export const metadata = {
   title: 'Create Next App',
@@ -23,7 +29,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="ko">
       <body
-        className={`${gothic.className} ${noto.className}`}
+        className={`${gothic.variable} ${noto.variable} ${abeezee.variable}`}
       >
         <Providers>
           <Map3DWrapper />
