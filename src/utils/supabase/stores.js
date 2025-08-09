@@ -25,3 +25,30 @@ export async function getStores() {
   if (error) throw error;
   return data;
 }
+
+export async function getStoreById(id) {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from('stores')
+    .select(
+      `
+      *,
+      store_contacts(
+        phone,
+        email,
+        website
+      ),
+      store_tags(
+        industry_types(name),
+        capacity_types(name),
+        material_types(name)
+      )
+    `,
+    )
+    .eq('id', id)
+    .single();
+
+  if (error) throw error;
+  return data;
+}

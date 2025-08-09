@@ -1,6 +1,7 @@
 'use client';
 
 import styled from '@emotion/styled';
+import { useRouter } from 'next/navigation';
 import { convertIndustryNameToKorean } from '@/utils/converters';
 
 const TableWrapper = styled.article`
@@ -100,6 +101,12 @@ const ContactCell = styled(TableCell)`
 
 // 테이블 헤더 추가할 것
 const StoreList = ({ stores }) => {
+  const router = useRouter();
+
+  const handleStoreClick = (storeId) => {
+    router.push(`/store/${storeId}`);
+  };
+
   return (
     <TableWrapper>
       <StoreTable>
@@ -113,7 +120,7 @@ const StoreList = ({ stores }) => {
         </TableHeader>
         <TableBody>
           {stores.map((store) => (
-            <TableRow key={store.id}>
+            <TableRow key={store.id} onClick={() => handleStoreClick(store.id)}>
               <TitleCell>
                 <Name>{store.name}</Name>
                 {store.store_tags?.length > 0 &&

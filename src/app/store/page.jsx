@@ -1,9 +1,8 @@
-import StoreWrapper from '@/container/StoreContainer';
+import StoreContainer from '@/container/StoreContainer';
 
 function StorePage() {
   return (
     <>
-      <StoreWrapper />
     </>
   );
 }

@@ -11,9 +11,9 @@ const Map3D = ({ stores }) => {
   const router = useRouter();
   usePOI(stores);
 
-  // /store 페이지에서 Map3D 클릭 시 홈으로 이동
+  // /store 페이지 또는 개별 스토어 페이지에서 Map3D 클릭 시 홈으로 이동
   const handleMapClick = () => {
-    if (pathname === '/store') {
+    if (pathname === '/store' || pathname.startsWith('/store/')) {
       router.push('/');
     }
   };
@@ -93,7 +93,7 @@ const Map3D = ({ stores }) => {
       style={{
         width: '100dvw',
         height: '100dvh',
-        cursor: pathname === '/store' ? 'pointer' : 'default'
+        cursor: (pathname === '/store' || pathname.startsWith('/store/')) ? 'pointer' : 'default'
       }}
       onClick={handleMapClick}
     />

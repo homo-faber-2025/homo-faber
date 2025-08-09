@@ -11,7 +11,7 @@ import { useStores, extractAllTags } from '@/hooks/useStores';
 import styled from '@emotion/styled';
 
 const StoreWrapper = styled.main`
-  width: ${(props) => (props.pathname === '/store' ? '80vw' : '10vw')};
+  width: ${(props) => (props.pathname.startsWith('/store') ? '80vw' : '10vw')};
   height: 100dvh;
   padding-left: 70px;
   padding-top: 27px;
@@ -20,7 +20,7 @@ const StoreWrapper = styled.main`
   top: 0px;
   z-index: 1;
   background-color: var(--yellow);
-  cursor: ${(props) => (props.pathname === '/' ? 'pointer' : 'default')};
+  cursor: ${(props) => (props.pathname === '/' || props.pathname.startsWith('/store/') ? 'pointer' : 'default')};
   transition: 3s ease-in-out;
   overflow: hidden;
   display: flex;
@@ -50,7 +50,6 @@ const StorePageName = styled.h1`
 `
 
 const StoreFilterWrapper = styled.div`
-  // box-shadow: inset 0 0 10px 10px pink;
   margin-bottom: 7px;
   margin-top: ${(props) => (props.isFilterOpen ? '60px' : '154.5px')};
 `
@@ -58,7 +57,6 @@ const StoreFilterWrapper = styled.div`
 const StoreFilterBtn = styled.button`
   border : none;
   background: none;
-  // box-shadow: inset 0 0 10px 10px orange;
   text-align: left;
   font-size: 1.12rem; 
   font-family: var(--font-gothic);
@@ -105,8 +103,11 @@ function StoreContainer() {
   const filteredStores = useStores(stores, searchKeyword, selectedTags, sortBy);
 
   // 홈 페이지에서 StoreWrapper 클릭 시 /store로 이동
+  // 개별 스토어 페이지에서 StoreWrapper 클릭 시 /store로 이동  
   const handleStoreWrapperClick = () => {
     if (pathname === '/') {
+      router.push('/store');
+    } else if (pathname.startsWith('/store/')) {
       router.push('/store');
     }
   };
