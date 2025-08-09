@@ -3,7 +3,7 @@
 import styled from '@emotion/styled';
 import { convertIndustryNameToKorean } from '@/utils/converters';
 
-const TableWrapper = styled.div`
+const TableWrapper = styled.article`
   width: 100vw;
   overflow-x: auto;
   flex: 1;
@@ -29,7 +29,7 @@ const TableHeader = styled.thead`
 `;
 
 const TableHeaderCell = styled.th`
-  padding: 15px 14px;
+  padding: 14px 15px 13px 15px;
   text-align: left;
   font-size: 1.2rem;
   font-weight: 800;
@@ -43,6 +43,7 @@ const TableBody = styled.tbody`
 `
 
 const TableRow = styled.tr`
+  padding-left: 1px;
   display: flex;
   align-items: center;
   &:hover {
@@ -52,7 +53,7 @@ const TableRow = styled.tr`
 `;
 
 const TableCell = styled.td`
-  padding: 13.5px 0px;
+  padding: 12px 0px 10px 0px;
   vertical-align: middle;
   font-size: 1.1rem;
   min-width: 140px;

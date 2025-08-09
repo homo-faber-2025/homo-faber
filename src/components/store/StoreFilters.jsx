@@ -2,37 +2,51 @@
 
 import styled from '@emotion/styled';
 import StoreSorting from '@/components/store/StoreSorting';
+import { convertCapacityNameToKorean } from '@/utils/converters';
 
 const FilterWrapper = styled.aside`
   width: 100vw;
   background-color: #FAF8DB;
-  padding: 14px 11px;
-  border-top: 2px solid #363315;
-  // box-shadow: 0 0 20px 20px blue;
+  padding: 13px 6px 12px;
+  border-top: 1.6px solid #363315;
   display: flex;
 `;
 
 const TagsContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 4px;
+  align-items: flex-start;
 `;
 
-const Tag = styled.span`
-  padding: 6px 12px;
-  border-radius: 16px;
-  font-size: ${(props) => props.theme.fontSize.sm};
-  background-color: ${(props) =>
-    props.active
-      ? props.theme.color.primary
-      : props.theme.color.background || '#f0f0f0'};
-  color: ${(props) => (props.active ? 'white' : props.theme.color.text)};
-  cursor: pointer;
-  transition: all 0.2s;
+const TagsIndustryContainer = styled(TagsContainer)`
+  width: 123px;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: 16px;
+`
+const TagsMaterialContainer = styled(TagsContainer)`
+  width: 200px;
+  margin-right: 200px;
+  align-content: flex-start;
+`
 
-  &:hover {
-    opacity: 0.8;
+const Tag = styled.button`
+  border:none;
+  background: none;
+  padding: 0px 5px 2px 5px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  font-size: 1.1rem;
+  font-family: var(--font-gothic);
+  font-weight: 800;
+  transform: scaleX(0.8);
+  transition: all 0.2s;
+  color: ${(props) => (props.active ? 'rgba(0,0,0,1)' : 'rgba(0,0,0,0.3)')};
+
+  &:hover{
+    color: black;
   }
 `;
 
@@ -41,11 +55,12 @@ const StoreFilters = ({ allTags, selectedTags, onTagClick, sortBy, onSortChange 
 
   return (
     <FilterWrapper>
+
       {/* 업종 필터 */}
       <StoreSorting sortBy={sortBy} onSortChange={onSortChange} />
       {allTags.industry.length > 0 && (
         <>
-          <TagsContainer>
+          <TagsIndustryContainer>
             {allTags.industry.map((tag) => (
               <Tag
                 key={`industry-${tag}`}
@@ -55,31 +70,14 @@ const StoreFilters = ({ allTags, selectedTags, onTagClick, sortBy, onSortChange 
                 {tag}
               </Tag>
             ))}
-          </TagsContainer>
-        </>
-      )}
-
-      {/* 수용 인원 필터 */}
-      {allTags.capacity.length > 0 && (
-        <>
-          <TagsContainer>
-            {allTags.capacity.map((tag) => (
-              <Tag
-                key={`capacity-${tag}`}
-                active={selectedTags.capacity.includes(tag)}
-                onClick={() => onTagClick('capacity', tag)}
-              >
-                {tag}
-              </Tag>
-            ))}
-          </TagsContainer>
+          </TagsIndustryContainer>
         </>
       )}
 
       {/* 재료 필터 */}
       {allTags.material.length > 0 && (
         <>
-          <TagsContainer>
+          <TagsMaterialContainer>
             {allTags.material.map((tag) => (
               <Tag
                 key={`material-${tag}`}
@@ -89,9 +87,22 @@ const StoreFilters = ({ allTags, selectedTags, onTagClick, sortBy, onSortChange 
                 {tag}
               </Tag>
             ))}
-          </TagsContainer>
+          </TagsMaterialContainer>
         </>
       )}
+
+      {/* 수용 인원 필터 */}
+      <>
+        <TagsContainer>
+          <Tag
+            key="capacity-소량 생산"
+            active={selectedTags.capacity.includes('소량 생산')}
+            onClick={() => onTagClick('capacity', '소량 생산')}
+          >
+            {convertCapacityNameToKorean('소량 생산')}
+          </Tag>
+        </TagsContainer>
+      </>
     </FilterWrapper>
   );
 };

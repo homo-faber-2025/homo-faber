@@ -7,7 +7,7 @@ const SortingWrapper = styled.div`
   align-items: left;
   justify-contents: left;
   flex-direction: column;
-  gap: 5px;
+  gap: 7px;
 `;
 
 const SortButton = styled.button`
@@ -20,7 +20,7 @@ const SortButton = styled.button`
   font-size: 1.1rem;
 
   &:hover {
-    background-color: black;
+    color: black;
 `;
 
 const SortTxt = styled.div`

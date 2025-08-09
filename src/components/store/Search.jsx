@@ -7,7 +7,7 @@ import styled from '@emotion/styled';
 
 const SearchWrapper = styled.div`
   width: 100%;
-  padding: 27px 40px 0 0;
+  padding-right: 20px;
 `;
 
 const SearchBox = styled.div`

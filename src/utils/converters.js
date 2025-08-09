@@ -20,6 +20,7 @@ export function convertIndustryNameToKorean(englishName) {
  */
 export function convertCapacityNameToKorean(englishName) {
   const nameMap = {
+    '소량 생산': '개인 및 학생 작업 가능',
     // 용량 타입 매핑을 여기에 추가할 수 있습니다
   };
 

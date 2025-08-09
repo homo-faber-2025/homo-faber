@@ -13,7 +13,8 @@ import styled from '@emotion/styled';
 const StoreWrapper = styled.main`
   width: ${(props) => (props.pathname === '/store' ? '80vw' : '10vw')};
   height: 100dvh;
-  padding-left: 50px;
+  padding-left: 70px;
+  padding-top: 27px;
   position: absolute;
   right: 0px;
   top: 0px;
@@ -36,6 +37,41 @@ const StoreWrapper = styled.main`
   }
 `;
 
+const StorePageName = styled.h1`
+  font-family: var(--font-gothic);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.5rem;
+  position: absolute;
+  transform: rotate(90deg);
+  transform-origin: top left;
+  top: 17px;
+  left: 46px;
+`
+
+const StoreFilterWrapper = styled.div`
+  // box-shadow: inset 0 0 10px 10px pink;
+  margin-bottom: 7px;
+  margin-top: ${(props) => (props.isFilterOpen ? '60px' : '154.5px')};
+`
+
+const StoreFilterBtn = styled.button`
+  border : none;
+  background: none;
+  // box-shadow: inset 0 0 10px 10px orange;
+  text-align: left;
+  font-size: 1.12rem; 
+  font-family: var(--font-gothic);
+  font-weight: 800;
+  transform: scaleX(0.8);
+  transform-origin: left center;
+  cursor: pointer;
+`
+
+const ResetFilterBtn = styled(StoreFilterBtn)`
+  margin-left: -27px;
+`
+
 
 function StoreContainer() {
   const pathname = usePathname();
@@ -54,6 +90,9 @@ function StoreContainer() {
 
   // 정렬 방식을 위한 상태
   const [sortBy, setSortBy] = useState('recommended');
+
+  // 필터 표시/숨김을 위한 상태
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // 모든 가능한 태그 목록
   const [allTags, setAllTags] = useState({
@@ -117,6 +156,29 @@ function StoreContainer() {
     setSortBy(newSortBy);
   };
 
+  // 필터 토글 처리
+  const handleFilterToggle = () => {
+    setIsFilterOpen((prev) => !prev);
+  };
+
+  // 활성화된 필터가 있는지 확인
+  const hasActiveFilters = () => {
+    return (
+      selectedTags.industry.length > 0 ||
+      selectedTags.capacity.length > 0 ||
+      selectedTags.material.length > 0
+    );
+  };
+
+  // 모든 필터 초기화
+  const handleResetFilters = () => {
+    setSelectedTags({
+      industry: [],
+      capacity: [],
+      material: [],
+    });
+  };
+
   if (error) {
     return <div>에러가 발생했습니다: {error.message}</div>;
   }
@@ -127,15 +189,31 @@ function StoreContainer() {
         pathname={pathname}
         onClick={handleStoreWrapperClick}
       >
+        <StorePageName>업체 목록</StorePageName>
         <Search onSearch={handleSearch} />
 
-        <StoreFilters
-          allTags={allTags}
-          selectedTags={selectedTags}
-          onTagClick={handleTagClick}
-          sortBy={sortBy}
-          onSortChange={handleSortChange}
-        />
+        <StoreFilterWrapper isFilterOpen={isFilterOpen}>
+          <StoreFilterBtn onClick={handleFilterToggle}>
+            {isFilterOpen ? '필터링 닫기' : '필터링 열기'}
+            {hasActiveFilters() && ' [사용중]'}
+          </StoreFilterBtn>
+          {hasActiveFilters() && (
+            <ResetFilterBtn onClick={handleResetFilters}>
+              / 초기화 하기
+            </ResetFilterBtn>
+          )}
+        </StoreFilterWrapper>
+
+        {isFilterOpen && (
+          <StoreFilters
+            allTags={allTags}
+            selectedTags={selectedTags}
+            onTagClick={handleTagClick}
+            sortBy={sortBy}
+            onSortChange={handleSortChange}
+          />
+        )}
+
 
         {isLoading ? (
           <div>로딩 중...</div>
