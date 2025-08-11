@@ -7,25 +7,30 @@ import styled from '@emotion/styled';
 
 const SearchWrapper = styled.div`
   width: 100%;
-  padding: 12px 0;
+  padding-right: 20px;
 `;
 
 const SearchBox = styled.div`
   display: flex;
+  margin-left: auto;
+  padding: 1px 27px 0 27px;
+  box-shadow: 0 4px 4px 0 rgba(0,0,0,0.25);
   align-items: center;
-  width: 50%;
-  border: 1px solid rgb(201, 202, 204);
-  border-radius: 30px;
-  background-color: white;
-  &:focus-within {
-    outline: 2px solid ${(props) => props.theme.color.primary};
+  width: 360px;
+  border-radius: 28px;
+  background-color: #322F18;
+  &:focus-within, &:hover {
+    outline: 2px solid #FFF8B8;
   }
+
 `;
 
 const SearchIcon = styled.div`
-  margin: 0 16px;
   display: flex;
+  margin-right: -4px;
+  padding-bottom: 3px;
   align-items: center;
+  justify-content: flex-end;
   cursor: pointer;
 `;
 
@@ -34,9 +39,16 @@ const TextBox = styled.input`
   margin: 12px 0;
   border: none;
   outline: none;
-  font-size: ${(props) => props.theme.fontSize.lg};
+  background-color: #363315;
+  font-size: 1.2rem; 
+  font-family: var(--font-gothic);
+  font-weight: 800;
+  color: #FFF8B8;
+  transform: scaleX(0.8);
+  transform-origin: left center; 
   &::placeholder {
-    color: gray;
+    color: #FFF8B8;
+    opacity: 80%;
   }
 `;
 
@@ -87,7 +99,7 @@ const Search = ({ onSearch }) => {
           placeholder="'키워드' 검색"
         />
         <SearchIcon onClick={handleIconClick}>
-          <Image src="/search-icon.svg" alt="검색" width={20} height={20} />
+          <Image src="/search-icon.svg" alt="검색" width={15} height={15} />
         </SearchIcon>
       </SearchBox>
     </SearchWrapper>

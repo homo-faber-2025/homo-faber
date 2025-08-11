@@ -131,6 +131,24 @@ const globalStyle = css`
     border-collapse: collapse;
     border-spacing: 0;
   }
+
+  /* Global Font Size Settings */
+  html {
+    /* Mobile first - 9pt base font size */
+    font-size: 9pt;
+  }
+
+  /* Desktop/Web - 10pt base font size */
+  @media (min-width: 768px) {
+    html {
+      font-size: 10pt;
+    }
+  }
+
+  /* Ensure body inherits the font size */
+  body {
+    font-size: 1rem;
+  }
 `;
 
 export default globalStyle;

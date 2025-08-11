@@ -56,7 +56,7 @@ export function usePOI(stores) {
             SIZE_OPTIONS[Math.floor(Math.random() * SIZE_OPTIONS.length)];
           const randomLineHeight =
             LINE_HEIGHT_OPTIONS[
-              Math.floor(Math.random() * LINE_HEIGHT_OPTIONS.length)
+            Math.floor(Math.random() * LINE_HEIGHT_OPTIONS.length)
             ];
 
           if (store.thumbnail_img) {

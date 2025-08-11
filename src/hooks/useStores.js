@@ -74,9 +74,18 @@ export function useStores(
 
     switch (sortBy) {
       case 'recommended':
-        // 추천순 정렬
-        // 여기서는 단순히 원래 순서를 유지
-        // 실제 추천 로직은 비즈니스 요구사항에 맞게 구현
+        // 추천순 정렬 - keyword가 있는 스토어를 위로
+        sortedStores.sort((a, b) => {
+          const aHasKeyword = Array.isArray(a.keyword) && a.keyword.length > 0;
+          const bHasKeyword = Array.isArray(b.keyword) && b.keyword.length > 0;
+
+          // keyword가 있는 스토어를 위로
+          if (aHasKeyword && !bHasKeyword) return -1;
+          if (!aHasKeyword && bHasKeyword) return 1;
+
+          // 둘 다 keyword가 있거나 둘 다 없는 경우 이름순으로 정렬
+          return (a.name || '').localeCompare(b.name || '');
+        });
         break;
 
       case 'nameDesc':
