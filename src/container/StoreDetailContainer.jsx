@@ -4,81 +4,179 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styled from '@emotion/styled';
 import { getStoreById } from '@/utils/supabase/stores';
-import { convertIndustryNameToKorean } from '@/utils/converters';
+import { convertIndustryNameToKorean, convertCapacityNameToKorean } from '@/utils/converters';
 
 const DetailWrapper = styled.main`
-  width: calc(80vw - 60px);
+  width: calc(80vw - 68px);
   height: 100dvh;
-  padding: 70px;
+  padding: 0px 10px 20px 50px;
   background-color: #F7F7F7;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
   position: absolute;
   right: 0px;
   top: 0px;
-  z-index: 5;
+  z-index: 3;
+  box-shadow: -2px 0 4px 0 rgba(79,75,31,0.57);
+  display: flex;
 `;
 
-const StoreDetailCard = styled.div`
-  background-color: #322F18;
-  color: #FFF8B8;
-  border-radius: 8px;
-  padding: 30px;
-  margin-bottom: 20px;
-  max-width: 800px;
-  width: 100%;
-  margin: 0 auto;
-`;
-
-const StoreName = styled.h1`
+const DetailPageName = styled.h1`
   font-family: var(--font-gothic);
-  font-size: 2.5rem;
-  font-weight: 800;
-  margin-bottom: 20px;
-  color: #FFF8B8;
-`;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.3rem;
+  position: absolute;
+  transform: rotate(90deg);
+  transform-origin: top left;
+  top: 17px;
+  left: 30px;
+`
 
-const InfoSection = styled.div`
-  margin-bottom: 25px;
-`;
-
-const InfoLabel = styled.h3`
+const StoreDetailCard = styled.article`
   font-family: var(--font-gothic);
-  font-size: 1.3rem;
+  letter-spacing: 0.2rem;
+  color: black;
+  display: flex;
+  flex-grow: 1;
+  gap: 2%;
+  // box-shadow: inset 0 0 10px 10px yellow;
+`;
+
+const StoreDetailSection = styled.section`
+  // box-shadow: inset 0 0 10px 10px pink;
+  width: 46%;
+  text-align: center;
+  overflow-y: auto;
+  padding-top: 20px;
+`
+
+const StoreImgSection = styled(StoreDetailSection)`
+  margin-bottom: -20px;
+  overflow-x: hidden;
+  width: 52%;
+  margin-top: -20px;
+`
+
+const StoreName = styled.h2`
+  font-size: 5rem;
+  letter-spacing: 0.3rem;
   font-weight: 700;
   margin-bottom: 10px;
-  color: #FFF8B8;
+  color: #A0A0A0;
+  -webkit-text-stroke: solid 1px rgba(0,0,0,0.1);
+  text-stroke: solid 1px rgba(0,0,0,0.1);
+  text-shadow: 1px 1px 13px rgba(255,255,255,0.95), -1px 1px 4px rgba(0,0,0,0.5);
+  background: linear-gradient(90deg,rgb(84, 84, 84), #424242);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 `;
 
-const InfoContent = styled.div`
-  font-family: var(--font-gothic);
+const StoreAdress = styled.h3`
+  font-size: 1.2rem;
+  margin-bottom: 50px;
+  font-weight: 400;
+  cursor: pointer;
+  
+  a {
+    color: inherit;
+    text-decoration: none;
+    
+    &:hover {
+      font-weight: 600;
+    }
+  }
+`
+const StoreTagList = styled.div`
+  font-size: 1.24rem;
+  font-weight: 700;
+  width: 60%;
+  line-height: 1.5;
+  margin: 0 auto 10px;
+`
+
+const StoreTag = styled.span`
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  white-space: normal;
+  display: inline;
+  background: linear-gradient(
+    to bottom,
+    transparent 10%,
+    var(--yellow) 60%,
+    var(--yellow) 90%,
+    transparent 100%
+  );
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+`
+const StoreCapacity = styled.div`
+  font-weight: 700;
+  margin-top: 25px;
+`
+
+const StoreContactList = styled.div`
+  display: inline-grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 2px;
+  width: fit-content;
+  margin: 56px auto 0;
+  align-items: center;
+  letter-spacing: 0.1rem;
+`
+const StoreContact = styled.div`
+  display: contents;
   font-size: 1.1rem;
-  line-height: 1.6;
-  margin-left: 10px;
-`;
+`
 
-const TagList = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-left: 10px;
-`;
+const StoreContactTxt = styled.div`
+  font-weight: 700;
+  white-space: nowrap;
+  text-align: right;
+  padding-right: 5px;
+  margin-left: 20px;
+`
 
-const Tag = styled.span`
-  background-color: rgba(255, 248, 184, 0.2);
-  color: #FFF8B8;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 500;
-`;
+const StoreContactContent = styled.div`
+  font-family: var(--font-abeezee);
+  text-align: left;
+  font-size: 1.17rem;
+  margin-bottom: 1px;
+  white-space: nowrap;
+  letter-spacing: 0.06rem;
+  
+  a {
+    color: inherit;
+    text-decoration: none;
+    
+    &:hover {
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  }
+`
+const StoreDescription = styled.div`
+`
 
-const KeywordList = styled.div`
-  margin-left: 10px;
-  font-size: 1.1rem;
-  line-height: 1.8;
-`;
+const StoreCardImg = styled.img`
+  width: 100%;
+  transform: rotate(-5deg);
+  margin-top: -20px;
+  transition: .3s all;
+  &:hover{
+    transform: rotate(5deg);
+  }
+`
+const StoreImgList = styled.div`
+  width: 100%;
+  margin-top: -56px;
+  padding-bottom: 10px;
+`
+const StoreImg = styled.img`
+  width: 100%;
+  border-radius: 50%;
+  border: 0.6px solid black;
+  vertical-align: top;
+`
 
 const LoadingContainer = styled.div`
   display: flex;
@@ -94,9 +192,7 @@ const ErrorContainer = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
-  font-family: var(--font-gothic);
   font-size: 1.5rem;
-  color: red;
 `;
 
 function StoreDetailContainer({ storeId }) {
@@ -156,66 +252,104 @@ function StoreDetailContainer({ storeId }) {
 
   return (
     <DetailWrapper>
-
+      <DetailPageName>업체 상세</DetailPageName>
       <StoreDetailCard>
-        <StoreName>{store.name}</StoreName>
+        <StoreDetailSection>
+          <StoreName>{store.name}</StoreName>
+          {store.address && (
+            <StoreAdress>
+              <a
+                href={`https://map.naver.com/v5/search/${encodeURIComponent(store.address)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {store.address}
+              </a>
+            </StoreAdress>
+          )}
 
-        {store.store_tags?.length > 0 && (
-          <InfoSection>
-            <InfoLabel>업종</InfoLabel>
-            <TagList>
+          {store.store_tags?.length > 0 && (
+            <StoreTagList>
               {store.store_tags
                 .map(tag => tag.industry_types?.name)
                 .filter(Boolean)
                 .map((industryName, index) => (
-                  <Tag key={index}>
+                  <StoreTag key={index}>
                     {convertIndustryNameToKorean(industryName)}
-                  </Tag>
+                  </StoreTag>
                 ))}
-            </TagList>
-          </InfoSection>
-        )}
+            </StoreTagList>
+          )}
 
-        {store.address && (
-          <InfoSection>
-            <InfoLabel>주소</InfoLabel>
-            <InfoContent>{store.address}</InfoContent>
-          </InfoSection>
-        )}
+          <StoreTagList>
+            {store.keyword?.length > 0 && (
+              <StoreTag>
+                {store.keyword.join(', ')}
+              </StoreTag>
+            )}
+          </StoreTagList>
 
-        {store.store_contacts?.length > 0 && store.store_contacts[0]?.phone && (
-          <InfoSection>
-            <InfoLabel>연락처</InfoLabel>
-            <InfoContent style={{ fontFamily: 'var(--font-abeezee)' }}>
-              {store.store_contacts[0].phone}
-            </InfoContent>
-          </InfoSection>
-        )}
+          {store.store_tags?.some(tag => tag.capacity_types?.name) && (
+            <StoreCapacity>
+              {store.store_tags
+                .map(tag => tag.capacity_types?.name)
+                .filter(Boolean)
+                .map(convertCapacityNameToKorean)
+                .join(', ')}
+            </StoreCapacity>
+          )}
 
-        {store.keyword?.length > 0 && (
-          <InfoSection>
-            <InfoLabel>취급 품목</InfoLabel>
-            <KeywordList>
-              {store.keyword.join(', ')}
-            </KeywordList>
-          </InfoSection>
-        )}
+          <StoreContactList>
+            {store.store_contacts?.length > 0 &&
+              [
+                { key: 'phone', label: 'Phone.', value: store.store_contacts[0]?.phone },
+                { key: 'fax', label: 'Fax.', value: store.store_contacts[0]?.fax },
+                { key: 'email', label: 'Mail.', value: store.store_contacts[0]?.email },
+                { key: 'website', label: 'Website.', value: store.store_contacts[0]?.website }
+              ]
+                .filter(contact => contact.value)
+                .map(contact => {
+                  let content = contact.value;
 
-        {store.store_contacts?.length > 0 && store.store_contacts[0]?.email && (
-          <InfoSection>
-            <InfoLabel>이메일</InfoLabel>
-            <InfoContent style={{ fontFamily: 'var(--font-abeezee)' }}>
-              {store.store_contacts[0].email}
-            </InfoContent>
-          </InfoSection>
-        )}
+                  if (contact.key === 'phone' || 'fax') {
+                    content = <a href={`tel:${contact.value}`}>{contact.value}</a>;
+                  } else if (contact.key === 'email') {
+                    content = <a href={`mailto:${contact.value}`}>{contact.value}</a>;
+                  } else if (contact.key === 'website') {
+                    const url = contact.value.startsWith('http') ? contact.value : `https://${contact.value}`;
+                    content = <a href={url} target="_blank" rel="noopener noreferrer">{contact.value}</a>;
+                  }
 
-        {store.description && (
-          <InfoSection>
-            <InfoLabel>설명</InfoLabel>
-            <InfoContent>{store.description}</InfoContent>
-          </InfoSection>
-        )}
+                  return (
+                    <StoreContact key={contact.key}>
+                      <StoreContactTxt>{contact.label}</StoreContactTxt>
+                      <StoreContactContent>{content}</StoreContactContent>
+                    </StoreContact>
+                  );
+                })
+            }
+          </StoreContactList>
+
+          {store.description && (
+            <StoreDescription>{store.description}</StoreDescription>
+          )}
+        </StoreDetailSection>
+
+        <StoreImgSection>
+          {store.card_img && (
+            <StoreCardImg src={`${store.card_img}`} />
+          )}
+
+          {store.store_gallery?.length > 0 && (
+            <StoreImgList>
+              {store.store_gallery
+                .map(tag => tag?.image_url)
+                .map((imgURL, index) => (
+                  <StoreImg key={index} src={`${imgURL}`} />
+                ))}
+            </StoreImgList>
+          )}
+        </StoreImgSection>
       </StoreDetailCard>
     </DetailWrapper>
   );

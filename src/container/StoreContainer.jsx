@@ -39,9 +39,9 @@ const StoreWrapper = styled.main`
 
 const StorePageName = styled.h1`
   font-family: var(--font-gothic);
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
-  letter-spacing: 0.5rem;
+  letter-spacing: 0.3rem;
   position: absolute;
   transform: rotate(90deg);
   transform-origin: top left;

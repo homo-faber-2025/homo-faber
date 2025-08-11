@@ -9,9 +9,7 @@ export async function getStores() {
       `
       *,
       store_contacts(
-        phone,
-        email,
-        website
+        phone
       ),
       store_tags(
         industry_types(name),
@@ -36,6 +34,7 @@ export async function getStoreById(id) {
       *,
       store_contacts(
         phone,
+        fax,
         email,
         website
       ),
@@ -43,6 +42,10 @@ export async function getStoreById(id) {
         industry_types(name),
         capacity_types(name),
         material_types(name)
+      ),
+      store_gallery(
+        image_url,
+        order_num
       )
     `,
     )
