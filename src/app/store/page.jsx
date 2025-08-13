@@ -1,5 +1,3 @@
-import StoreContainer from '@/container/StoreContainer';
-
 function StorePage() {
   return (
     <>

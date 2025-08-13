@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Search from '@/components/store/Search';
 import StoreFilters from '@/components/store/StoreFilters';
-import StoreSorting from '@/components/store/StoreSorting';
 import StoreList from '@/components/store/StoreList';
 import { getStores } from '@/utils/supabase/stores';
 import { useStores, extractAllTags } from '@/hooks/useStores';
