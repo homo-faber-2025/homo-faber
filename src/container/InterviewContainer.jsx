@@ -135,6 +135,10 @@ function InterviewContainer() {
     }
   };
 
+  const handleInterviewClick = (interviewId) => {
+    router.push(`/interview/${interviewId}`);
+  }
+
   const [interviews, setInterviews] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -174,7 +178,7 @@ function InterviewContainer() {
         ) : (
           <InterviewList>
             {interviews.map((interview) => (
-              <InterviewItem key={interview.id}>
+              <InterviewItem key={interview.id} onClick={() => handleInterviewClick(interview.id)}>
                 <InterviewStore>{interview.stores?.name}</InterviewStore>
                 <InterviewPerson>{interview.stores?.person}</InterviewPerson>
               </InterviewItem>

@@ -10,32 +10,21 @@
  * @param {number} quality - 압축 품질 (0.1 ~ 1.0, 기본값: 0.8)
  * @returns {Promise<File>} 압축된 이미지 파일
  */
-export const compressImage = (file, maxSizeInMB = 1, quality = 0.8) => {
+export const compressImageToWebP = (file, maxSizeInMB = 0.5, initialQuality = 0.8) => {
   return new Promise((resolve, reject) => {
-    // 파일이 이미지인지 확인
-    if (!file.type.startsWith('image/')) {
-      resolve(file); // 이미지가 아니면 그대로 반환
-      return;
-    }
+    if (!file.type.startsWith('image/')) return resolve(file);
 
-    const maxSizeInBytes = maxSizeInMB * 1024 * 1024; // MB를 바이트로 변환
-
-    // 파일 크기가 이미 최대 크기보다 작으면 압축하지 않음
-    if (file.size <= maxSizeInBytes) {
-      resolve(file);
-      return;
-    }
+    const maxSizeInBytes = maxSizeInMB * 1024 * 1024;
+    if (file.size <= maxSizeInBytes) return resolve(file);
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
 
-    img.onload = () => {
-      // 원본 이미지 크기
+    img.onload = async () => {
       let { width, height } = img;
 
-      // 이미지 크기 조정 (너무 큰 경우)
-      const maxDimension = 1920; // 최대 너비/높이
+      const maxDimension = 1920;
       if (width > maxDimension || height > maxDimension) {
         if (width > height) {
           height = (height * maxDimension) / width;
@@ -48,61 +37,45 @@ export const compressImage = (file, maxSizeInMB = 1, quality = 0.8) => {
 
       canvas.width = width;
       canvas.height = height;
-
-      // 이미지를 캔버스에 그리기
       ctx.drawImage(img, 0, 0, width, height);
 
-      // 압축된 이미지를 Blob으로 변환
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) {
-            reject(new Error('이미지 압축에 실패했습니다.'));
-            return;
-          }
+      const outputType = 'image/webp';
+      let quality = initialQuality;
 
-          // 압축된 파일 크기가 여전히 크면 품질을 더 낮춰서 재압축
-          if (blob.size > maxSizeInBytes && quality > 0.1) {
-            const newQuality = quality - 0.1;
-            canvas.toBlob(
-              (newBlob) => {
-                if (newBlob) {
-                  const compressedFile = new File([newBlob], file.name, {
-                    type: file.type,
-                    lastModified: Date.now(),
-                  });
-                  resolve(compressedFile);
-                } else {
-                  reject(new Error('이미지 재압축에 실패했습니다.'));
-                }
-              },
-              file.type,
-              newQuality
-            );
-          } else {
-            const compressedFile = new File([blob], file.name, {
-              type: file.type,
-              lastModified: Date.now(),
-            });
-            resolve(compressedFile);
-          }
-        },
-        file.type,
-        quality
-      );
+      const compressLoop = () => {
+        return new Promise((res, rej) => {
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) return rej(new Error('이미지 압축 실패'));
+              if (blob.size <= maxSizeInBytes || quality <= 0.1) {
+                const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.webp'), {
+                  type: outputType,
+                  lastModified: Date.now(),
+                });
+                res(compressedFile);
+              } else {
+                quality -= 0.1;
+                res(compressLoop()); // 재귀로 반복 압축
+              }
+            },
+            outputType,
+            quality
+          );
+        });
+      };
+
+      try {
+        const compressedFile = await compressLoop();
+        resolve(compressedFile);
+      } catch (err) {
+        reject(err);
+      }
     };
 
-    img.onerror = () => {
-      reject(new Error('이미지 로드에 실패했습니다.'));
-    };
-
-    // File을 Data URL로 변환하여 이미지 로드
+    img.onerror = () => reject(new Error('이미지 로드 실패'));
     const reader = new FileReader();
-    reader.onload = (e) => {
-      img.src = e.target.result;
-    };
-    reader.onerror = () => {
-      reject(new Error('파일 읽기에 실패했습니다.'));
-    };
+    reader.onload = (e) => (img.src = e.target.result);
+    reader.onerror = () => reject(new Error('파일 읽기 실패'));
     reader.readAsDataURL(file);
   });
 };
@@ -122,7 +95,7 @@ export const checkAndCompressImage = async (file, maxSizeInMB = 1) => {
 
   try {
     console.log(`이미지 압축 중... (원본: ${(file.size / 1024 / 1024).toFixed(2)}MB)`);
-    const compressedFile = await compressImage(file, maxSizeInMB);
+    const compressedFile = await compressImageToWebP(file, maxSizeInMB);
     console.log(`압축 완료: ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
     return compressedFile;
   } catch (error) {
