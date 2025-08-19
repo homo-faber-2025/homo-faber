@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import styled from '@emotion/styled';
 import { getStoreById } from '@/utils/supabase/stores';
 import { convertIndustryNameToKorean, convertCapacityNameToKorean } from '@/utils/converters';
+import { useCustomScrollbar } from '@/hooks/useCustomScrollbar';
+import CustomScrollbar from '@/components/common/CustomScrollbar';
 
 const DetailWrapper = styled.main`
-  width: calc(80vw - 68px);
+  width: calc(80vw - 60px);
   height: 100dvh;
   padding: 0px 10px 20px 50px;
   background-color: #F7F7F7;
@@ -28,7 +30,7 @@ const DetailPageName = styled.h1`
   transform: rotate(90deg);
   transform-origin: top left;
   top: 17px;
-  left: 30px;
+  left: 29px;
 `
 
 const StoreDetailCard = styled.article`
@@ -54,6 +56,13 @@ const StoreImgSection = styled(StoreDetailSection)`
   overflow-x: hidden;
   width: 52%;
   margin-top: -20px;
+  margin-right: 30px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 `
 
 const StoreName = styled.h2`
@@ -62,13 +71,18 @@ const StoreName = styled.h2`
   font-weight: 700;
   margin-bottom: 10px;
   color: #A0A0A0;
-  -webkit-text-stroke: solid 1px rgba(0,0,0,0.1);
-  text-stroke: solid 1px rgba(0,0,0,0.1);
-  text-shadow: 1px 1px 13px rgba(255,255,255,0.95), -1px 1px 4px rgba(0,0,0,0.5);
-  background: linear-gradient(90deg,rgb(84, 84, 84), #424242);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background-color:rgb(146, 146, 146);
   background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow: 3px 4px 5px rgba(245, 245, 245, 0.3), -0.1px -0.1px 6px rgba(100,92,92,0.2), 2px 2px 2px rgba(255,255,255,0.5);
+  transition: text-shadow .4s ;
+  padding-top: 3px;
+  margin-top:-2px;
+
+  &:hover{
+      text-shadow: 0px 2px 3px rgba(221, 221, 221, 0.8), -0.1px -0.1px 5px rgba(100,92,92,0.6), 2px 2px 10px rgba(255,255,255,0.5);
+  }
 `;
 
 const StoreAdress = styled.h3`
@@ -169,13 +183,26 @@ const StoreCardImg = styled.img`
 const StoreImgList = styled.div`
   width: 100%;
   margin-top: -56px;
-  padding-bottom: 10px;
+  padding: 0 40px 10px 40px;
+  margin-bottom: 40px;
 `
 const StoreImg = styled.img`
   width: 100%;
   border-radius: 50%;
   border: 0.6px solid black;
   vertical-align: top;
+  position: relative;
+  box-shadow: -1px 1px 3px 6px rgba(255,255,255,1), -2px -1px 20px 0.3px rgba(116, 116, 116, 0.63), 3px 15px 30px 10px rgba(177, 177, 177, 0.36);
+  margin-bottom: -10px;
+  position: relative;
+  transition: all .4s ;
+
+  &:hover{
+    z-index: 2;
+    transform: scale(1.06);
+    box-shadow: -1px 1px 3px 6px rgba(255,255,255,1), -2px -1px 30px 0.5px rgba(116, 116, 116, 0), 3px 15px 30px 0px rgba(177, 177, 177, 0.36);
+
+  }
 `
 
 const LoadingContainer = styled.div`
@@ -200,6 +227,8 @@ function StoreDetailContainer({ storeId }) {
   const [store, setStore] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const { containerRef, scrollState, scrollToRatio } = useCustomScrollbar();
 
   useEffect(() => {
     async function fetchStore() {
@@ -251,107 +280,116 @@ function StoreDetailContainer({ storeId }) {
   }
 
   return (
-    <DetailWrapper>
-      <DetailPageName>업체 상세</DetailPageName>
-      <StoreDetailCard>
-        <StoreDetailSection>
-          <StoreName>{store.name}</StoreName>
-          {store.address && (
-            <StoreAdress>
-              <a
-                href={`https://map.naver.com/v5/search/${encodeURIComponent(store.address)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {store.address}
-              </a>
-            </StoreAdress>
-          )}
-
-          {store.store_tags?.length > 0 && (
-            <StoreTagList>
-              {store.store_tags
-                .map(tag => tag.industry_types?.name)
-                .filter(Boolean)
-                .map((industryName, index) => (
-                  <StoreTag key={index}>
-                    {convertIndustryNameToKorean(industryName)}
-                  </StoreTag>
-                ))}
-            </StoreTagList>
-          )}
-
-          <StoreTagList>
-            {store.keyword?.length > 0 && (
-              <StoreTag>
-                {store.keyword.join(', ')}
-              </StoreTag>
+    <>
+      <DetailWrapper>
+        <DetailPageName>업체 상세</DetailPageName>
+        <StoreDetailCard>
+          <StoreDetailSection>
+            <StoreName>{store.name}</StoreName>
+            {store.address && (
+              <StoreAdress>
+                <a
+                  href={`https://map.naver.com/v5/search/${encodeURIComponent(store.address)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {store.address}
+                </a>
+              </StoreAdress>
             )}
-          </StoreTagList>
 
-          {store.store_tags?.some(tag => tag.capacity_types?.name) && (
-            <StoreCapacity>
-              {store.store_tags
-                .map(tag => tag.capacity_types?.name)
-                .filter(Boolean)
-                .map(convertCapacityNameToKorean)
-                .join(', ')}
-            </StoreCapacity>
-          )}
+            {store.store_tags?.length > 0 && (
+              <StoreTagList>
+                {store.store_tags
+                  .map(tag => tag.industry_types?.name)
+                  .filter(Boolean)
+                  .map((industryName, index) => (
+                    <StoreTag key={index}>
+                      {convertIndustryNameToKorean(industryName)}
+                    </StoreTag>
+                  ))}
+              </StoreTagList>
+            )}
 
-          <StoreContactList>
-            {store.store_contacts?.length > 0 &&
-              [
-                { key: 'phone', label: 'Phone.', value: store.store_contacts[0]?.phone },
-                { key: 'fax', label: 'Fax.', value: store.store_contacts[0]?.fax },
-                { key: 'email', label: 'Mail.', value: store.store_contacts[0]?.email },
-                { key: 'website', label: 'Website.', value: store.store_contacts[0]?.website }
-              ]
-                .filter(contact => contact.value)
-                .map(contact => {
-                  let content = contact.value;
+            <StoreTagList>
+              {store.keyword?.length > 0 && (
+                <StoreTag>
+                  {store.keyword.join(', ')}
+                </StoreTag>
+              )}
+            </StoreTagList>
 
-                  if (contact.key === 'phone' || 'fax') {
-                    content = <a href={`tel:${contact.value}`}>{contact.value}</a>;
-                  } else if (contact.key === 'email') {
-                    content = <a href={`mailto:${contact.value}`}>{contact.value}</a>;
-                  } else if (contact.key === 'website') {
-                    const url = contact.value.startsWith('http') ? contact.value : `https://${contact.value}`;
-                    content = <a href={url} target="_blank" rel="noopener noreferrer">{contact.value}</a>;
-                  }
+            {store.store_tags?.some(tag => tag.capacity_types?.name) && (
+              <StoreCapacity>
+                {store.store_tags
+                  .map(tag => tag.capacity_types?.name)
+                  .filter(Boolean)
+                  .map(convertCapacityNameToKorean)
+                  .join(', ')}
+              </StoreCapacity>
+            )}
 
-                  return (
-                    <StoreContact key={contact.key}>
-                      <StoreContactTxt>{contact.label}</StoreContactTxt>
-                      <StoreContactContent>{content}</StoreContactContent>
-                    </StoreContact>
-                  );
-                })
-            }
-          </StoreContactList>
+            <StoreContactList>
+              {store.store_contacts?.length > 0 &&
+                [
+                  { key: 'phone', label: 'Phone.', value: store.store_contacts[0]?.phone },
+                  { key: 'fax', label: 'Fax.', value: store.store_contacts[0]?.fax },
+                  { key: 'email', label: 'Mail.', value: store.store_contacts[0]?.email },
+                  { key: 'website', label: 'Website.', value: store.store_contacts[0]?.website }
+                ]
+                  .filter(contact => contact.value)
+                  .map(contact => {
+                    let content = contact.value;
 
-          {store.description && (
-            <StoreDescription>{store.description}</StoreDescription>
-          )}
-        </StoreDetailSection>
+                    if (contact.key === 'phone' || 'fax') {
+                      content = <a href={`tel:${contact.value}`}>{contact.value}</a>;
+                    } else if (contact.key === 'email') {
+                      content = <a href={`mailto:${contact.value}`}>{contact.value}</a>;
+                    } else if (contact.key === 'website') {
+                      const url = contact.value.startsWith('http') ? contact.value : `https://${contact.value}`;
+                      content = <a href={url} target="_blank" rel="noopener noreferrer">{contact.value}</a>;
+                    }
 
-        <StoreImgSection>
-          {store.card_img && (
-            <StoreCardImg src={`${store.card_img}`} />
-          )}
+                    return (
+                      <StoreContact key={contact.key}>
+                        <StoreContactTxt>{contact.label}</StoreContactTxt>
+                        <StoreContactContent>{content}</StoreContactContent>
+                      </StoreContact>
+                    );
+                  })
+              }
+            </StoreContactList>
 
-          {store.store_gallery?.length > 0 && (
-            <StoreImgList>
-              {store.store_gallery
-                .map(tag => tag?.image_url)
-                .map((imgURL, index) => (
-                  <StoreImg key={index} src={`${imgURL}`} />
-                ))}
-            </StoreImgList>
-          )}
-        </StoreImgSection>
-      </StoreDetailCard>
-    </DetailWrapper>
+            {store.description && (
+              <StoreDescription>{store.description}</StoreDescription>
+            )}
+          </StoreDetailSection>
+
+          <StoreImgSection ref={containerRef}>
+            {store.card_img && (
+              <StoreCardImg src={`${store.card_img}`} />
+            )}
+
+            {store.store_gallery?.length > 0 && (
+              <StoreImgList>
+                {store.store_gallery
+                  .map(tag => tag?.image_url)
+                  .map((imgURL, index) => (
+                    <StoreImg key={index} src={`${imgURL}`} />
+                  ))}
+              </StoreImgList>
+            )}
+          </StoreImgSection>
+        </StoreDetailCard>
+      </DetailWrapper>
+
+      {/* 커스텀 스크롤바 */}
+      <CustomScrollbar
+        scrollState={scrollState}
+        onScrollToRatio={scrollToRatio}
+        height={300}
+      />
+    </>
   );
 }
 

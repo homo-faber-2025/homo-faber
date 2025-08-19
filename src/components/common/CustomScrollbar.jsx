@@ -5,14 +5,14 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 
 const ScrollbarContainer = styled.div`
   position: fixed;
-  right: 20px;
-  top: 50%;
+  right: 23px;
+  top: ${props => props.$top ? `${props.$top}` : `50%`};
   transform: translateY(-50%);
   width: 20px;
-  height: calc(100dvh - 50px);
+  height: ${props => props.$height ? `${props.$height}px` : 'calc(100dvh - 200px)'};
   background-color: #737373;
   border-radius: 30px;
-  z-index: 10;
+  z-index: 4;
   opacity: ${props => props.$visible ? 1 : 0};
   transition: opacity 0.3s ease;
   cursor: pointer;
@@ -52,7 +52,7 @@ const ScrollbarThumb = styled.div`
   }
 `;
 
-const CustomScrollbar = ({ scrollState, onScrollToRatio }) => {
+const CustomScrollbar = ({ scrollState, onScrollToRatio, height, top }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const scrollbarRef = useRef(null);
@@ -61,7 +61,8 @@ const CustomScrollbar = ({ scrollState, onScrollToRatio }) => {
 
   const { scrollRatio, isScrollable, clientHeight, scrollHeight } = scrollState;
 
-  const containerHeight = scrollbarRef.current?.getBoundingClientRect().height ?? (window.innerHeight - 100);
+  // height prop이 있으면 사용, 없으면 기본값 (100dvh - 50px)
+  const containerHeight = height || (window.innerHeight - 200);
   const thumbSize = 40; // 썸네일 크기
 
   // 썸네일 위치 계산 (픽셀 단위)
@@ -224,6 +225,8 @@ const CustomScrollbar = ({ scrollState, onScrollToRatio }) => {
     <ScrollbarContainer
       ref={scrollbarRef}
       $visible={isVisible}
+      $height={height}
+      $top={top}
       onClick={handleScrollbarClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}

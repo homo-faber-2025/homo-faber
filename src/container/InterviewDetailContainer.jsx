@@ -4,6 +4,117 @@ import styled from '@emotion/styled';
 import { getInterviewById } from '@/utils/supabase/interview';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import EditorInterviewRender from '@/components/interview/EditorInterviewRenderer';
+import { useCustomScrollbar } from '@/hooks/useCustomScrollbar';
+import CustomScrollbar from '@/components/common/CustomScrollbar';
+
+const DetailWrapper = styled.main`
+  width: calc(80vw - 46px);
+  height: 100dvh;
+  padding: 0px 10px 20px 50px;
+  background-color: #F7F7F7;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  z-index: 3;
+  box-shadow: -2px 0 4px 0 rgba(84,84,84,0.57);
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  padding-left: 60px;
+  padding-right: 130px;
+  padding-bottom: 100px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+`
+const DetailPageName = styled.h1`
+  font-family: var(--font-gothic);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.3rem;
+  position: sticky;
+  transform: rotate(90deg);
+  transform-origin: top left;
+  top: 17px;
+  margin-left: -29px;
+`
+
+const InterviewHeader = styled.div`
+  display: flex;
+  gap: 2dvw;
+  margin-top: 12px;
+`
+
+const InterviewTitle = styled.div`
+  font-family: var(--font-gothic);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: -5px;
+  text-align: center;
+`
+const InterviewStore = styled.h2`
+  font-weight: 800;
+  font-size: 4.3dvw;
+  background-color:rgb(146, 146, 146);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow: 3px 4px 5px rgba(245, 245, 245, 0.3), -0.1px -0.1px 6px rgba(100,92,92,0.2), 2px 2px 2px rgba(255,255,255,0.5);
+  position: relative;
+  padding-top: 7px;
+  transition: text-shadow .4s ;
+
+  &:hover{
+      text-shadow: 0px 2px 3px rgba(221, 221, 221, 0.8), -0.1px -0.1px 5px rgba(100,92,92,0.6), 2px 2px 10px rgba(255,255,255,0.5);
+  }
+`
+const InterviewPerson = styled.h3`
+  font-weight: 800;
+  font-size: 1.6dvw;
+  padding-top: 4px;
+  background-color:rgb(145, 145, 145);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow: 3px 4px 5px rgba(245, 245, 245, 0.3), -0.1px -0.1px 6px rgba(100,92,92,0.2), 2px 2px 2px rgba(255,255,255,0.5);
+`
+const InterviewIntro = styled.h4`
+  font-weight: 500;
+  font-size: 1.2rem;
+  line-height: 1.75;
+  word-break: keep-all;
+  padding: 0 20px;
+  text-align: center;
+  color:rgb(94, 94, 94);
+`
+
+const InterviewCoverImg = styled.img`
+  height: 100.2dvh;
+  width: auto;
+  margin-right: -130px;
+  margin-left: auto;
+  // margin-top: -93px;
+  object-fit: contain;
+  border-radius: 0% 0 0% 43%;
+  margin-top: -26px;
+`
+
+const InterviewInfo = styled.div`
+  font-weight: 500;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  margin-left: auto;
+
+  & :first-of-type{
+    margin-top: 200px;
+  }
+`
 
 const LoadingContainer = styled.div`
   display: flex;
@@ -28,6 +139,8 @@ function InterviewDetailContainer({ interviewId }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const { containerRef, scrollState, scrollToRatio } = useCustomScrollbar();
+
   useEffect(() => {
     async function fetchInterview() {
       try {
@@ -48,10 +161,6 @@ function InterviewDetailContainer({ interviewId }) {
       fetchInterview();
     }
   }, [interviewId]);
-
-  const handleBackClick = () => {
-    router.back();
-  };
 
   if (isLoading) {
     return (
@@ -77,8 +186,30 @@ function InterviewDetailContainer({ interviewId }) {
     );
   }
 
-  return (<>
-  </>)
+  return (
+    <>
+      <DetailWrapper ref={containerRef}>
+        <DetailPageName>{interview?.stores.name}</DetailPageName>
+        <InterviewHeader>
+          <InterviewTitle>
+            <InterviewStore data-text={interview?.stores.name}>{interview?.stores.name}</InterviewStore>
+            <InterviewPerson>{interview?.stores.person}</InterviewPerson>
+            <InterviewIntro>{interview?.intro}</InterviewIntro>
+          </InterviewTitle>
+
+          <InterviewCoverImg src={interview?.cover_img} alt="이미지" />
+        </InterviewHeader>
+        <EditorInterviewRender item={interview?.contents} />
+        <InterviewInfo>{interview?.date}</InterviewInfo>
+        <InterviewInfo>{interview?.interviewee}</InterviewInfo>
+      </DetailWrapper>
+
+      {/* 커스텀 스크롤바 */}
+      <CustomScrollbar
+        scrollState={scrollState}
+        onScrollToRatio={scrollToRatio}
+      />
+    </>)
 }
 
 export default InterviewDetailContainer;

@@ -4,14 +4,12 @@ import styled from '@emotion/styled';
 import { memo } from 'react';
 
 const EditorArticle = styled.article`
-  // box-shadow: inset 0 0 10px 10px green;
   display: flex;
   flex-direction: column;
   margin-left: 20px;
-  // margin-right: 80px;
+  margin-bottom: 200px;
 `
 const EditorPara = styled.p`
-  // box-shadow: isnet 0 0 10px 10px blue;
   font-family: var(--font-noto);
   font-weight: 400;
   font-size: 1.5rem;
@@ -20,7 +18,6 @@ const EditorPara = styled.p`
   word-break: keep-all;
   margin-left: 11dvw;
   text-indent: 80px;
-  // margin-bottom: 180px;
   position: relative;
   
 
@@ -36,7 +33,6 @@ const EditorPara = styled.p`
     margin-left: -11dvw;
     margin-right: 2dvw;
     text-indent: 0px;
-    // position: relative;
   }
 
   & .sticker{
@@ -100,9 +96,7 @@ const EditorPara = styled.p`
     line-height: 2.1;
   }
 `
-const EditorIntro = styled.h3`
-  box-shadow: inset 0 0 10px 10px pink;
-`
+
 const EditorImgWrapper = styled.div`
   width: calc(100% - 11dvw - 9px);
   margin-left: auto;
@@ -118,6 +112,9 @@ const EditorImgCaption = styled.div`
   text-align: right;
   opacity: 0.5;
 `
+const EditorInfo = styled.div`
+  box-shadow: inset 0 0 10px 10px yellow;
+`
 
 function EditorInterviewRender({ item }) {
 
@@ -132,15 +129,6 @@ function EditorInterviewRender({ item }) {
               </>
             ) : (
               ''
-            )}
-            {block.type === 'header' && [1, 2, 3].includes(block.data.level) ? (
-              <EditorIntro
-                dangerouslySetInnerHTML={{
-                  __html: block.data.text.replace(/\n/g, '<br />'),
-                }}
-              />
-            ) : (
-              <></>
             )}
             {block.type === 'image' ? (
               <EditorImgWrapper>

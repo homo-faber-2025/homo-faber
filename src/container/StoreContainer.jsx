@@ -45,7 +45,7 @@ const StorePageName = styled.h1`
   transform: rotate(90deg);
   transform-origin: top left;
   top: 17px;
-  left: 46px;
+  left: 43px;
 `
 
 const StoreFilterWrapper = styled.div`

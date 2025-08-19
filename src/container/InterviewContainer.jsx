@@ -47,7 +47,7 @@ const InterviwPageName = styled.h1`
   transform: rotate(90deg);
   transform-origin: top left;
   top: 17px;
-  left: 32px;
+  left: 26px;
 `
 
 const InterviewList = styled.ul`
