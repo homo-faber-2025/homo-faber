@@ -20,11 +20,11 @@ const Map3D = ({ stores }) => {
 
   useEffect(() => {
     const script = document.createElement('script');
-    script.src = 'https://cdn.xdworld.kr/latest/XDWorldEM.js';
+    script.src = 'https://cdn.xdworld.kr/2.13.0/XDWorldEM.js';
     script.async = true;
     script.onload = () => {
       Module.locateFile = function (s) {
-        return `https://cdn.xdworld.kr/latest/${s}`;
+        return `https://cdn.xdworld.kr/2.13.0/${s}`;
       };
 
       Module.postRun = function () {
