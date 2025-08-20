@@ -9,26 +9,22 @@ import { useStores, useStoreFilters, extractAllTags } from '@/hooks/useStores';
 import styled from '@emotion/styled';
 
 const StoreWrapper = styled.main`
-  width: ${(props) => props.width};
+  width: 80dvw;
   height: 100dvh;
   padding-left: 70px;
   padding-top: 27px;
   position: absolute;
-  right: 0px;
+  right: ${(props) => props.right};
   top: 0px;
-  z-index: ${(props) => {
-    if (!props.pathname) return 0;
-    if (props.pathname === '/') return 2;
-    if (props.pathname.startsWith('/store')) return 2;
-    return 0;
-  }};
+  z-index: 2;
   background-color: var(--yellow);
-  cursor: ${(props) => (props.pathname && (props.pathname === '/' || props.pathname.startsWith('/store/'))) ? 'pointer' : 'default'};
-  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: ${(props) => (props.pathname && (props.pathname !== '/' || props.pathname.startsWith('/store/'))) ? 'pointer' : 'default'};
+  transition: right 0.6s cubic-bezier(0.2, 0, 0.4, 1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  
+  box-shadow: -2px 4px 10px 0 rgba(0,0,0,0.25);
+
   &::before {
     content: '';
     position: absolute;
@@ -79,10 +75,10 @@ function StoreContainer() {
   const router = useRouter();
   const { stores, isLoading, error } = useStores();
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [width, setWidth] = useState(() => {
-    if (pathname === '/') return '10vw';
-    if (pathname.startsWith('/store')) return '80vw';
-    return '10vw';
+  const [right, setRight] = useState(() => {
+    if (pathname === '/') return 'calc(80dvw - 300px)';
+    if (pathname.startsWith('/store')) return '0px';
+    return 'calc(80dvw - 300px)';
   });
 
   // 태그 필터링을 위한 상태
@@ -118,17 +114,17 @@ function StoreContainer() {
     }
   };
 
-  // pathname 변경 시 width 업데이트
+  // pathname 변경 시 right 업데이트
   useEffect(() => {
-    let newWidth;
+    let newRight;
     if (pathname === '/') {
-      newWidth = '10vw';
+      newRight = 'calc(-80dvw + 120px)';
     } else if (pathname.startsWith('/store')) {
-      newWidth = '80vw';
+      newRight = '0px';
     } else {
-      newWidth = '10vw';
+      newRight = 'calc(-80dvw + 120px)';
     }
-    setWidth(newWidth);
+    setRight(newRight);
   }, [pathname]);
 
   // 모든 가능한 태그 목록 업데이트
@@ -196,7 +192,7 @@ function StoreContainer() {
     <>
       <StoreWrapper
         pathname={pathname}
-        width={width}
+        right={right}
         onClick={handleStoreWrapperClick}
       >
         <StorePageName>업체 목록</StorePageName>

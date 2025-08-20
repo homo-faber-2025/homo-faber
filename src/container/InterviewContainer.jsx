@@ -16,13 +16,13 @@ const InterviewWrapper = styled.main`
   background-size: 200% 200%;
   background-position: -100% -100%;
   cursor: ${(props) => (props.pathname && (props.pathname === '/' || props.pathname.startsWith('/interview/'))) ? 'pointer' : 'default'};
-  transition: width 5s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   border-left: solid 3px #DADADA;
   box-shadow: -8px 4px 10px 0 rgba(0,0,0,0.25);
   font-family: var(--font-gothic);
+  pointer-events: auto;
 
   &::before {
     content: '';

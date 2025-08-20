@@ -8,7 +8,8 @@ import { motion, AnimatePresence } from 'motion/react';
 // Lazy loading으로 컨테이너들을 동적으로 import
 const InterviewContainer = lazy(() => import('@/container/InterviewContainer'));
 const WordContainer = lazy(() => import('@/container/WordContainer'));
-const StoreContainer = lazy(() => import('@/container/StoreContainer'));
+const InfoContainer = lazy(() => import('@/container/InfoContainer'));
+const LoginContainer = lazy(() => import('@/container/LoginContainer'));
 
 const SidePanelWrapper = styled(motion.div)`
   width: 80dvw;
@@ -18,7 +19,8 @@ const SidePanelWrapper = styled(motion.div)`
   top: 0px;
   z-index: 2;
   overflow: hidden;
-  // background: blue;
+  background: orange;
+  box-shadow: -8px 4px 10px 0 rgba(0,0,0,0.25);
 `;
 
 const LoadingFallback = styled.div`
