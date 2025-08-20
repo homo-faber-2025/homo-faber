@@ -3,29 +3,27 @@
 import { usePathname, useRouter } from 'next/navigation';
 import styled from '@emotion/styled';
 import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
-import { getInterviews } from '@/utils/supabase/interview';
+import { motion } from 'motion/react';
+import { useInterviews } from '@/hooks/useInterviews';
 
-const InterviewWrapper = styled.main`
-  width: ${(props) => (props.pathname.startsWith('/interview') ? '80vw' : '10vw')};
-  height: 100dvh;
+const InterviewWrapper = styled(motion.main)`
+  width: 100%
+  height: 100%;
   padding-left: 70px;
   padding-top: 27px;
-  position: absolute;
-  right: 0px;
-  top: 0px;
-  z-index: 1;
+  z-index:3;
   background: #7C7C7C;
   background: ${(props) => props.gradientCss};
   background-size: 200% 200%;
   background-position: -100% -100%;
-  cursor: ${(props) => (props.pathname === '/' || props.pathname.startsWith('/store/') ? 'pointer' : 'default')};
-  transition: 3s ease-in-out;
+  cursor: ${(props) => (props.pathname && (props.pathname === '/' || props.pathname.startsWith('/interview/'))) ? 'pointer' : 'default'};
   overflow: hidden;
   display: flex;
   flex-direction: column;
   border-left: solid 3px #DADADA;
   box-shadow: -8px 4px 10px 0 rgba(0,0,0,0.25);
   font-family: var(--font-gothic);
+  pointer-events: auto;
 
   &::before {
     content: '';
@@ -35,7 +33,6 @@ const InterviewWrapper = styled.main`
     width: 100%;
     height: 100%;
     background: linear-gradient(270deg,rgba(124, 124, 124, 0.5) 19%, rgba(229, 229, 229, 0.3) 42%, rgba(229, 229, 229, 0.7) 95%);
-
   }
 `;
 
@@ -47,14 +44,21 @@ const InterviwPageName = styled.h1`
   transform: rotate(90deg);
   transform-origin: top left;
   top: 17px;
-  left: 32px;
+  left: 26px;
 `
 
 const InterviewList = styled.ul`
   width: 100%;
-  height: 100%;
+  height: calc(100dvh + 27px);
   color: #6E6E6E;
-  margin-top: -3px;
+  padding-top: 27px;
+  margin-top: -27px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 `
 
 const InterviewItem = styled.li`
@@ -65,11 +69,11 @@ const InterviewItem = styled.li`
   mix-blend-mode: hard-light;
   background: linear-gradient(100deg, rgba(70,70,70,0.6), black);
   -webkit-background-clip: text;
-  // -webkit-text-fill-color: rgba(94, 94, 94, 0.88);
   background-clip: text;
   cursor: pointer;
+  transition: 0.3s ease-in-out;
   &:hover{
-    color: green;
+    color: white;
   }
   `
 
@@ -82,7 +86,7 @@ const InterviewPerson = styled.div`
   font-size: 2.4rem;
 `
 
-function InterviewContainer() {
+function InterviewContainer({ onLoadComplete }) {
   const pathname = usePathname();
   const router = useRouter();
   const wrapperRef = useRef(null);
@@ -139,23 +143,14 @@ function InterviewContainer() {
     router.push(`/interview/${interviewId}`);
   }
 
-  const [interviews, setInterviews] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { interviews, isLoading, error } = useInterviews();
 
+  // 데이터 로딩 완료 시 부모 컴포넌트에 알림
   useEffect(() => {
-    const fetchInterviews = async () => {
-      try {
-        const data = await getInterviews();
-        setInterviews(Array.isArray(data) ? data : []);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchInterviews();
-  }, []);
+    if (!isLoading && interviews.length > 0 && onLoadComplete) {
+      onLoadComplete();
+    }
+  }, [isLoading, interviews, onLoadComplete]);
 
   if (error) {
     return <div>에러가 발생했습니다: {error.message}</div>;
@@ -165,7 +160,6 @@ function InterviewContainer() {
     <>
       <InterviewWrapper
         ref={wrapperRef}
-        pathname={pathname}
         gradientCss={gradientCss}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}

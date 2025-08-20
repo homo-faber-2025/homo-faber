@@ -5,26 +5,26 @@ import { usePathname, useRouter } from 'next/navigation';
 import Search from '@/components/store/Search';
 import StoreFilters from '@/components/store/StoreFilters';
 import StoreList from '@/components/store/StoreList';
-import { getStores } from '@/utils/supabase/stores';
-import { useStores, extractAllTags } from '@/hooks/useStores';
+import { useStores, useStoreFilters, extractAllTags } from '@/hooks/useStores';
 import styled from '@emotion/styled';
 
 const StoreWrapper = styled.main`
-  width: ${(props) => (props.pathname.startsWith('/store') ? '80vw' : '10vw')};
+  width: 80dvw;
   height: 100dvh;
   padding-left: 70px;
   padding-top: 27px;
   position: absolute;
-  right: 0px;
+  right: ${(props) => props.right};
   top: 0px;
-  z-index: 1;
+  z-index: 2;
   background-color: var(--yellow);
-  cursor: ${(props) => (props.pathname === '/' || props.pathname.startsWith('/store/') ? 'pointer' : 'default')};
-  transition: 3s ease-in-out;
+  cursor: ${(props) => (props.pathname && (props.pathname !== '/' || props.pathname.startsWith('/store/'))) ? 'pointer' : 'default'};
+  transition: right 0.6s cubic-bezier(0.2, 0, 0.4, 1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  
+  box-shadow: -2px 4px 10px 0 rgba(0,0,0,0.25);
+
   &::before {
     content: '';
     position: absolute;
@@ -45,7 +45,7 @@ const StorePageName = styled.h1`
   transform: rotate(90deg);
   transform-origin: top left;
   top: 17px;
-  left: 46px;
+  left: 43px;
 `
 
 const StoreFilterWrapper = styled.div`
@@ -73,10 +73,9 @@ const ResetFilterBtn = styled(StoreFilterBtn)`
 function StoreContainer() {
   const pathname = usePathname();
   const router = useRouter();
-  const [stores, setStores] = useState([]);
+  const { stores, isLoading, error } = useStores();
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [right, setRight] = useState('calc(-80dvw + 120px)');
 
   // 태그 필터링을 위한 상태
   const [selectedTags, setSelectedTags] = useState({
@@ -98,8 +97,8 @@ function StoreContainer() {
     material: [],
   });
 
-  // 확장된 useStores 훅 사용 (정렬 포함)
-  const filteredStores = useStores(stores, searchKeyword, selectedTags, sortBy);
+  // 필터링된 스토어 목록
+  const filteredStores = useStoreFilters(stores, searchKeyword, selectedTags, sortBy);
 
   // 홈 페이지에서 StoreWrapper 클릭 시 /store로 이동
   // 개별 스토어 페이지에서 StoreWrapper 클릭 시 /store로 이동  
@@ -111,24 +110,26 @@ function StoreContainer() {
     }
   };
 
+  // pathname 변경 시 right 업데이트
   useEffect(() => {
-    async function fetchStores() {
-      try {
-        const data = await getStores();
-        setStores(data);
-
-        // 모든 가능한 태그 추출
-        const tags = extractAllTags(data);
-        setAllTags(tags);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
+    let newRight;
+    if (pathname === '/') {
+      newRight = 'calc(-80dvw + 120px)';
+    } else if (pathname.startsWith('/store')) {
+      newRight = '0px';
+    } else {
+      newRight = 'calc(-80dvw + 120px)';
     }
+    setRight(newRight);
+  }, [pathname]);
 
-    fetchStores();
-  }, []);
+  // 모든 가능한 태그 목록 업데이트
+  useEffect(() => {
+    if (stores.length > 0) {
+      const tags = extractAllTags(stores);
+      setAllTags(tags);
+    }
+  }, [stores]);
 
   // 검색 키워드 처리
   const handleSearch = (keyword) => {
@@ -187,6 +188,7 @@ function StoreContainer() {
     <>
       <StoreWrapper
         pathname={pathname}
+        right={right}
         onClick={handleStoreWrapperClick}
       >
         <StorePageName>업체 목록</StorePageName>

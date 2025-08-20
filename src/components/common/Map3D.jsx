@@ -13,18 +13,18 @@ const Map3D = ({ stores }) => {
 
   // /store 페이지 또는 개별 스토어 페이지에서 Map3D 클릭 시 홈으로 이동
   const handleMapClick = () => {
-    if (pathname === '/store' || pathname.startsWith('/store/')) {
+    if (pathname !== '/') {
       router.push('/');
     }
   };
 
   useEffect(() => {
     const script = document.createElement('script');
-    script.src = 'https://cdn.xdworld.kr/latest/XDWorldEM.js';
+    script.src = 'https://cdn.xdworld.kr/2.13.0/XDWorldEM.js';
     script.async = true;
     script.onload = () => {
       Module.locateFile = function (s) {
-        return `https://cdn.xdworld.kr/latest/${s}`;
+        return `https://cdn.xdworld.kr/2.13.0/${s}`;
       };
 
       Module.postRun = function () {
@@ -93,7 +93,7 @@ const Map3D = ({ stores }) => {
       style={{
         width: '100dvw',
         height: '100dvh',
-        cursor: (pathname === '/store' || pathname.startsWith('/store/')) ? 'pointer' : 'default'
+        cursor: 'pointer'
       }}
       onClick={handleMapClick}
     />

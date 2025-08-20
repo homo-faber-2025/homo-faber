@@ -7,9 +7,14 @@ import { createInterview } from '@/utils/supabase/interview';
 import styled from '@emotion/styled';
 
 const AdminInterviewPage = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
   padding: 20px;
+  position: absolute;
+  top:0;
+  left:0;
+  width: 100dvw;
+  height: 100dvh;
+  background:white;
+  z-index: 10;
 `;
 
 const Header = styled.div`

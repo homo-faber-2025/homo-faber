@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { set, useForm } from 'react-hook-form';
 
-function LoginWrapper() {
+function LoginContainer({ onLoadComplete }) {
   const [error, setError] = useState('');
   const router = useRouter();
   const {
@@ -31,6 +31,8 @@ function LoginWrapper() {
       setError(error.message);
     }
   };
+
+  onLoadComplete();
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -72,4 +74,4 @@ function LoginWrapper() {
   );
 }
 
-export default LoginWrapper;
+export default LoginContainer;

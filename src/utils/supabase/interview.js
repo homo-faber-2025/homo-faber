@@ -62,7 +62,8 @@ export async function getInterviewsByStore(storeId) {
       *,
       stores(
         id,
-        name
+        name,
+        person
       )
     `)
     .eq('store_id', storeId)
@@ -86,7 +87,8 @@ export async function getInterviewById(interviewId) {
       *,
       stores(
         id,
-        name
+        name,
+        person
       )
     `)
     .eq('id', interviewId)

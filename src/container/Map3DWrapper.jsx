@@ -1,31 +1,17 @@
 'use client';
 
 import Map3D from '../components/common/Map3D';
-import { getStores } from '@/utils/supabase/stores';
-import { usePOI } from '@/hooks/usePOI';
-import { useEffect, useState } from 'react';
+import { useStores } from '@/hooks/useStores';
 
 export default function Map3DWrapper() {
-  const [stores, setStores] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchStores() {
-      try {
-        const data = await getStores();
-        setStores(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchStores();
-  }, []);
-
+  const { stores, isLoading, error } = useStores();
 
   if (isLoading) {
     return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error loading stores</div>;
   }
 
   return <Map3D stores={stores} />
