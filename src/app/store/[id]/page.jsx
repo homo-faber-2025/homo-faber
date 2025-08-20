@@ -1,4 +1,3 @@
-import StoreDetailContainer from '@/container/StoreDetailContainer';
 import { getStoreById } from '@/utils/supabase/stores';
 
 export async function generateMetadata({ params }) {

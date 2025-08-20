@@ -1,4 +1,61 @@
-import { useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { getStores } from '@/utils/supabase/stores';
+
+// 전역 캐시 객체
+let storesCache = null;
+let storesCacheTimestamp = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5분
+
+export function useStores() {
+  const [stores, setStores] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchStores = useCallback(async (forceRefresh = false) => {
+    // 캐시가 유효하고 강제 새로고침이 아닌 경우 캐시 사용
+    if (!forceRefresh && storesCache && storesCacheTimestamp &&
+      (Date.now() - storesCacheTimestamp) < CACHE_DURATION) {
+      setStores(storesCache);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+      const data = await getStores();
+      const storesArray = Array.isArray(data) ? data : [];
+
+      // 캐시 업데이트
+      storesCache = storesArray;
+      storesCacheTimestamp = Date.now();
+
+      setStores(storesArray);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStores();
+  }, [fetchStores]);
+
+  // 캐시 무효화 함수
+  const invalidateCache = useCallback(() => {
+    storesCache = null;
+    storesCacheTimestamp = null;
+  }, []);
+
+  return {
+    stores,
+    isLoading,
+    error,
+    refetch: () => fetchStores(true),
+    invalidateCache
+  };
+}
 
 /**
  * 스토어 검색, 태그 필터링, 정렬 기능을 제공하는 hook
@@ -8,7 +65,7 @@ import { useMemo } from 'react';
  * @param {string} sortBy - 정렬 방식 ('recommended', 'nameAsc', 'nameDesc')
  * @returns {Array} - 필터링 및 정렬된 스토어 목록
  */
-export function useStores(
+export function useStoreFilters(
   stores,
   searchKeyword,
   selectedTags = null,
@@ -104,35 +161,33 @@ export function useStores(
   }, [stores, searchKeyword, selectedTags, sortBy]);
 }
 
-/**
- * 모든 가능한 태그를 추출하는 함수
- * @param {Array} stores - 스토어 목록
- * @returns {Object} - 추출된 태그 {industry: [], capacity: [], material: []}
- */
+// 태그 추출 함수
 export function extractAllTags(stores) {
-  const tags = {
+  const allTags = {
     industry: new Set(),
     capacity: new Set(),
     material: new Set(),
   };
 
-  stores.forEach((store) => {
-    store.store_tags?.forEach((tag) => {
-      if (tag.industry_types?.name) {
-        tags.industry.add(tag.industry_types.name);
-      }
-      if (tag.capacity_types?.name) {
-        tags.capacity.add(tag.capacity_types.name);
-      }
-      if (tag.material_types?.name) {
-        tags.material.add(tag.material_types.name);
-      }
-    });
+  stores.forEach(store => {
+    if (store.store_tags) {
+      store.store_tags.forEach(tag => {
+        if (tag.industry_types?.name) {
+          allTags.industry.add(tag.industry_types.name);
+        }
+        if (tag.capacity_types?.name) {
+          allTags.capacity.add(tag.capacity_types.name);
+        }
+        if (tag.material_types?.name) {
+          allTags.material.add(tag.material_types.name);
+        }
+      });
+    }
   });
 
   return {
-    industry: Array.from(tags.industry),
-    capacity: Array.from(tags.capacity),
-    material: Array.from(tags.material),
+    industry: Array.from(allTags.industry).sort(),
+    capacity: Array.from(allTags.capacity).sort(),
+    material: Array.from(allTags.material).sort(),
   };
 }

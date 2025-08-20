@@ -1,4 +1,3 @@
-import InterviewContainer from '@/container/InterviewContainer';
 import InterviewDetailContainer from '@/container/InterviewDetailContainer';
 
 export const metadata = {
@@ -21,7 +20,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <>
-      <InterviewContainer />
+      <InterviewDetailContainer />
       {children}
     </>
   );

@@ -1,9 +1,9 @@
 'use client';
 
 import styled from '@emotion/styled';
-import { getInterviewById } from '@/utils/supabase/interview';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { useInterviewDetail } from '@/hooks/useInterviewDetail';
 import EditorInterviewRender from '@/components/interview/EditorInterviewRenderer';
 import { useCustomScrollbar } from '@/hooks/useCustomScrollbar';
 import { motion, AnimatePresence } from 'motion/react';
@@ -137,12 +137,12 @@ const ErrorContainer = styled.div`
 function InterviewDetailContainer({ }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [interview, setInterview] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [right, setRight] = useState('-100dvw');
   const interviewId = pathname.startsWith('/interview/') && pathname !== '/interview' ? pathname.split('/')[2] : null;
 
+
+
+  const { interview, isLoading, error } = useInterviewDetail(interviewId);
   const { containerRef, scrollState, scrollToRatio } = useCustomScrollbar();
 
   // pathname 변경 시 width 업데이트
@@ -150,34 +150,6 @@ function InterviewDetailContainer({ }) {
     const newRight = pathname.startsWith('/interview/') && pathname !== '/interview' ? '0px' : '-100dvw';
     setRight(newRight);
   }, [pathname]);
-
-  useEffect(() => {
-    async function fetchInterview() {
-      try {
-        const data = await getInterviewById(interviewId);
-        if (!data) {
-          setError(new Error('인터뷰를 찾을 수 없습니다.'));
-          return;
-        }
-        setInterview(data);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    if (interviewId) {
-      setIsLoading(true);
-      setError(null);
-      setInterview(null);
-      fetchInterview();
-    } else {
-      setIsLoading(false);
-      setError(null);
-      setInterview(null);
-    }
-  }, [interviewId]);
 
   return (
     <AnimatePresence mode="wait">

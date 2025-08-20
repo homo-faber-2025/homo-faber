@@ -5,8 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import Search from '@/components/store/Search';
 import StoreFilters from '@/components/store/StoreFilters';
 import StoreList from '@/components/store/StoreList';
-import { getStores } from '@/utils/supabase/stores';
-import { useStores, extractAllTags } from '@/hooks/useStores';
+import { useStores, useStoreFilters, extractAllTags } from '@/hooks/useStores';
 import styled from '@emotion/styled';
 
 const StoreWrapper = styled.main`
@@ -78,10 +77,8 @@ const ResetFilterBtn = styled(StoreFilterBtn)`
 function StoreContainer() {
   const pathname = usePathname();
   const router = useRouter();
-  const [stores, setStores] = useState([]);
+  const { stores, isLoading, error } = useStores();
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [width, setWidth] = useState(() => {
     if (pathname === '/') return '10vw';
     if (pathname.startsWith('/store')) return '80vw';
@@ -108,8 +105,8 @@ function StoreContainer() {
     material: [],
   });
 
-  // 확장된 useStores 훅 사용 (정렬 포함)
-  const filteredStores = useStores(stores, searchKeyword, selectedTags, sortBy);
+  // 필터링된 스토어 목록
+  const filteredStores = useStoreFilters(stores, searchKeyword, selectedTags, sortBy);
 
   // 홈 페이지에서 StoreWrapper 클릭 시 /store로 이동
   // 개별 스토어 페이지에서 StoreWrapper 클릭 시 /store로 이동  
@@ -134,24 +131,13 @@ function StoreContainer() {
     setWidth(newWidth);
   }, [pathname]);
 
+  // 모든 가능한 태그 목록 업데이트
   useEffect(() => {
-    async function fetchStores() {
-      try {
-        const data = await getStores();
-        setStores(data);
-
-        // 모든 가능한 태그 추출
-        const tags = extractAllTags(data);
-        setAllTags(tags);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
+    if (stores.length > 0) {
+      const tags = extractAllTags(stores);
+      setAllTags(tags);
     }
-
-    fetchStores();
-  }, []);
+  }, [stores]);
 
   // 검색 키워드 처리
   const handleSearch = (keyword) => {

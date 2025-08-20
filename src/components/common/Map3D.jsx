@@ -13,7 +13,7 @@ const Map3D = ({ stores }) => {
 
   // /store 페이지 또는 개별 스토어 페이지에서 Map3D 클릭 시 홈으로 이동
   const handleMapClick = () => {
-    if (pathname === '/store' || pathname.startsWith('/store/')) {
+    if (pathname !== '/') {
       router.push('/');
     }
   };

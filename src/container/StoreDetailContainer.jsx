@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import styled from '@emotion/styled';
 import { motion, AnimatePresence } from 'motion/react';
-import { getStoreById } from '@/utils/supabase/stores';
+import { useStoreDetail } from '@/hooks/useStoreDetail';
 import { convertIndustryNameToKorean, convertCapacityNameToKorean } from '@/utils/converters';
 import { useCustomScrollbar } from '@/hooks/useCustomScrollbar';
 import CustomScrollbar from '@/components/common/CustomScrollbar';
@@ -17,7 +17,7 @@ const DetailWrapper = styled(motion.main)`
   position: absolute;
   right: ${(props) => props.right};
   top: 0px;
-  z-index: 4;
+  z-index: 7;
   box-shadow: -2px 0 4px 0 rgba(79,75,31,0.57);
   display: flex;
   overflow: hidden;
@@ -227,12 +227,12 @@ const ErrorContainer = styled.div`
 function StoreDetailContainer({ }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [store, setStore] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [right, setRight] = useState('-100dvw');
   const storeId = pathname.startsWith('/store/') && pathname !== '/store' ? pathname.split('/')[2] : null;
 
+
+
+  const { store, isLoading, error } = useStoreDetail(storeId);
   const { containerRef, scrollState, scrollToRatio } = useCustomScrollbar();
 
   // pathname 변경 시 width 업데이트
@@ -240,34 +240,6 @@ function StoreDetailContainer({ }) {
     const newRight = pathname.startsWith('/store/') && pathname !== '/store' ? '0px' : '-100dvw';
     setRight(newRight);
   }, [pathname]);
-
-  useEffect(() => {
-    async function fetchStore() {
-      try {
-        const data = await getStoreById(storeId);
-        if (!data) {
-          setError(new Error('스토어를 찾을 수 없습니다.'));
-          return;
-        }
-        setStore(data);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    if (storeId) {
-      setIsLoading(true);
-      setError(null);
-      setStore(null);
-      fetchStore();
-    } else {
-      setIsLoading(false);
-      setError(null);
-      setStore(null);
-    }
-  }, [storeId]);
 
   const handleBackClick = () => {
     router.back();

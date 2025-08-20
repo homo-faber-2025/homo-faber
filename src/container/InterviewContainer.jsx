@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import styled from '@emotion/styled';
 import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
-import { getInterviews } from '@/utils/supabase/interview';
+import { useInterviews } from '@/hooks/useInterviews';
 
 const InterviewWrapper = styled.main`
   width: 100%
@@ -142,23 +142,7 @@ function InterviewContainer() {
     router.push(`/interview/${interviewId}`);
   }
 
-  const [interviews, setInterviews] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchInterviews = async () => {
-      try {
-        const data = await getInterviews();
-        setInterviews(Array.isArray(data) ? data : []);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchInterviews();
-  }, []);
+  const { interviews, isLoading, error } = useInterviews();
 
   if (error) {
     return <div>에러가 발생했습니다: {error.message}</div>;
