@@ -2,6 +2,8 @@ import { Gothic_A1, Noto_Serif_KR, ABeeZee } from 'next/font/google';
 import './globals.css';
 import Providers from '@/app/providers';
 import Map3DWrapper from '@/container/Map3DWrapper';
+import StoreContainer from '@/container/StoreContainer';
+import Navigation from '@/components/common/Navigation';
 
 const gothic = Gothic_A1({
   weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
@@ -33,6 +35,8 @@ export default function RootLayout({ children }) {
       >
         <Providers>
           <Map3DWrapper />
+          <StoreContainer />
+          <Navigation />
           {children}
         </Providers>
       </body>

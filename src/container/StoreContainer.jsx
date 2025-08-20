@@ -10,7 +10,7 @@ import { useStores, extractAllTags } from '@/hooks/useStores';
 import styled from '@emotion/styled';
 
 const StoreWrapper = styled.main`
-  width: ${(props) => (props.pathname.startsWith('/store') ? '80vw' : '10vw')};
+  width: ${(props) => props.width};
   height: 100dvh;
   padding-left: 70px;
   padding-top: 27px;
@@ -20,7 +20,7 @@ const StoreWrapper = styled.main`
   z-index: 1;
   background-color: var(--yellow);
   cursor: ${(props) => (props.pathname === '/' || props.pathname.startsWith('/store/') ? 'pointer' : 'default')};
-  transition: 3s ease-in-out;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -77,6 +77,7 @@ function StoreContainer() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [width, setWidth] = useState(pathname.startsWith('/store') ? '80vw' : '10vw');
 
   // 태그 필터링을 위한 상태
   const [selectedTags, setSelectedTags] = useState({
@@ -110,6 +111,12 @@ function StoreContainer() {
       router.push('/store');
     }
   };
+
+  // pathname 변경 시 width 업데이트
+  useEffect(() => {
+    const newWidth = pathname.startsWith('/store') ? '80vw' : '10vw';
+    setWidth(newWidth);
+  }, [pathname]);
 
   useEffect(() => {
     async function fetchStores() {
@@ -187,6 +194,7 @@ function StoreContainer() {
     <>
       <StoreWrapper
         pathname={pathname}
+        width={width}
         onClick={handleStoreWrapperClick}
       >
         <StorePageName>업체 목록</StorePageName>

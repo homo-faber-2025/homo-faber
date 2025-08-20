@@ -2,19 +2,20 @@
 
 import styled from '@emotion/styled';
 import { getInterviewById } from '@/utils/supabase/interview';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import EditorInterviewRender from '@/components/interview/EditorInterviewRenderer';
 import { useCustomScrollbar } from '@/hooks/useCustomScrollbar';
+import { motion, AnimatePresence } from 'motion/react';
 import CustomScrollbar from '@/components/common/CustomScrollbar';
 
-const DetailWrapper = styled.main`
+const DetailWrapper = styled(motion.main)`
   width: calc(80vw - 46px);
   height: 100dvh;
   padding: 0px 10px 20px 50px;
   background-color: #F7F7F7;
   position: absolute;
-  right: 0px;
+  right: ${(props) => props.right};
   top: 0px;
   z-index: 3;
   box-shadow: -2px 0 4px 0 rgba(84,84,84,0.57);
@@ -134,12 +135,18 @@ const ErrorContainer = styled.div`
 `;
 
 function InterviewDetailContainer({ interviewId }) {
-  const router = useRouter();
+  const pathname = usePathname();
   const [interview, setInterview] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [right, setRight] = useState('-100dvw');
 
   const { containerRef, scrollState, scrollToRatio } = useCustomScrollbar();
+
+  useEffect(() => {
+    const newRight = pathname.startsWith('/interview/') && pathname !== '/interview' ? '0px' : '-100dvw';
+    setRight(newRight);
+  }, [pathname]);
 
   useEffect(() => {
     async function fetchInterview() {
@@ -187,8 +194,15 @@ function InterviewDetailContainer({ interviewId }) {
   }
 
   return (
-    <>
-      <DetailWrapper ref={containerRef}>
+    <AnimatePresence mode="wait">
+      <DetailWrapper
+        ref={containerRef}
+        right={right}
+        initial={{ right: '-100dvw' }}
+        animate={{ right: right }}
+        exit={{ right: '-100dvw' }}
+        transition={{ duration: 1, ease: [0.4, 0, 0.2, 1] }}
+      >
         <DetailPageName>{interview?.stores.name}</DetailPageName>
         <InterviewHeader>
           <InterviewTitle>
@@ -209,7 +223,8 @@ function InterviewDetailContainer({ interviewId }) {
         scrollState={scrollState}
         onScrollToRatio={scrollToRatio}
       />
-    </>)
+    </AnimatePresence>
+  );
 }
 
 export default InterviewDetailContainer;

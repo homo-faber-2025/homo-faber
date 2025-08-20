@@ -4,16 +4,15 @@ import { usePathname, useRouter } from 'next/navigation';
 import styled from '@emotion/styled';
 import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { getInterviews } from '@/utils/supabase/interview';
+import { motion, AnimatePresence } from 'motion/react';
+import AnimatedPanel from '@/components/common/AnimatedPanel';
 
 const InterviewWrapper = styled.main`
-  width: ${(props) => (props.pathname.startsWith('/interview') ? '80vw' : '10vw')};
-  height: 100dvh;
+  width: 100%;
+  height: 100%;
   padding-left: 70px;
   padding-top: 27px;
-  position: absolute;
-  right: 0px;
-  top: 0px;
-  z-index: 1;
+  position: relative;
   background: #7C7C7C;
   background: ${(props) => props.gradientCss};
   background-size: 200% 200%;
@@ -35,7 +34,6 @@ const InterviewWrapper = styled.main`
     width: 100%;
     height: 100%;
     background: linear-gradient(270deg,rgba(124, 124, 124, 0.5) 19%, rgba(229, 229, 229, 0.3) 42%, rgba(229, 229, 229, 0.7) 95%);
-
   }
 `;
 
@@ -52,9 +50,16 @@ const InterviwPageName = styled.h1`
 
 const InterviewList = styled.ul`
   width: 100%;
-  height: 100%;
+  height: calc(100dvh + 27px);
   color: #6E6E6E;
-  margin-top: -3px;
+  padding-top: 27px;
+  margin-top: -27px;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 `
 
 const InterviewItem = styled.li`
@@ -65,11 +70,11 @@ const InterviewItem = styled.li`
   mix-blend-mode: hard-light;
   background: linear-gradient(100deg, rgba(70,70,70,0.6), black);
   -webkit-background-clip: text;
-  // -webkit-text-fill-color: rgba(94, 94, 94, 0.88);
   background-clip: text;
   cursor: pointer;
+  transition: 0.3s ease-in-out;
   &:hover{
-    color: green;
+    color: white;
   }
   `
 
@@ -86,6 +91,12 @@ function InterviewContainer() {
   const pathname = usePathname();
   const router = useRouter();
   const wrapperRef = useRef(null);
+  const [right, setRight] = useState('-81dvw');
+
+  useEffect(() => {
+    const newRight = pathname.startsWith('/interview') ? '0' : '-81dvw';
+    setRight(newRight);
+  }, [pathname]);
 
   const [cursorPositionPercent, setCursorPositionPercent] = useState({ x: 50, y: 50 });
 
@@ -162,7 +173,10 @@ function InterviewContainer() {
   }
 
   return (
-    <>
+    <AnimatedPanel
+      baseRoute="interview"
+      onWrapperClick={handleInterviewWrapperClick}
+    >
       <InterviewWrapper
         ref={wrapperRef}
         pathname={pathname}
@@ -186,7 +200,7 @@ function InterviewContainer() {
           </InterviewList>
         )}
       </InterviewWrapper>
-    </>
+    </AnimatedPanel>
   );
 }
 
