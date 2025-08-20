@@ -17,7 +17,11 @@ const StoreWrapper = styled.main`
   position: absolute;
   right: 0px;
   top: 0px;
-  z-index: 1;
+  z-index: ${(props) => {
+    if (props.pathname === '/') return 2;
+    if (props.pathname.startsWith('/store')) return 2;
+    return 0;
+  }};
   background-color: var(--yellow);
   cursor: ${(props) => (props.pathname === '/' || props.pathname.startsWith('/store/') ? 'pointer' : 'default')};
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -77,7 +81,11 @@ function StoreContainer() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [width, setWidth] = useState(pathname.startsWith('/store') ? '80vw' : '10vw');
+  const [width, setWidth] = useState(() => {
+    if (pathname === '/') return '10vw';
+    if (pathname.startsWith('/store')) return '80vw';
+    return '10vw';
+  });
 
   // 태그 필터링을 위한 상태
   const [selectedTags, setSelectedTags] = useState({
@@ -114,7 +122,14 @@ function StoreContainer() {
 
   // pathname 변경 시 width 업데이트
   useEffect(() => {
-    const newWidth = pathname.startsWith('/store') ? '80vw' : '10vw';
+    let newWidth;
+    if (pathname === '/') {
+      newWidth = '10vw';
+    } else if (pathname.startsWith('/store')) {
+      newWidth = '80vw';
+    } else {
+      newWidth = '10vw';
+    }
     setWidth(newWidth);
   }, [pathname]);
 

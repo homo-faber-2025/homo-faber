@@ -1,4 +1,5 @@
 import InterviewContainer from '@/container/InterviewContainer';
+import InterviewDetailContainer from '@/container/InterviewDetailContainer';
 
 export const metadata = {
   title: '인터뷰 - 산림동의 만드는 사람들: 호모파베르',
@@ -20,7 +21,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <>
-      <InterviewContainer />
+      <InterviewDetailContainer />
       {children}
     </>
   );

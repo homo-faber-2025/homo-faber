@@ -3,6 +3,7 @@ import './globals.css';
 import Providers from '@/app/providers';
 import Map3DWrapper from '@/container/Map3DWrapper';
 import StoreContainer from '@/container/StoreContainer';
+import InterviewContainer from '@/container/InterviewContainer';
 import Navigation from '@/components/common/Navigation';
 
 const gothic = Gothic_A1({
@@ -36,6 +37,7 @@ export default function RootLayout({ children }) {
         <Providers>
           <Map3DWrapper />
           <StoreContainer />
+          <InterviewContainer />
           <Navigation />
           {children}
         </Providers>

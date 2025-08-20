@@ -17,7 +17,7 @@ const DetailWrapper = styled(motion.main)`
   position: absolute;
   right: ${(props) => props.right};
   top: 0px;
-  z-index: 3;
+  z-index: 4;
   box-shadow: -2px 0 4px 0 rgba(84,84,84,0.57);
   display: flex;
   flex-direction: column;
@@ -134,15 +134,18 @@ const ErrorContainer = styled.div`
   font-size: 1.5rem;
 `;
 
-function InterviewDetailContainer({ interviewId }) {
+function InterviewDetailContainer({ }) {
+  const router = useRouter();
   const pathname = usePathname();
   const [interview, setInterview] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [right, setRight] = useState('-100dvw');
+  const interviewId = pathname.startsWith('/interview/') && pathname !== '/interview' ? pathname.split('/')[2] : null;
 
   const { containerRef, scrollState, scrollToRatio } = useCustomScrollbar();
 
+  // pathname 변경 시 width 업데이트
   useEffect(() => {
     const newRight = pathname.startsWith('/interview/') && pathname !== '/interview' ? '0px' : '-100dvw';
     setRight(newRight);
@@ -165,64 +168,66 @@ function InterviewDetailContainer({ interviewId }) {
     }
 
     if (interviewId) {
+      setIsLoading(true);
+      setError(null);
+      setInterview(null);
       fetchInterview();
+    } else {
+      setIsLoading(false);
+      setError(null);
+      setInterview(null);
     }
   }, [interviewId]);
 
-  if (isLoading) {
-    return (
-      <LoadingContainer>
-        <div>로딩 중...</div>
-      </LoadingContainer>
-    );
-  }
-
-  if (error) {
-    return (
-      <ErrorContainer>
-        <div>에러가 발생했습니다: {error.message}</div>
-      </ErrorContainer>
-    );
-  }
-
-  if (!interview) {
-    return (
-      <ErrorContainer>
-        <div>인터뷰를 찾을 수 없습니다.</div>
-      </ErrorContainer>
-    );
-  }
-
   return (
     <AnimatePresence mode="wait">
-      <DetailWrapper
-        ref={containerRef}
-        right={right}
-        initial={{ right: '-100dvw' }}
-        animate={{ right: right }}
-        exit={{ right: '-100dvw' }}
-        transition={{ duration: 1, ease: [0.4, 0, 0.2, 1] }}
-      >
-        <DetailPageName>{interview?.stores.name}</DetailPageName>
-        <InterviewHeader>
-          <InterviewTitle>
-            <InterviewStore data-text={interview?.stores.name}>{interview?.stores.name}</InterviewStore>
-            <InterviewPerson>{interview?.stores.person}</InterviewPerson>
-            <InterviewIntro>{interview?.intro}</InterviewIntro>
-          </InterviewTitle>
+      {interviewId && (
+        <DetailWrapper
+          key={interviewId}
+          ref={containerRef}
+          right={right}
+          initial={{ right: '-100dvw' }}
+          animate={{ right: right }}
+          exit={{ right: '-100dvw' }}
+          transition={{ duration: 1, ease: [0.4, 0, 0.2, 1] }}
+        >
+          {error ? (
+            <ErrorContainer>
+              <div>에러가 발생했습니다: {error.message}</div>
+            </ErrorContainer>
+          ) : isLoading ? (
+            <LoadingContainer>
+              <div>로딩 중...</div>
+            </LoadingContainer>
+          ) : !interview ? (
+            <ErrorContainer>
+              <div>인터뷰를 찾을 수 없습니다.</div>
+            </ErrorContainer>
+          ) : (
+            <>
+              <DetailPageName>{interview?.stores.name}</DetailPageName>
+              <InterviewHeader>
+                <InterviewTitle>
+                  <InterviewStore data-text={interview?.stores.name}>{interview?.stores.name}</InterviewStore>
+                  <InterviewPerson>{interview?.stores.person}</InterviewPerson>
+                  <InterviewIntro>{interview?.intro}</InterviewIntro>
+                </InterviewTitle>
 
-          <InterviewCoverImg src={interview?.cover_img} alt="이미지" />
-        </InterviewHeader>
-        <EditorInterviewRender item={interview?.contents} />
-        <InterviewInfo>{interview?.date}</InterviewInfo>
-        <InterviewInfo>{interview?.interviewee}</InterviewInfo>
-      </DetailWrapper>
+                <InterviewCoverImg src={interview?.cover_img} alt="이미지" />
+              </InterviewHeader>
+              <EditorInterviewRender item={interview?.contents} />
+              <InterviewInfo>{interview?.date}</InterviewInfo>
+              <InterviewInfo>{interview?.interviewee}</InterviewInfo>
+            </>
+          )}
 
-      {/* 커스텀 스크롤바 */}
-      <CustomScrollbar
-        scrollState={scrollState}
-        onScrollToRatio={scrollToRatio}
-      />
+          {/* 커스텀 스크롤바 */}
+          <CustomScrollbar
+            scrollState={scrollState}
+            onScrollToRatio={scrollToRatio}
+          />
+        </DetailWrapper>
+      )}
     </AnimatePresence>
   );
 }
