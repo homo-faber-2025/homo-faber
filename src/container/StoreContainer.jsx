@@ -75,11 +75,7 @@ function StoreContainer() {
   const router = useRouter();
   const { stores, isLoading, error } = useStores();
   const [searchKeyword, setSearchKeyword] = useState('');
-  const [right, setRight] = useState(() => {
-    if (pathname === '/') return 'calc(80dvw - 300px)';
-    if (pathname.startsWith('/store')) return '0px';
-    return 'calc(80dvw - 300px)';
-  });
+  const [right, setRight] = useState('calc(-80dvw + 120px)');
 
   // 태그 필터링을 위한 상태
   const [selectedTags, setSelectedTags] = useState({

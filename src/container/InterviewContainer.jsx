@@ -3,9 +3,10 @@
 import { usePathname, useRouter } from 'next/navigation';
 import styled from '@emotion/styled';
 import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { useInterviews } from '@/hooks/useInterviews';
 
-const InterviewWrapper = styled.main`
+const InterviewWrapper = styled(motion.main)`
   width: 100%
   height: 100%;
   padding-left: 70px;
@@ -85,7 +86,7 @@ const InterviewPerson = styled.div`
   font-size: 2.4rem;
 `
 
-function InterviewContainer() {
+function InterviewContainer({ onLoadComplete }) {
   const pathname = usePathname();
   const router = useRouter();
   const wrapperRef = useRef(null);
@@ -143,6 +144,13 @@ function InterviewContainer() {
   }
 
   const { interviews, isLoading, error } = useInterviews();
+
+  // 데이터 로딩 완료 시 부모 컴포넌트에 알림
+  useEffect(() => {
+    if (!isLoading && interviews.length > 0 && onLoadComplete) {
+      onLoadComplete();
+    }
+  }, [isLoading, interviews, onLoadComplete]);
 
   if (error) {
     return <div>에러가 발생했습니다: {error.message}</div>;

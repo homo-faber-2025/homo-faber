@@ -85,7 +85,7 @@ const WordDescription = styled.div`
   font-size: 2.4rem;
 `;
 
-function WordContainer() {
+function WordContainer({ onLoadComplete }) {
   const pathname = usePathname();
   const router = useRouter();
   const wrapperRef = useRef(null);
@@ -104,6 +104,7 @@ function WordContainer() {
     setCursorPositionPercent({ x: 50, y: 50 });
   }, []);
 
+  onLoadComplete();
   const gradientCss = useMemo(() => {
     const baseStops = [22, 53, 78, 100];
     const yNormalized = cursorPositionPercent.y / 100; // 0..1

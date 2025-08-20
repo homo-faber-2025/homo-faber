@@ -93,7 +93,7 @@ const Map3D = ({ stores }) => {
       style={{
         width: '100dvw',
         height: '100dvh',
-        cursor: (pathname === '/store' || pathname.startsWith('/store/')) ? 'pointer' : 'default'
+        cursor: 'pointer'
       }}
       onClick={handleMapClick}
     />

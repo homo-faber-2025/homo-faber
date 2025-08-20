@@ -35,7 +35,6 @@ const LoadingFallback = styled.div`
 `;
 
 function AnimatedPanel({
-  children,
   baseRoute,
   onWrapperClick,
   className
@@ -44,6 +43,7 @@ function AnimatedPanel({
   const [right, setRight] = useState('-81dvw');
   const [isVisible, setIsVisible] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [shouldAnimate, setShouldAnimate] = useState(false);
 
   // 현재 경로가 이 패널의 baseRoute와 일치하는지 확인
   const isActiveRoute = useMemo(() => {
@@ -67,6 +67,7 @@ function AnimatedPanel({
         setTimeout(() => {
           if (!isActiveRoute) {
             setIsLoaded(false);
+            setShouldAnimate(false);
           }
         }, 500);
       }, 1000); // 애니메이션 duration과 동일
@@ -98,7 +99,7 @@ function AnimatedPanel({
 
     return (
       <Suspense fallback={<LoadingFallback>Loading...</LoadingFallback>}>
-        <Component />
+        <Component onLoadComplete={() => setShouldAnimate(true)} />
       </Suspense>
     );
   }, [baseRoute, isVisible, isLoaded]);
@@ -114,7 +115,7 @@ function AnimatedPanel({
         pathname={pathname}
         onClick={onWrapperClick}
         initial={{ right: '-81dvw' }}
-        animate={{ right: right }}
+        animate={{ right: shouldAnimate ? right : '-81dvw' }}
         exit={{ right: '-81dvw' }}
         transition={{ duration: 1, ease: [0.2, 0, 0.4, 1] }}
         right={right}

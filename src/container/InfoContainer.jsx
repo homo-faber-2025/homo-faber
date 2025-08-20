@@ -1,4 +1,5 @@
-function InfoContainer() {
+function InfoContainer({ onLoadComplete }) {
+  onLoadComplete();
   return <div>InfoContainer</div>;
 }
 
