@@ -5,6 +5,8 @@ import Map3DWrapper from '@/container/Map3DWrapper';
 import StoreContainer from '@/container/StoreContainer';
 import InterviewContainer from '@/container/InterviewContainer';
 import Navigation from '@/components/common/Navigation';
+import AnimatedPanel from '@/components/common/AnimatedPanel';
+import RootAnimation from '@/components/common/RootAnimation';
 
 const gothic = Gothic_A1({
   weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
@@ -37,9 +39,9 @@ export default function RootLayout({ children }) {
         <Providers>
           <Map3DWrapper />
           <StoreContainer />
-          <InterviewContainer />
           <Navigation />
-          {children}
+          <AnimatedPanel baseRoute='interview' />
+          <AnimatedPanel baseRoute='word' />
         </Providers>
       </body>
     </html>

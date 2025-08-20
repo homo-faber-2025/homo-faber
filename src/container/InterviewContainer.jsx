@@ -6,24 +6,17 @@ import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { getInterviews } from '@/utils/supabase/interview';
 
 const InterviewWrapper = styled.main`
-  width: ${(props) => props.width};
-  height: 100dvh;
+  width: 100%
+  height: 100%;
   padding-left: 70px;
   padding-top: 27px;
-  position: absolute;
-  right: 0px;
-  top: 0px;
-  z-index: ${(props) => {
-    if (props.pathname === '/') return 0;
-    if (props.pathname.startsWith('/interview')) return 2;
-    return 0;
-  }};
+  z-index:3;
   background: #7C7C7C;
   background: ${(props) => props.gradientCss};
   background-size: 200% 200%;
   background-position: -100% -100%;
-  cursor: ${(props) => (props.pathname === '/' || props.pathname.startsWith('/interview/') ? 'pointer' : 'default')};
-  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: ${(props) => (props.pathname && (props.pathname === '/' || props.pathname.startsWith('/interview/'))) ? 'pointer' : 'default'};
+  transition: width 5s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -96,24 +89,6 @@ function InterviewContainer() {
   const pathname = usePathname();
   const router = useRouter();
   const wrapperRef = useRef(null);
-  const [width, setWidth] = useState(() => {
-    if (pathname === '/') return '10vw';
-    if (pathname.startsWith('/interview')) return '80vw';
-    return '10vw';
-  });
-
-  // pathname 변경 시 width 업데이트
-  useEffect(() => {
-    let newWidth;
-    if (pathname === '/') {
-      newWidth = '10vw';
-    } else if (pathname.startsWith('/interview')) {
-      newWidth = '80vw';
-    } else {
-      newWidth = '10vw';
-    }
-    setWidth(newWidth);
-  }, [pathname]);
 
   const [cursorPositionPercent, setCursorPositionPercent] = useState({ x: 50, y: 50 });
 
@@ -193,8 +168,6 @@ function InterviewContainer() {
     <>
       <InterviewWrapper
         ref={wrapperRef}
-        pathname={pathname}
-        width={width}
         gradientCss={gradientCss}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}

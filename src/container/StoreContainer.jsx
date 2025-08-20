@@ -18,12 +18,13 @@ const StoreWrapper = styled.main`
   right: 0px;
   top: 0px;
   z-index: ${(props) => {
+    if (!props.pathname) return 0;
     if (props.pathname === '/') return 2;
     if (props.pathname.startsWith('/store')) return 2;
     return 0;
   }};
   background-color: var(--yellow);
-  cursor: ${(props) => (props.pathname === '/' || props.pathname.startsWith('/store/') ? 'pointer' : 'default')};
+  cursor: ${(props) => (props.pathname && (props.pathname === '/' || props.pathname.startsWith('/store/'))) ? 'pointer' : 'default'};
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   display: flex;

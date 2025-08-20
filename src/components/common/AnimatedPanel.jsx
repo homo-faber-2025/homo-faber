@@ -5,14 +5,19 @@ import styled from '@emotion/styled';
 import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
+import InterviewContainer from '@/container/InterviewContainer';
+import WordContainer from '@/container/WordContainer';
+import StoreContainer from '@/container/StoreContainer';
+
 const SidePanelWrapper = styled(motion.main)`
   width: 80dvw;
   height: 100dvh;
   position: fixed;
   right: ${(props) => props.right};
   top: 0px;
-  z-index: 3;
+  z-index: 5;
   overflow: hidden;
+  background: blue;
 `;
 
 function AnimatedPanel({
@@ -24,11 +29,26 @@ function AnimatedPanel({
   const pathname = usePathname();
   const [right, setRight] = useState('-81dvw');
 
+
   useEffect(() => {
     const newRight = pathname.startsWith(`/${baseRoute}`) ? '0' : '-81dvw';
     setRight(newRight);
   }, [pathname, baseRoute]);
 
+
+  // baseRoute에 따라 컴포넌트 렌더링
+  const renderComponent = () => {
+    switch (baseRoute) {
+      case 'store':
+        return <StoreContainer />;
+      case 'interview':
+        return <InterviewContainer />;
+      case 'word':
+        return <WordContainer />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <AnimatePresence mode="wait">
@@ -43,7 +63,7 @@ function AnimatedPanel({
         right={right}
         className={className}
       >
-        {children}
+        {renderComponent()}
       </SidePanelWrapper>
     </AnimatePresence>
   );
