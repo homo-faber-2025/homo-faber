@@ -16,6 +16,10 @@ export async function createInterview(interviewData) {
       {
         store_id: interviewData.store_id,
         contents: interviewData.contents,
+        intro: interviewData.intro,
+        cover_img: interviewData.cover_img,
+        date: interviewData.date,
+        interviewee: interviewData.interviewee,
         created_at: new Date().toISOString()
       }
     ])
@@ -109,10 +113,7 @@ export async function updateInterview(interviewId, updateData) {
 
   const { data, error } = await supabase
     .from('interview')
-    .update({
-      ...updateData,
-      updated_at: new Date().toISOString()
-    })
+    .update(updateData)
     .eq('id', interviewId)
     .select()
     .single();
