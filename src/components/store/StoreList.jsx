@@ -12,12 +12,17 @@ const TableWrapper = styled.article`
   flex-direction: column;
   text-overflow: ellipsis;
   white-space: nowrap;
+  /* Safari sticky support */
+  -webkit-overflow-scrolling: touch;
 `;
 
 const StoreTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   font-family: var(--font-gothic);
+  /* Safari sticky support */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 `;
 
 const TableHeader = styled.thead`
@@ -26,7 +31,10 @@ const TableHeader = styled.thead`
   position: sticky;
   top: 0;
   z-index: 10;
-  display: flex;
+  /* Safari sticky support */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  /* Remove display: flex as it breaks table structure */
 `;
 
 const TableHeaderCell = styled.th`
@@ -36,11 +44,16 @@ const TableHeaderCell = styled.th`
   font-weight: 800;
   transform: scaleX(0.8);
   transform-origin: left;
+  /* Safari sticky support */
+  -webkit-transform: scaleX(0.8) translateZ(0);
+  transform: scaleX(0.8) translateZ(0);
 `;
 
 const TableBody = styled.tbody`
   overflow-y: auto;
   letter-spacing: 0.1rem;
+  /* Safari sticky support */
+  -webkit-overflow-scrolling: touch;
 `
 
 const TableRow = styled.tr`
@@ -111,7 +124,7 @@ const StoreList = ({ stores }) => {
     <TableWrapper>
       <StoreTable>
         <TableHeader>
-          <tr>
+          <tr style={{ display: 'flex' }}>
             <TableHeaderCell style={{ width: '200px' }}>이름</TableHeaderCell>
             <TableHeaderCell style={{ width: '572px' }}>취급 품목</TableHeaderCell>
             <TableHeaderCell style={{ width: '148px' }}>연락처</TableHeaderCell>

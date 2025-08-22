@@ -20,9 +20,10 @@ const EditorWrapper = styled.div`
   }
 `;
 
-const Editor = forwardRef(({ onChange }, ref) => {
+const Editor = forwardRef(({ onChange, data }, ref) => {
   const editorRef = useRef(null);
   const instanceRef = useRef(null);
+  const isInitializedRef = useRef(false);
 
   const { uploadImage } = useImageUpload({
     bucket: 'gallery',
@@ -45,10 +46,24 @@ const Editor = forwardRef(({ onChange }, ref) => {
   }));
 
   useEffect(() => {
-    if (!editorRef.current || instanceRef.current) return;
+    if (!editorRef.current) return;
+
+    // 이미 인스턴스가 있다면 제거
+    if (instanceRef.current) {
+      try {
+        if (typeof instanceRef.current.destroy === 'function') {
+          instanceRef.current.destroy();
+        }
+      } catch (error) {
+        console.warn('Editor destroy 중 오류:', error);
+      }
+      instanceRef.current = null;
+      isInitializedRef.current = false;
+    }
 
     const initializeEditor = async () => {
       try {
+        console.log('Editor 초기화 데이터:', data);
         instanceRef.current = new EditorJS({
           holder: editorRef.current,
           autofocus: true,
@@ -82,7 +97,7 @@ const Editor = forwardRef(({ onChange }, ref) => {
             marker: MarkerTool // 우리가 만든 MarkerTool 등록
           },
           inlineToolbar: ['link', 'marker', 'bold', 'italic'],
-          data: {},
+          data: data || {},
           onChange: (api, event) => {
             if (typeof onChange === 'function') onChange(api, event);
           },
@@ -93,6 +108,7 @@ const Editor = forwardRef(({ onChange }, ref) => {
 
         await instanceRef.current.isReady;
         console.log('Editor.js 준비 완료');
+        isInitializedRef.current = true;
       } catch (error) {
         console.error('Editor 초기화 오류:', error);
       }
@@ -101,12 +117,19 @@ const Editor = forwardRef(({ onChange }, ref) => {
     initializeEditor();
 
     return () => {
-      if (instanceRef.current && typeof instanceRef.current.destroy === 'function') {
-        instanceRef.current.destroy();
+      if (instanceRef.current) {
+        try {
+          if (typeof instanceRef.current.destroy === 'function') {
+            instanceRef.current.destroy();
+          }
+        } catch (error) {
+          console.warn('Editor cleanup 중 오류:', error);
+        }
         instanceRef.current = null;
+        isInitializedRef.current = false;
       }
     };
-  }, []);
+  }, [data]);
 
   return (
     <EditorWrapper>
