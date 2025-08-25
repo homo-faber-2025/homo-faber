@@ -178,6 +178,84 @@ const NoBookmarks = styled.div`
   padding: 20px;
 `;
 
+const ProfileEditSection = styled.div`
+  margin-top: 20px;
+  width: 100%;
+`;
+
+const EditButton = styled.button`
+  padding: 8px 16px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-gothic);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-right: 10px;
+  
+  &:hover {
+    background: #0056b3;
+  }
+`;
+
+const CancelButton = styled(EditButton)`
+  background: #6c757d;
+  
+  &:hover {
+    background: #545b62;
+  }
+`;
+
+const SaveButton = styled(EditButton)`
+  background: #28a745;
+  
+  &:hover {
+    background: #218838;
+  }
+`;
+
+const FormGroup = styled.div`
+  margin-bottom: 15px;
+`;
+
+const Label = styled.label`
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 5px;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: var(--font-gothic);
+  
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  }
+`;
+
+const ErrorMessage = styled.div`
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 5px;
+`;
+
+const SuccessMessage = styled.div`
+  color: #28a745;
+  font-size: 12px;
+  margin-top: 5px;
+`;
+
 function MypageContainer({ onLoadComplete }) {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
@@ -249,6 +327,12 @@ function MypageContainer({ onLoadComplete }) {
           {user.user_metadata?.name || '사용자'}
         </UserName>
         <UserEmail>{user.email}</UserEmail>
+
+        {/* 프로필 수정 버튼 */}
+        <EditButton onClick={() => router.push('/mypage/edit')}>
+          프로필 수정
+        </EditButton>
+
         <LogoutButton onClick={handleLogout}>
           로그아웃
         </LogoutButton>
