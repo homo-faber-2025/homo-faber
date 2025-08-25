@@ -58,7 +58,7 @@ export async function middleware(request) {
   const { data: { session } } = await supabase.auth.getSession();
 
   // 보호된 라우트들
-  const protectedRoutes = ['/mypage', '/admin'];
+  const protectedRoutes = ['/mypage'];
   const authRoutes = ['/login', '/signup'];
 
   const isProtectedRoute = protectedRoutes.some(route =>

@@ -57,6 +57,7 @@ export function useWords() {
     fetchWords,
     searchWordsByName,
     clearError,
+    refetch: fetchWords, // refetch 함수 추가
   };
 }
 
