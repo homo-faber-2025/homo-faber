@@ -24,6 +24,7 @@ const Editor = forwardRef(({ onChange, data }, ref) => {
   const editorRef = useRef(null);
   const instanceRef = useRef(null);
   const isInitializedRef = useRef(false);
+  const onChangeTimeoutRef = useRef(null);
 
   const { uploadImage } = useImageUpload({
     bucket: 'gallery',
@@ -66,7 +67,7 @@ const Editor = forwardRef(({ onChange, data }, ref) => {
         console.log('Editor 초기화 데이터:', data);
         instanceRef.current = new EditorJS({
           holder: editorRef.current,
-          autofocus: true,
+          autofocus: false,
           placeholder: '내용을 입력하세요...',
           tools: {
             header: {
@@ -99,7 +100,13 @@ const Editor = forwardRef(({ onChange, data }, ref) => {
           inlineToolbar: ['link', 'marker', 'bold', 'italic'],
           data: data || {},
           onChange: (api, event) => {
-            if (typeof onChange === 'function') onChange(api, event);
+            // onChange 이벤트 디바운싱
+            if (onChangeTimeoutRef.current) {
+              clearTimeout(onChangeTimeoutRef.current);
+            }
+            onChangeTimeoutRef.current = setTimeout(() => {
+              if (typeof onChange === 'function') onChange(api, event);
+            }, 300); // 300ms 디바운싱
           },
           onReady: () => {
             console.log('Editor.js 초기화 완료!');
@@ -109,6 +116,15 @@ const Editor = forwardRef(({ onChange, data }, ref) => {
         await instanceRef.current.isReady;
         console.log('Editor.js 준비 완료');
         isInitializedRef.current = true;
+
+        // 초기 데이터가 있으면 설정
+        if (data && data.blocks && data.blocks.length > 0) {
+          try {
+            await instanceRef.current.render(data);
+          } catch (error) {
+            console.warn('Editor 초기 데이터 설정 중 오류:', error);
+          }
+        }
       } catch (error) {
         console.error('Editor 초기화 오류:', error);
       }
@@ -117,6 +133,11 @@ const Editor = forwardRef(({ onChange, data }, ref) => {
     initializeEditor();
 
     return () => {
+      // 디바운싱 타이머 정리
+      if (onChangeTimeoutRef.current) {
+        clearTimeout(onChangeTimeoutRef.current);
+      }
+
       if (instanceRef.current) {
         try {
           if (typeof instanceRef.current.destroy === 'function') {
@@ -129,7 +150,7 @@ const Editor = forwardRef(({ onChange, data }, ref) => {
         isInitializedRef.current = false;
       }
     };
-  }, [data]);
+  }, []); // data 의존성 제거하여 불필요한 재초기화 방지
 
   return (
     <EditorWrapper>

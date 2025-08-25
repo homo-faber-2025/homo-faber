@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import styled from '@emotion/styled';
 import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import { useWords } from '@/hooks/useWord';
 
 const WordWrapper = styled.main`
   width: 100%;
@@ -45,12 +46,19 @@ const WordPageName = styled.h1`
   left: 30px;
 `;
 
+const WordItemWrapper = styled.div`
+  display:flex;
+  overflow-y: hidden;
+`;
+
 const WordList = styled.ul`
-  width: 100%;
-  height: calc(100dvh + 27px);
+  // width: 100%;
   color: #2E5BBA;
   padding-top: 27px;
   margin-top: -27px;
+  height: 100%;
+  overflow-y: auto;
+  padding-right: 70px;
 
   &::-webkit-scrollbar {
     display: none;
@@ -61,7 +69,7 @@ const WordList = styled.ul`
 
 const WordItem = styled.li`
   display: flex;
-  gap: 17px;
+  align-items: center;
   margin-bottom: 25px;
   text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8), -2px -1px 4px rgba(46, 91, 186, 0.9);
   mix-blend-mode: hard-light;
@@ -70,26 +78,167 @@ const WordItem = styled.li`
   background-clip: text;
   cursor: pointer;
   transition: 0.3s ease-in-out;
+  position: relative;
+  
   &:hover {
+    color: white;
+  }
+  
+  &.active {
     color: white;
   }
 `;
 
 const WordTitle = styled.div`
   font-weight: 800;
-  font-size: 5.5rem;
+  font-size: 4.5rem;
+  flex-shrink: 0;
 `;
 
-const WordDescription = styled.div`
-  font-weight: 700;
-  font-size: 2.4rem;
+const WordMeaning = styled.div`
+  background: rgba(255, 255, 255, 0.95);
+  padding: 30px;
+  border-radius: 15px;
+  font-weight: 600;
+  font-size: 1.3rem;
+  line-height: 1.6;
+  word-break: keep-all;
+  color: #2E5BBA;
+  max-width: 400px;
+  z-index: 1000;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  animation: slideIn 0.4s ease-out;
+  margin: 10px;
+  box-shadow: 2px 1px 10px 3px rgba(79, 90, 247, 0.2);
+  
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 `;
 
-function WordContainer({ onLoadComplete }) {
+const WordMeaningsContainer = styled.div`;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  overflow-y: auto;
+  height: 100dvh;
+  z-index: 1000;
+  
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(46, 91, 186, 0.3);
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(46, 91, 186, 0.5);
+  }
+`;
+
+
+
+const SearchContainer = styled.div`
+  position: absolute;
+  top: 20px;
+  right: 70px;
+  z-index: 10;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+`;
+
+const SearchInput = styled.input`
+  padding: 10px 15px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #2E5BBA;
+  font-size: 1rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  min-width: 200px;
+
+  &::placeholder {
+    color: rgba(46, 91, 186, 0.7);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  }
+`;
+
+const SearchButton = styled.button`
+  padding: 10px 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 25px;
+  background: rgba(46, 91, 186, 0.8);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+
+  &:hover {
+    background: rgba(46, 91, 186, 1);
+    border-color: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+`;
+
+
+
+const ClearButton = styled.button`
+  padding: 8px 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: #2E5BBA;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.8);
+  }
+`;
+
+function WordContainer({ onLoadComplete, selectedWordId: initialSelectedWordId }) {
   const pathname = usePathname();
   const router = useRouter();
   const wrapperRef = useRef(null);
   const [cursorPositionPercent, setCursorPositionPercent] = useState({ x: 50, y: 50 });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedWordIds, setSelectedWordIds] = useState(initialSelectedWordId ? [initialSelectedWordId] : []);
 
   const handleMouseMove = useCallback((event) => {
     if (!wrapperRef.current) return;
@@ -129,26 +278,61 @@ function WordContainer({ onLoadComplete }) {
   }, [cursorPositionPercent.x, cursorPositionPercent.y]);
 
   // 홈 페이지에서 WordWrapper 클릭 시 /word로 이동
-  // 개별 word 페이지에서 WordWrapper 클릭 시 /word로 이동  
   const handleWordWrapperClick = () => {
     if (pathname === '/') {
-      router.push('/word');
-    } else if (pathname.startsWith('/word/')) {
       router.push('/word');
     }
   };
 
-  const handleWordClick = (wordId) => {
-    router.push(`/word/${wordId}`);
+  const { words, loading, error, searchWordsByName, fetchWords } = useWords();
+
+  console.log('Words data:', words, 'Loading:', loading, 'Error:', error);
+
+  const handleWordClick = (wordId, e) => {
+    e.stopPropagation();
+    console.log('Word clicked:', wordId, 'Current selectedWordIds:', selectedWordIds);
+
+    // 이미 선택된 단어인지 확인
+    if (selectedWordIds.includes(wordId)) {
+      // 이미 선택된 단어라면 제거
+      setSelectedWordIds(prev => {
+        const newIds = prev.filter(id => id !== wordId);
+        console.log('Removing word, new selectedWordIds:', newIds);
+        return newIds;
+      });
+    } else {
+      // 새로운 단어라면 추가
+      setSelectedWordIds(prev => {
+        const newIds = [...prev, wordId];
+        console.log('Adding word, new selectedWordIds:', newIds);
+        return newIds;
+      });
+    }
   };
 
-  // 임시 데이터
-  const words = [
-    { id: 1, title: '호모파베르', description: '만드는 사람' },
-    { id: 2, title: '산림동', description: '우리의 공간' },
-    { id: 3, title: '제작', description: '창조의 과정' },
-    { id: 4, title: '공예', description: '손길의 예술' },
-  ];
+  const handleSearch = () => {
+    searchWordsByName(searchQuery);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    fetchWords();
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  // initialSelectedWordId가 변경될 때 selectedWordIds 업데이트
+  useEffect(() => {
+    if (initialSelectedWordId) {
+      setSelectedWordIds([initialSelectedWordId]);
+    } else {
+      setSelectedWordIds([]);
+    }
+  }, [initialSelectedWordId]);
 
   return (
     <WordWrapper
@@ -157,18 +341,112 @@ function WordContainer({ onLoadComplete }) {
       gradientCss={gradientCss}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      onClick={handleWordWrapperClick}
+      onClick={pathname === '/' ? handleWordWrapperClick : undefined}
     >
       <WordPageName>단어 목록</WordPageName>
 
-      <WordList>
-        {words.map((word) => (
-          <WordItem key={word.id} onClick={() => handleWordClick(word.id)}>
-            <WordTitle>{word.title}</WordTitle>
-            <WordDescription>{word.description}</WordDescription>
-          </WordItem>
-        ))}
-      </WordList>
+      <SearchContainer onClick={(e) => e.stopPropagation()}>
+        <SearchInput
+          type="text"
+          placeholder="단어명으로 검색..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyPress={handleKeyPress}
+        />
+
+        <SearchButton onClick={handleSearch}>
+          검색
+        </SearchButton>
+
+        {searchQuery && (
+          <ClearButton onClick={handleClearSearch} title="검색 초기화">
+            ✕
+          </ClearButton>
+        )}
+      </SearchContainer>
+
+      <WordItemWrapper>
+        <WordList>
+          {loading ? (
+            <div style={{ color: 'white', padding: '20px', textAlign: 'center' }}>
+              단어 목록을 불러오는 중...
+            </div>
+          ) : error ? (
+            <div style={{ color: 'white', padding: '20px', textAlign: 'center' }}>
+              오류가 발생했습니다: {error}
+            </div>
+          ) : words.length === 0 ? (
+            <div style={{ color: 'white', padding: '20px', textAlign: 'center' }}>
+              {searchQuery ? `"${searchQuery}"에 대한 검색 결과가 없습니다.` : '등록된 단어가 없습니다.'}
+            </div>
+          ) : (
+            words.map((word) => (
+              <WordItem
+                key={word.id}
+                onClick={(e) => handleWordClick(word.id, e)}
+                className={selectedWordIds.includes(word.id) ? 'active' : ''}
+              >
+                <WordTitle>{word.name}</WordTitle>
+              </WordItem>
+            ))
+          )}
+        </WordList>
+        {selectedWordIds.length > 0 && (
+          <WordMeaningsContainer>
+            {selectedWordIds.map((wordId, index) => {
+              const selectedWord = words.find(word => word.id === wordId);
+              return selectedWord ? (
+                <WordMeaning
+                  key={wordId}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
+                    <h3 style={{ margin: '0', fontSize: '1.5rem', color: '#2E5BBA' }}>
+                      {selectedWord.name}
+                    </h3>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedWordIds(prev => prev.filter(id => id !== wordId));
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        fontSize: '1.2rem',
+                        color: '#666',
+                        cursor: 'pointer',
+                        padding: '0',
+                        marginLeft: '10px'
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <p style={{ margin: '0 0 20px 0' }}>
+                    {selectedWord.meaning}
+                  </p>
+                  {selectedWord.img && selectedWord.img.length > 0 && (
+                    <div style={{ marginTop: '20px' }}>
+                      {selectedWord.img.map((img) => (
+                        <img
+                          key={img.id}
+                          src={img.url}
+                          alt={img.caption || selectedWord.name}
+                          style={{
+                            width: '100%',
+                            height: 'auto',
+                            borderRadius: '8px',
+                            marginBottom: '10px'
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </WordMeaning>
+              ) : null;
+            })}
+          </WordMeaningsContainer>
+        )}
+      </WordItemWrapper>
     </WordWrapper>
   );
 }
