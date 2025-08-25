@@ -10,6 +10,8 @@ const InterviewContainer = lazy(() => import('@/container/InterviewContainer'));
 const WordContainer = lazy(() => import('@/container/WordContainer'));
 const InfoContainer = lazy(() => import('@/container/InfoContainer'));
 const LoginContainer = lazy(() => import('@/container/LoginContainer'));
+const SignupContainer = lazy(() => import('@/container/SignupContainer'));
+const MypageContainer = lazy(() => import('@/container/MypageContainer'));
 
 const SidePanelWrapper = styled(motion.div)`
   width: 80dvw;
@@ -90,6 +92,10 @@ function AnimatedPanel({
           return InfoContainer;
         case 'login':
           return LoginContainer;
+        case 'signup':
+          return SignupContainer;
+        case 'mypage':
+          return MypageContainer;
         default:
           return null;
       }
@@ -112,7 +118,6 @@ function AnimatedPanel({
   return (
     <AnimatePresence mode="wait">
       <SidePanelWrapper
-        pathname={pathname}
         onClick={onWrapperClick}
         initial={{ right: '-81dvw' }}
         animate={{ right: shouldAnimate ? right : '-81dvw' }}

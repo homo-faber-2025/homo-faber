@@ -1,8 +1,3 @@
-function LoginPage() {
-
-  return (
-    <></>
-  );
+export default function LoginPage() {
+  return <></>; // AnimatedPanel에서 렌더링됨
 }
-
-export default LoginPage;

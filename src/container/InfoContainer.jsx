@@ -1,5 +1,12 @@
+import { useEffect } from 'react';
+
 function InfoContainer({ onLoadComplete }) {
-  onLoadComplete();
+  useEffect(() => {
+    if (onLoadComplete) {
+      onLoadComplete();
+    }
+  }, [onLoadComplete]);
+
   return <div>InfoContainer</div>;
 }
 

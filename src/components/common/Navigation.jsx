@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 function isActive(pathname, href) {
   // Treat '/' as home for '/home' as well
@@ -13,6 +14,7 @@ function isActive(pathname, href) {
 
 export default function Navigation() {
   const pathname = usePathname();
+  const { user, loading } = useAuth();
 
   const links = [
     { href: '/', label: 'Home' },
@@ -20,7 +22,7 @@ export default function Navigation() {
     { href: '/interview', label: 'Interview' },
     { href: '/word', label: 'Word' },
     { href: '/info', label: 'Info' },
-    { href: '/login', label: 'Login' },
+    { href: user ? '/mypage' : '/login', label: user ? 'MyPage' : 'Login' },
   ];
 
   return (

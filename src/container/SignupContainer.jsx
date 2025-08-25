@@ -10,13 +10,13 @@ import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
-const LoginWrapper = styled(motion.main)`
+const SignupWrapper = styled(motion.main)`
   width: 100%;
   height: 100%;
   padding-left: 70px;
   padding-top: 27px;
   z-index: 3;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -34,11 +34,11 @@ const LoginWrapper = styled(motion.main)`
     top: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(270deg, rgba(102, 126, 234, 0.3) 19%, rgba(118, 75, 162, 0.2) 42%, rgba(102, 126, 234, 0.4) 95%);
+    background: linear-gradient(270deg, rgba(40, 167, 69, 0.3) 19%, rgba(32, 201, 151, 0.2) 42%, rgba(40, 167, 69, 0.4) 95%);
   }
 `;
 
-const LoginPageName = styled.h1`
+const SignupPageName = styled.h1`
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.3rem;
@@ -50,7 +50,7 @@ const LoginPageName = styled.h1`
   color: white;
 `;
 
-const LoginForm = styled.form`
+const SignupForm = styled.form`
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -106,7 +106,7 @@ const ErrorMessage = styled.p`
 
 const SubmitButton = styled.button`
   padding: 12px 24px;
-  background: #007bff;
+  background: #28a745;
   color: white;
   border: none;
   border-radius: 8px;
@@ -117,7 +117,7 @@ const SubmitButton = styled.button`
   transition: background-color 0.2s ease;
   
   &:hover {
-    background: #0056b3;
+    background: #218838;
   }
   
   &:disabled {
@@ -126,7 +126,7 @@ const SubmitButton = styled.button`
   }
 `;
 
-const SignupLink = styled.div`
+const LoginLink = styled.div`
   text-align: center;
   margin-top: 20px;
   font-family: var(--font-gothic);
@@ -141,10 +141,10 @@ const SignupLink = styled.div`
   }
 `;
 
-function LoginContainer({ onLoadComplete }) {
+function SignupContainer({ onLoadComplete }) {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signUp } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -155,27 +155,31 @@ function LoginContainer({ onLoadComplete }) {
     }
   }, [onLoadComplete]);
 
-  // 로그인 패널 클릭 시 홈으로 이동
-  const handleLoginWrapperClick = () => {
+  // 회원가입 패널 클릭 시 홈으로 이동
+  const handleSignupWrapperClick = () => {
     if (pathname === '/') {
-      router.push('/login');
-    } else if (pathname.startsWith('/login/')) {
-      router.push('/login');
+      router.push('/signup');
+    } else if (pathname.startsWith('/signup/')) {
+      router.push('/signup');
     }
   };
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm({ mode: 'onChange' });
+  const password = watch('password');
 
   const onSubmit = async (formData) => {
     setIsLoading(true);
     setError('');
 
     try {
-      const { data, error } = await signIn(formData.email, formData.password);
+      const { data, error } = await signUp(formData.email, formData.password, {
+        name: formData.name,
+      });
 
       if (error) {
         throw error;
@@ -192,16 +196,16 @@ function LoginContainer({ onLoadComplete }) {
   };
 
   return (
-    <LoginWrapper onClick={handleLoginWrapperClick}>
-      <LoginPageName>로그인</LoginPageName>
-      <LoginForm onSubmit={handleSubmit(onSubmit)} onClick={(e) => e.stopPropagation()}>
+    <SignupWrapper onClick={handleSignupWrapperClick}>
+      <SignupPageName>회원가입</SignupPageName>
+      <SignupForm onSubmit={handleSubmit(onSubmit)} onClick={(e) => e.stopPropagation()}>
         <h2 style={{
           textAlign: 'center',
           marginBottom: '20px',
           fontFamily: 'var(--font-gothic)',
           color: '#333'
         }}>
-          로그인
+          회원가입
         </h2>
 
         <FormGroup>
@@ -222,6 +226,17 @@ function LoginContainer({ onLoadComplete }) {
         </FormGroup>
 
         <FormGroup>
+          <Label htmlFor="name">이름</Label>
+          <Input
+            type="text"
+            id="name"
+            placeholder="이름을 입력해주세요"
+            {...register('name', { required: '이름을 입력해주세요' })}
+          />
+          {errors.name && <ErrorMessage>{errors.name.message}</ErrorMessage>}
+        </FormGroup>
+
+        <FormGroup>
           <Label htmlFor="password">비밀번호</Label>
           <Input
             type="password"
@@ -238,18 +253,32 @@ function LoginContainer({ onLoadComplete }) {
           {errors.password && <ErrorMessage>{errors.password.message}</ErrorMessage>}
         </FormGroup>
 
+        <FormGroup>
+          <Label htmlFor="confirmPassword">비밀번호 확인</Label>
+          <Input
+            type="password"
+            id="confirmPassword"
+            placeholder="비밀번호를 다시 입력해주세요"
+            {...register('confirmPassword', {
+              validate: (value) =>
+                value === password || '비밀번호가 일치하지 않습니다',
+            })}
+          />
+          {errors.confirmPassword && <ErrorMessage>{errors.confirmPassword.message}</ErrorMessage>}
+        </FormGroup>
+
         {error && <ErrorMessage>{error}</ErrorMessage>}
 
         <SubmitButton type="submit" disabled={isLoading}>
-          {isLoading ? '로그인 중...' : '로그인'}
+          {isLoading ? '가입 중...' : '회원가입'}
         </SubmitButton>
 
-        <SignupLink>
-          계정이 없으신가요? <Link href="/signup">회원가입</Link>
-        </SignupLink>
-      </LoginForm>
-    </LoginWrapper>
+        <LoginLink>
+          이미 계정이 있으신가요? <Link href="/login">로그인</Link>
+        </LoginLink>
+      </SignupForm>
+    </SignupWrapper>
   );
 }
 
-export default LoginContainer;
+export default SignupContainer; 

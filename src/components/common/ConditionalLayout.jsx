@@ -24,6 +24,8 @@ export default function ConditionalLayout() {
       <AnimatedPanel baseRoute='word' />
       <AnimatedPanel baseRoute='info' />
       <AnimatedPanel baseRoute='login' />
+      <AnimatedPanel baseRoute='signup' />
+      <AnimatedPanel baseRoute='mypage' />
     </>
   );
 }
