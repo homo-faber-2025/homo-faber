@@ -277,32 +277,10 @@ export default function StoreCreateForm() {
         }
       }
 
-      // 선택된 태그들을 데이터로 변환
-      const filteredTags = [];
-
-      selectedIndustryTypes.forEach(industryId => {
-        filteredTags.push({
-          industry_type_id: industryId,
-          capacity_type_id: null,
-          material_type_id: null
-        });
-      });
-
-      selectedCapacityTypes.forEach(capacityId => {
-        filteredTags.push({
-          industry_type_id: null,
-          capacity_type_id: capacityId,
-          material_type_id: null
-        });
-      });
-
-      selectedMaterialTypes.forEach(materialId => {
-        filteredTags.push({
-          industry_type_id: null,
-          capacity_type_id: null,
-          material_type_id: materialId
-        });
-      });
+      // 선택된 태그들을 새로운 데이터 구조로 변환
+      const capacities = selectedCapacityTypes;
+      const industries = selectedIndustryTypes;
+      const materials = selectedMaterialTypes;
 
       // 갤러리 데이터 준비
       const processedGallery = data.gallery.map((item, index) => ({
@@ -310,14 +288,22 @@ export default function StoreCreateForm() {
         image_url: galleryUrls[index] || item.image_url || '',
       })).filter((item) => item.image_url);
 
+      // keyword 처리
+      const processedKeyword = keyword ? keyword.split(',').map(k => k.trim()).filter(k => k) : [];
+      console.log('Processed keyword:', processedKeyword);
+
       const storeData = {
         ...data,
         card_img: cardImgUrl,
         thumbnail_img: thumbnailImgUrl,
-        keyword: keyword ? keyword.split(',').map(k => k.trim()).filter(k => k) : [],
-        tags: filteredTags,
+        keyword: processedKeyword,
+        capacities: capacities,
+        industries: industries,
+        materials: materials,
         gallery: processedGallery,
       };
+
+      console.log('Store data to be sent:', storeData);
 
       const newStore = await createStore(storeData);
       console.log('Store 생성 완료:', newStore);
@@ -389,6 +375,11 @@ export default function StoreCreateForm() {
               onChange={(e) => setKeyword(e.target.value)}
               placeholder="키워드를 쉼표로 구분하여 입력하세요 (예: 조명기구, 특수조명, 일반조명)"
             />
+            {keyword && (
+              <div style={{ marginTop: '5px', fontSize: '12px', color: '#666' }}>
+                입력된 키워드: {keyword.split(',').map(k => k.trim()).filter(k => k).join(', ')}
+              </div>
+            )}
           </div>
         </div>
 

@@ -136,16 +136,15 @@ const StoreList = ({ stores }) => {
             <TableRow key={store.id} onClick={() => handleStoreClick(store.id)}>
               <TitleCell>
                 <Name>{store.name}</Name>
-                {store.store_tags?.length > 0 &&
-                  store.store_tags.some(tag => tag.industry_types?.name) && (
-                    <Industry>
-                      {store.store_tags
-                        .map(tag => tag.industry_types?.name)
-                        .filter(Boolean)
-                        .map(convertIndustryNameToKorean)
-                        .join(' • ')}
-                    </Industry>
-                  )}
+                {store.store_industry?.length > 0 && (
+                  <Industry>
+                    {store.store_industry
+                      .map(item => item.industry_types?.name)
+                      .filter(Boolean)
+                      .map(convertIndustryNameToKorean)
+                      .join(' • ')}
+                  </Industry>
+                )}
                 <Line style={{ marginRight: '8px' }} ></Line>
               </TitleCell>
               <KeywordCell>

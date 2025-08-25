@@ -11,10 +11,14 @@ export async function getStores() {
       store_contacts(
         phone
       ),
-      store_tags(
-        industry_types(name),
-        capacity_types(name),
-        material_types(name)
+      store_capacity(
+        capacity_types(id, name)
+      ),
+      store_industry(
+        industry_types(id, name)
+      ),
+      store_material(
+        material_types(id, name)
       )
     `,
     )
@@ -38,10 +42,14 @@ export async function getStoreById(id) {
         email,
         website
       ),
-      store_tags(
-        industry_types(name),
-        capacity_types(name),
-        material_types(name)
+      store_capacity(
+        capacity_types(id, name)
+      ),
+      store_industry(
+        industry_types(id, name)
+      ),
+      store_material(
+        material_types(id, name)
       ),
       store_gallery(
         image_url,
@@ -60,6 +68,9 @@ export async function createStore(storeData) {
   const supabase = createClient();
 
   try {
+    console.log('Creating store with data:', storeData);
+    console.log('Keyword data:', storeData.keyword);
+
     // 1. stores 테이블에 기본 정보 삽입
     const { data: store, error: storeError } = await supabase
       .from('stores')
@@ -67,6 +78,7 @@ export async function createStore(storeData) {
         name: storeData.name,
         description: storeData.description,
         address: storeData.address,
+        keyword: storeData.keyword || null,
         card_img: storeData.card_img || null,
         thumbnail_img: storeData.thumbnail_img || null,
         // 기타 store 테이블 필드들
@@ -92,19 +104,46 @@ export async function createStore(storeData) {
       if (contactsError) throw contactsError;
     }
 
-    if (storeData.tags && storeData.tags.length > 0) {
-      const tagInserts = storeData.tags.map((tag) => ({
+    // 2. store_capacity 데이터 삽입
+    if (storeData.capacities && storeData.capacities.length > 0) {
+      const capacityInserts = storeData.capacities.map((capacityId) => ({
         store_id: storeId,
-        industry_type_id: tag.industry_type_id,
-        capacity_type_id: tag.capacity_type_id,
-        material_type_id: tag.material_type_id,
+        capacity_type_id: capacityId,
       }));
 
-      const { error: tagsError } = await supabase
-        .from('store_tags')
-        .insert(tagInserts);
+      const { error: capacityError } = await supabase
+        .from('store_capacity')
+        .insert(capacityInserts);
 
-      if (tagsError) throw tagsError;
+      if (capacityError) throw capacityError;
+    }
+
+    // 3. store_industry 데이터 삽입
+    if (storeData.industries && storeData.industries.length > 0) {
+      const industryInserts = storeData.industries.map((industryId) => ({
+        store_id: storeId,
+        industry_type_id: industryId,
+      }));
+
+      const { error: industryError } = await supabase
+        .from('store_industry')
+        .insert(industryInserts);
+
+      if (industryError) throw industryError;
+    }
+
+    // 4. store_material 데이터 삽입
+    if (storeData.materials && storeData.materials.length > 0) {
+      const materialInserts = storeData.materials.map((materialId) => ({
+        store_id: storeId,
+        material_type_id: materialId,
+      }));
+
+      const { error: materialError } = await supabase
+        .from('store_material')
+        .insert(materialInserts);
+
+      if (materialError) throw materialError;
     }
 
     if (storeData.gallery && storeData.gallery.length > 0) {
@@ -177,15 +216,31 @@ export async function deleteStore(storeId) {
 
     if (galleryError) throw galleryError;
 
-    // 2. store_tags 삭제
-    const { error: tagsError } = await supabase
-      .from('store_tags')
+    // 2. store_capacity 삭제
+    const { error: capacityError } = await supabase
+      .from('store_capacity')
       .delete()
       .eq('store_id', storeId);
 
-    if (tagsError) throw tagsError;
+    if (capacityError) throw capacityError;
 
-    // 3. store_contacts 삭제
+    // 3. store_industry 삭제
+    const { error: industryError } = await supabase
+      .from('store_industry')
+      .delete()
+      .eq('store_id', storeId);
+
+    if (industryError) throw industryError;
+
+    // 4. store_material 삭제
+    const { error: materialError } = await supabase
+      .from('store_material')
+      .delete()
+      .eq('store_id', storeId);
+
+    if (materialError) throw materialError;
+
+    // 5. store_contacts 삭제
     const { error: contactsError } = await supabase
       .from('store_contacts')
       .delete()
@@ -193,7 +248,7 @@ export async function deleteStore(storeId) {
 
     if (contactsError) throw contactsError;
 
-    // 4. stores 테이블에서 삭제
+    // 6. stores 테이블에서 삭제
     const { error: storeError } = await supabase
       .from('stores')
       .delete()
@@ -254,32 +309,82 @@ export async function updateStore(storeId, storeData) {
       if (contactsError) throw contactsError;
     }
 
-    // 3. store_tags 업데이트 (기존 데이터 삭제 후 새로 삽입)
-    if (storeData.tags && storeData.tags.length > 0) {
-      // 기존 태그 삭제
-      const { error: deleteTagsError } = await supabase
-        .from('store_tags')
+    // 3. store_capacity 업데이트 (기존 데이터 삭제 후 새로 삽입)
+    if (storeData.capacities) {
+      // 기존 capacity 삭제
+      const { error: deleteCapacityError } = await supabase
+        .from('store_capacity')
         .delete()
         .eq('store_id', storeId);
 
-      if (deleteTagsError) throw deleteTagsError;
+      if (deleteCapacityError) throw deleteCapacityError;
 
-      // 새 태그 삽입
-      const tagInserts = storeData.tags.map((tag) => ({
-        store_id: storeId,
-        industry_type_id: tag.industry_type_id,
-        capacity_type_id: tag.capacity_type_id,
-        material_type_id: tag.material_type_id,
-      }));
+      // 새 capacity 삽입
+      if (storeData.capacities.length > 0) {
+        const capacityInserts = storeData.capacities.map((capacityId) => ({
+          store_id: storeId,
+          capacity_type_id: capacityId,
+        }));
 
-      const { error: tagsError } = await supabase
-        .from('store_tags')
-        .insert(tagInserts);
+        const { error: capacityError } = await supabase
+          .from('store_capacity')
+          .insert(capacityInserts);
 
-      if (tagsError) throw tagsError;
+        if (capacityError) throw capacityError;
+      }
     }
 
-    // 4. store_gallery 업데이트 (기존 데이터 삭제 후 새로 삽입)
+    // 4. store_industry 업데이트 (기존 데이터 삭제 후 새로 삽입)
+    if (storeData.industries) {
+      // 기존 industry 삭제
+      const { error: deleteIndustryError } = await supabase
+        .from('store_industry')
+        .delete()
+        .eq('store_id', storeId);
+
+      if (deleteIndustryError) throw deleteIndustryError;
+
+      // 새 industry 삽입
+      if (storeData.industries.length > 0) {
+        const industryInserts = storeData.industries.map((industryId) => ({
+          store_id: storeId,
+          industry_type_id: industryId,
+        }));
+
+        const { error: industryError } = await supabase
+          .from('store_industry')
+          .insert(industryInserts);
+
+        if (industryError) throw industryError;
+      }
+    }
+
+    // 5. store_material 업데이트 (기존 데이터 삭제 후 새로 삽입)
+    if (storeData.materials) {
+      // 기존 material 삭제
+      const { error: deleteMaterialError } = await supabase
+        .from('store_material')
+        .delete()
+        .eq('store_id', storeId);
+
+      if (deleteMaterialError) throw deleteMaterialError;
+
+      // 새 material 삽입
+      if (storeData.materials.length > 0) {
+        const materialInserts = storeData.materials.map((materialId) => ({
+          store_id: storeId,
+          material_type_id: materialId,
+        }));
+
+        const { error: materialError } = await supabase
+          .from('store_material')
+          .insert(materialInserts);
+
+        if (materialError) throw materialError;
+      }
+    }
+
+    // 6. store_gallery 업데이트 (기존 데이터 삭제 후 새로 삽입)
     if (storeData.gallery && storeData.gallery.length > 0) {
       // 기존 갤러리 삭제
       const { error: deleteGalleryError } = await supabase

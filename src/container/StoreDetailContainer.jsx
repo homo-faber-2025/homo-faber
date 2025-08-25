@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import styled from '@emotion/styled';
 import { motion, AnimatePresence } from 'motion/react';
-import { useStoreDetail } from '@/hooks/useStoreDetail';
+import { useStoreDetail } from '@/hooks/useStores';
 import { convertIndustryNameToKorean, convertCapacityNameToKorean } from '@/utils/converters';
 import { useCustomScrollbar } from '@/hooks/useCustomScrollbar';
 import CustomScrollbar from '@/components/common/CustomScrollbar';

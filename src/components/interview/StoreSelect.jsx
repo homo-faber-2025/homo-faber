@@ -1,6 +1,6 @@
 "use client";
 
-import { useStoreList } from '@/hooks/useStoreList';
+import { useStoreList } from '@/hooks/useStores';
 import styled from '@emotion/styled';
 
 const Container = styled.div`

@@ -250,6 +250,10 @@ const StoreEditPage = () => {
 
         // 스토어 데이터 로드
         const store = await getStoreById(storeId);
+        console.log('Loaded store data:', store);
+        console.log('Store industry:', store.store_industry);
+        console.log('Store capacity:', store.store_capacity);
+        console.log('Store material:', store.store_material);
         setStoreData(store);
 
         // 기본 정보 설정
@@ -278,20 +282,28 @@ const StoreEditPage = () => {
           setWebsite(contact.website || '');
         }
 
-        // 태그 정보 설정
-        if (store.store_tags && store.store_tags.length > 0) {
-          const industryIds = store.store_tags
-            .filter(tag => tag.industry_types)
-            .map(tag => tag.industry_types.id);
-          const capacityIds = store.store_tags
-            .filter(tag => tag.capacity_types)
-            .map(tag => tag.capacity_types.id);
-          const materialIds = store.store_tags
-            .filter(tag => tag.material_types)
-            .map(tag => tag.material_types.id);
-
+        // 태그 정보 설정 (새로운 데이터 구조)
+        if (store.store_industry && store.store_industry.length > 0) {
+          const industryIds = store.store_industry
+            .map(item => item.industry_types.id)
+            .filter(Boolean);
+          console.log('Setting industry IDs:', industryIds);
           setSelectedIndustryTypes(industryIds);
+        }
+
+        if (store.store_capacity && store.store_capacity.length > 0) {
+          const capacityIds = store.store_capacity
+            .map(item => item.capacity_types.id)
+            .filter(Boolean);
+          console.log('Setting capacity IDs:', capacityIds);
           setSelectedCapacityTypes(capacityIds);
+        }
+
+        if (store.store_material && store.store_material.length > 0) {
+          const materialIds = store.store_material
+            .map(item => item.material_types.id)
+            .filter(Boolean);
+          console.log('Setting material IDs:', materialIds);
           setSelectedMaterialTypes(materialIds);
         }
 
@@ -380,33 +392,10 @@ const StoreEditPage = () => {
           email,
           website
         },
-        tags: []
+        capacities: selectedCapacityTypes,
+        industries: selectedIndustryTypes,
+        materials: selectedMaterialTypes
       };
-
-      // 선택된 태그들을 업데이트 데이터에 추가
-      selectedIndustryTypes.forEach(industryId => {
-        updateData.tags.push({
-          industry_type_id: industryId,
-          capacity_type_id: null,
-          material_type_id: null
-        });
-      });
-
-      selectedCapacityTypes.forEach(capacityId => {
-        updateData.tags.push({
-          industry_type_id: null,
-          capacity_type_id: capacityId,
-          material_type_id: null
-        });
-      });
-
-      selectedMaterialTypes.forEach(materialId => {
-        updateData.tags.push({
-          industry_type_id: null,
-          capacity_type_id: null,
-          material_type_id: materialId
-        });
-      });
 
       await updateStore(storeId, updateData);
       alert('수정 완료');
@@ -614,7 +603,7 @@ const StoreEditPage = () => {
             </FormField>
 
             <TagSection>
-              <h3>업종 태그</h3>
+              <h3>업종 태그 (선택된 ID: {selectedIndustryTypes.join(', ')})</h3>
               <div className="tag-grid">
                 {industryTypes.map((type) => (
                   <div key={type.id} className="tag-item">
@@ -624,14 +613,14 @@ const StoreEditPage = () => {
                       checked={selectedIndustryTypes.includes(type.id)}
                       onChange={(e) => handleTagChange('industry', type.id, e.target.checked)}
                     />
-                    <label htmlFor={`industry-${type.id}`}>{type.name}</label>
+                    <label htmlFor={`industry-${type.id}`}>{type.name} (ID: {type.id})</label>
                   </div>
                 ))}
               </div>
             </TagSection>
 
             <TagSection>
-              <h3>규모 태그</h3>
+              <h3>규모 태그 (선택된 ID: {selectedCapacityTypes.join(', ')})</h3>
               <div className="tag-grid">
                 {capacityTypes.map((type) => (
                   <div key={type.id} className="tag-item">
@@ -641,14 +630,14 @@ const StoreEditPage = () => {
                       checked={selectedCapacityTypes.includes(type.id)}
                       onChange={(e) => handleTagChange('capacity', type.id, e.target.checked)}
                     />
-                    <label htmlFor={`capacity-${type.id}`}>{type.name}</label>
+                    <label htmlFor={`capacity-${type.id}`}>{type.name} (ID: {type.id})</label>
                   </div>
                 ))}
               </div>
             </TagSection>
 
             <TagSection>
-              <h3>재료 태그</h3>
+              <h3>재료 태그 (선택된 ID: {selectedMaterialTypes.join(', ')})</h3>
               <div className="tag-grid">
                 {materialTypes.map((type) => (
                   <div key={type.id} className="tag-item">
@@ -658,7 +647,7 @@ const StoreEditPage = () => {
                       checked={selectedMaterialTypes.includes(type.id)}
                       onChange={(e) => handleTagChange('material', type.id, e.target.checked)}
                     />
-                    <label htmlFor={`material-${type.id}`}>{type.name}</label>
+                    <label htmlFor={`material-${type.id}`}>{type.name} (ID: {type.id})</label>
                   </div>
                 ))}
               </div>

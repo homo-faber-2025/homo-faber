@@ -3,7 +3,7 @@
 import styled from '@emotion/styled';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useInterviewDetail } from '@/hooks/useInterviewDetail';
+import { useInterviewDetail } from '@/hooks/useInterviews';
 import EditorInterviewRender from '@/components/interview/EditorInterviewRenderer';
 import { useCustomScrollbar } from '@/hooks/useCustomScrollbar';
 import { motion, AnimatePresence } from 'motion/react';

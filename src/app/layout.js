@@ -1,10 +1,8 @@
 import { Gothic_A1, Noto_Serif_KR, ABeeZee } from 'next/font/google';
 import './globals.css';
 import Providers from '@/app/providers';
-import Map3DWrapper from '@/container/Map3DWrapper';
+import ConditionalLayout from '@/components/common/ConditionalLayout';
 import Navigation from '@/components/common/Navigation';
-import AnimatedPanel from '@/components/common/AnimatedPanel';
-import StoreContainer from '@/container/StoreContainer';
 
 const gothic = Gothic_A1({
   weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
@@ -47,13 +45,8 @@ export default function RootLayout({ children }) {
         className={`${gothic.variable} ${noto.variable} ${abeezee.variable}`}
       >
         <Providers>
-          <Map3DWrapper />
-          <StoreContainer />
+          <ConditionalLayout />
           <Navigation />
-          <AnimatedPanel baseRoute='interview' />
-          <AnimatedPanel baseRoute='word' />
-          <AnimatedPanel baseRoute='info' />
-          <AnimatedPanel baseRoute='login' />
           {children}
         </Providers>
       </body>
