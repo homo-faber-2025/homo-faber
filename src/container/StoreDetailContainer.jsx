@@ -8,6 +8,8 @@ import { useStoreDetail } from '@/hooks/useStores';
 import { convertIndustryNameToKorean, convertCapacityNameToKorean } from '@/utils/converters';
 import { useCustomScrollbar } from '@/hooks/useCustomScrollbar';
 import CustomScrollbar from '@/components/common/CustomScrollbar';
+import { useBookmarks } from '@/hooks/useBookmarks';
+import { useAuth } from '@/contexts/AuthContext';
 
 const DetailWrapper = styled(motion.main)`
   width: calc(80vw - 60px);
@@ -224,14 +226,50 @@ const ErrorContainer = styled.div`
   font-size: 1.5rem;
 `;
 
+const BookmarkButton = styled.button`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    transform: scale(1.1);
+  }
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+`;
+
+const BookmarkIcon = styled.span`
+  font-size: 24px;
+  color: ${props => props.isBookmarked ? '#ff6b6b' : '#ccc'};
+  transition: all 0.2s ease;
+  
+  &:hover {
+    color: ${props => props.isBookmarked ? '#ff5252' : '#999'};
+  }
+`;
+
 function StoreDetailContainer({ }) {
   const router = useRouter();
   const pathname = usePathname();
   const [right, setRight] = useState('-100dvw');
   const storeId = pathname.startsWith('/store/') && pathname !== '/store' ? pathname.split('/')[2] : null;
 
-
-
+  const { user } = useAuth();
+  const { toggleBookmark, isStoreBookmarked, loading } = useBookmarks();
   const { store, isLoading, error } = useStoreDetail(storeId);
   const { containerRef, scrollState, scrollToRatio } = useCustomScrollbar();
 
@@ -243,6 +281,12 @@ function StoreDetailContainer({ }) {
 
   const handleBackClick = () => {
     router.back();
+  };
+
+  const handleBookmarkClick = () => {
+    if (user && storeId) {
+      toggleBookmark(storeId);
+    }
   };
 
   return (
@@ -271,6 +315,20 @@ function StoreDetailContainer({ }) {
           ) : (
             <>
               <DetailPageName>업체 상세</DetailPageName>
+
+              {/* 북마크 버튼 */}
+              {user && (
+                <BookmarkButton
+                  onClick={handleBookmarkClick}
+                  disabled={loading}
+                  title={isStoreBookmarked(storeId) ? '북마크 제거' : '북마크 추가'}
+                >
+                  <BookmarkIcon isBookmarked={isStoreBookmarked(storeId)}>
+                    {isStoreBookmarked(storeId) ? '★' : '☆'}
+                  </BookmarkIcon>
+                </BookmarkButton>
+              )}
+
               <StoreDetailCard>
                 <StoreDetailSection>
                   <StoreName>{store.name}</StoreName>

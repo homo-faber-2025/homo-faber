@@ -6,69 +6,7 @@ import Search from '@/components/store/Search';
 import StoreFilters from '@/components/store/StoreFilters';
 import StoreList from '@/components/store/StoreList';
 import { useStores, useStoreFilters, extractAllTags } from '@/hooks/useStores';
-import styled from '@emotion/styled';
-
-const StoreWrapper = styled.main`
-  width: 80dvw;
-  height: 100dvh;
-  padding-left: 70px;
-  padding-top: 27px;
-  position: absolute;
-  right: ${(props) => props.right};
-  top: 0px;
-  z-index: 2;
-  background-color: var(--yellow);
-  cursor: ${(props) => (props.pathname && (props.pathname !== '/' || props.pathname.startsWith('/store/'))) ? 'pointer' : 'default'};
-  transition: right 0.6s cubic-bezier(0.2, 0, 0.4, 1);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  box-shadow: -2px 4px 10px 0 rgba(0,0,0,0.25);
-
-  &::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 15px;
-    height: 100%;
-    background: linear-gradient(270deg, rgba(69, 67, 43, 1) 0%, rgba(239, 232, 168, 1) 12%, rgba(239, 232, 168, 1) 35%, rgba(69, 67, 43, 1) 41%, rgba(217, 212, 166, 1) 47%, rgba(217, 212, 166, 1) 73%, rgba(69, 67, 43, 1) 78%, rgba(192, 189, 158, 1) 86%, rgba(192, 189, 158, 1) 99%, rgba(69, 67, 43, 1) 100%);
-  }
-`;
-
-const StorePageName = styled.h1`
-  font-family: var(--font-gothic);
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0.3rem;
-  position: absolute;
-  transform: rotate(90deg);
-  transform-origin: top left;
-  top: 17px;
-  left: 43px;
-`
-
-const StoreFilterWrapper = styled.div`
-  margin-bottom: 7px;
-  margin-top: ${(props) => (props.isFilterOpen ? '60px' : '154.5px')};
-`
-
-const StoreFilterBtn = styled.button`
-  border : none;
-  background: none;
-  text-align: left;
-  font-size: 1.12rem; 
-  font-family: var(--font-gothic);
-  font-weight: 800;
-  transform: scaleX(0.8);
-  transform-origin: left center;
-  cursor: pointer;
-`
-
-const ResetFilterBtn = styled(StoreFilterBtn)`
-  margin-left: -27px;
-`
-
+import * as S from '@/styles/store/storeContainer.style';
 
 function StoreContainer() {
   const pathname = usePathname();
@@ -109,19 +47,6 @@ function StoreContainer() {
       router.push('/store');
     }
   };
-
-  // pathname 변경 시 right 업데이트
-  useEffect(() => {
-    let newRight;
-    if (pathname === '/') {
-      newRight = 'calc(-80dvw + 120px)';
-    } else if (pathname.startsWith('/store')) {
-      newRight = '0px';
-    } else {
-      newRight = 'calc(-80dvw + 120px)';
-    }
-    setRight(newRight);
-  }, [pathname]);
 
   // 모든 가능한 태그 목록 업데이트
   useEffect(() => {
@@ -180,50 +105,60 @@ function StoreContainer() {
     });
   };
 
+  // pathname 변경 시 right 업데이트
+  useEffect(() => {
+    let newRight;
+    if (pathname === '/') {
+      newRight = 'calc(-80dvw + 120px)';
+    } else if (pathname.startsWith('/store')) {
+      newRight = '0px';
+    } else {
+      newRight = 'calc(-80dvw + 120px)';
+    }
+    setRight(newRight);
+  }, [pathname]);
+
   if (error) {
     return <div>에러가 발생했습니다: {error.message}</div>;
   }
 
   return (
-    <>
-      <StoreWrapper
-        pathname={pathname}
-        right={right}
-        onClick={handleStoreWrapperClick}
-      >
-        <StorePageName>업체 목록</StorePageName>
-        <Search onSearch={handleSearch} />
+    <S.StoreWrapper
+      pathname={pathname}
+      right={right}
+      onClick={handleStoreWrapperClick}
+    >
+      <S.StorePageName>업체 목록</S.StorePageName>
+      <Search onSearch={handleSearch} />
 
-        <StoreFilterWrapper isFilterOpen={isFilterOpen}>
-          <StoreFilterBtn onClick={handleFilterToggle}>
-            {isFilterOpen ? '필터링 닫기' : '필터링 열기'}
-            {hasActiveFilters() && ' [사용중]'}
-          </StoreFilterBtn>
-          {hasActiveFilters() && (
-            <ResetFilterBtn onClick={handleResetFilters}>
-              / 초기화 하기
-            </ResetFilterBtn>
-          )}
-        </StoreFilterWrapper>
-
-        {isFilterOpen && (
-          <StoreFilters
-            allTags={allTags}
-            selectedTags={selectedTags}
-            onTagClick={handleTagClick}
-            sortBy={sortBy}
-            onSortChange={handleSortChange}
-          />
+      <S.StoreFilterWrapper isFilterOpen={isFilterOpen}>
+        <S.StoreFilterBtn onClick={handleFilterToggle}>
+          {isFilterOpen ? '필터링 닫기' : '필터링 열기'}
+          {hasActiveFilters() && ' [사용중]'}
+        </S.StoreFilterBtn>
+        {hasActiveFilters() && (
+          <S.ResetFilterBtn onClick={handleResetFilters}>
+            / 초기화 하기
+          </S.ResetFilterBtn>
         )}
+      </S.StoreFilterWrapper>
 
+      {isFilterOpen && (
+        <StoreFilters
+          allTags={allTags}
+          selectedTags={selectedTags}
+          onTagClick={handleTagClick}
+          sortBy={sortBy}
+          onSortChange={handleSortChange}
+        />
+      )}
 
-        {isLoading ? (
-          <div>로딩 중...</div>
-        ) : (
-          <StoreList stores={filteredStores} />
-        )}
-      </StoreWrapper>
-    </>
+      {isLoading ? (
+        <div>로딩 중...</div>
+      ) : (
+        <StoreList stores={filteredStores} />
+      )}
+    </S.StoreWrapper>
   );
 }
 

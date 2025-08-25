@@ -6,6 +6,8 @@ import { useEffect } from 'react';
 import styled from '@emotion/styled';
 import { motion } from 'motion/react';
 import { usePathname } from 'next/navigation';
+import { useBookmarks } from '@/hooks/useBookmarks';
+import { convertIndustryNameToKorean } from '@/utils/converters';
 
 const MyPageWrapper = styled(motion.main)`
   width: 100%;
@@ -111,10 +113,76 @@ const LoadingText = styled.div`
   font-family: var(--font-gothic);
 `;
 
+const BookmarkSection = styled.div`
+  margin-top: 30px;
+  width: 100%;
+`;
+
+const BookmarkTitle = styled.h2`
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+`;
+
+const BookmarkList = styled.div`
+  max-height: 300px;
+  overflow-y: auto;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px;
+`;
+
+const BookmarkItem = styled.div`
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const StoreName = styled.h3`
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+`;
+
+const StoreInfo = styled.div`
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 5px;
+`;
+
+const StoreTags = styled.div`
+  font-size: 12px;
+  color: #888;
+`;
+
+const NoBookmarks = styled.div`
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  padding: 20px;
+`;
+
 function MypageContainer({ onLoadComplete }) {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const { bookmarks, loading: bookmarksLoading } = useBookmarks();
 
   // 마이페이지 패널 클릭 시 홈으로 이동
   const handleMypageWrapperClick = () => {
@@ -144,6 +212,10 @@ function MypageContainer({ onLoadComplete }) {
     } catch (error) {
       console.error('로그아웃 중 오류가 발생했습니다:', error);
     }
+  };
+
+  const handleBookmarkClick = (storeId) => {
+    router.push(`/store/${storeId}`);
   };
 
   if (loading) {
@@ -180,6 +252,44 @@ function MypageContainer({ onLoadComplete }) {
         <LogoutButton onClick={handleLogout}>
           로그아웃
         </LogoutButton>
+
+        {/* 북마크된 가게 리스트 */}
+        <BookmarkSection>
+          <BookmarkTitle>북마크한 가게</BookmarkTitle>
+          <BookmarkList>
+            {bookmarksLoading ? (
+              <NoBookmarks>로딩 중...</NoBookmarks>
+            ) : bookmarks.length > 0 ? (
+              bookmarks.map((bookmark) => {
+                const store = bookmark.stores;
+                if (!store) return null;
+
+                return (
+                  <BookmarkItem
+                    key={bookmark.id}
+                    onClick={() => handleBookmarkClick(store.id)}
+                  >
+                    <StoreName>{store.name}</StoreName>
+                    {store.address && (
+                      <StoreInfo>{store.address}</StoreInfo>
+                    )}
+                    {store.store_industry?.length > 0 && (
+                      <StoreTags>
+                        {store.store_industry
+                          .map(item => item.industry_types?.name)
+                          .filter(Boolean)
+                          .map(convertIndustryNameToKorean)
+                          .join(' • ')}
+                      </StoreTags>
+                    )}
+                  </BookmarkItem>
+                );
+              })
+            ) : (
+              <NoBookmarks>북마크한 가게가 없습니다.</NoBookmarks>
+            )}
+          </BookmarkList>
+        </BookmarkSection>
       </ProfileCard>
     </MyPageWrapper>
   );

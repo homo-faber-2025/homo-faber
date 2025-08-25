@@ -42,10 +42,16 @@ function AnimatedPanel({
   className
 }) {
   const pathname = usePathname();
-  const [right, setRight] = useState('-81dvw');
+  const [right, setRight] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  // 클라이언트 사이드에서만 실행
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // 현재 경로가 이 패널의 baseRoute와 일치하는지 확인
   const isActiveRoute = useMemo(() => {
@@ -53,6 +59,8 @@ function AnimatedPanel({
   }, [pathname, baseRoute]);
 
   useEffect(() => {
+    if (!isClient) return;
+
     const newRight = isActiveRoute ? '0' : '-81dvw';
     setRight(newRight);
 
@@ -115,15 +123,18 @@ function AnimatedPanel({
     return null;
   }
 
+  // 클라이언트 사이드에서만 애니메이션 적용
+  const currentRight = isClient ? right : null;
+
   return (
     <AnimatePresence mode="wait">
       <SidePanelWrapper
         onClick={onWrapperClick}
         initial={{ right: '-81dvw' }}
-        animate={{ right: shouldAnimate ? right : '-81dvw' }}
+        animate={{ right: shouldAnimate && isClient ? right : '-81dvw' }}
         exit={{ right: '-81dvw' }}
         transition={{ duration: 1, ease: [0.2, 0, 0.4, 1] }}
-        right={right}
+        right={currentRight}
         className={className}
       >
         {renderComponent()}
