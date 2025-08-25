@@ -16,7 +16,48 @@ export const useImageUpload = (options = {}) => {
   const supabase = createClient();
 
   /**
-   * 이미지 업로드 핸들러
+   * 로컬 프리뷰용 이미지 처리 (스토리지 업로드 없음)
+   * @param {File} file - 처리할 이미지 파일
+   * @returns {Promise<Object>} 처리 결과
+   */
+  const processImageForPreview = useCallback(async (file) => {
+    try {
+      // 이미지 정보 로그
+      logImageInfo(file, '프리뷰 처리 전');
+
+      // 이미지 압축 (maxSizeInMB 초과시)
+      const compressedFile = await checkAndCompressImage(file, maxSizeInMB);
+
+      // 압축 후 이미지 정보 로그
+      if (compressedFile !== file) {
+        logImageInfo(compressedFile, '압축 후');
+      }
+
+      // 로컬 URL 생성
+      const localUrl = URL.createObjectURL(compressedFile);
+
+      console.log('이미지 프리뷰 생성 성공:', localUrl);
+
+      return {
+        success: 1,
+        file: {
+          url: localUrl,
+          name: compressedFile.name,
+          size: compressedFile.size,
+          originalFile: compressedFile, // 나중에 업로드할 때 사용
+        }
+      };
+    } catch (error) {
+      console.error('이미지 프리뷰 처리 오류:', error);
+      return {
+        success: 0,
+        error: error.message || '이미지 처리에 실패했습니다.'
+      };
+    }
+  }, [maxSizeInMB]);
+
+  /**
+   * 이미지 업로드 핸들러 (즉시 스토리지에 업로드)
    * @param {File} file - 업로드할 이미지 파일
    * @returns {Promise<Object>} 업로드 결과
    */
@@ -110,5 +151,6 @@ export const useImageUpload = (options = {}) => {
     uploadImage,
     uploadMultipleImages,
     deleteImage,
+    processImageForPreview,
   };
 };

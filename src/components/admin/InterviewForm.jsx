@@ -5,6 +5,7 @@ import Editor from '@/components/interview/Editor';
 import StoreSelect from '@/components/interview/StoreSelect';
 import { checkAndCompressImage } from '@/utils/imageCompression';
 import { createClient } from '@/utils/supabase/client';
+import { useImageUpload } from '@/hooks/useImageUpload';
 import styled from '@emotion/styled';
 
 const FormSection = styled.div`
@@ -122,7 +123,11 @@ const InterviewForm = ({
   const [date, setDate] = useState('');
   const [interviewee, setInterviewee] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [localCoverImage, setLocalCoverImage] = useState(null);
   const editorRef = useRef(null);
+
+  // 이미지 업로드 훅 사용
+  const { uploadImage, processImageForPreview } = useImageUpload({ bucket: 'gallery', maxSizeInMB: 0.5 });
 
   // 초기 데이터가 있으면 폼에 설정
   useEffect(() => {
@@ -143,43 +148,44 @@ const InterviewForm = ({
     }
   }, [onSaveClick, selectedStoreId, intro, coverImg, date, interviewee]);
 
+  // 컴포넌트 언마운트 시 로컬 URL 정리
+  useEffect(() => {
+    return () => {
+      if (coverImgPreview && coverImgPreview.startsWith('blob:')) {
+        URL.revokeObjectURL(coverImgPreview);
+      }
+    };
+  }, [coverImgPreview]);
+
   const handleEditorChange = (api, event) => {
     // onChange 이벤트가 너무 자주 호출되는 것을 방지
     // 실제로는 Editor 내부에서 데이터를 관리하므로 여기서는 로깅만
     console.log('Editor onChange:', { api, event });
   };
 
-  const handleImageUpload = async (event) => {
+  const handleImagePreview = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
     try {
       setIsUploading(true);
 
-      // 이미지 압축
-      const compressedFile = await checkAndCompressImage(file, 0.5);
+      const result = await processImageForPreview(file);
+      if (result.success) {
+        const imageUrl = result.file.url;
+        const originalFile = result.file.originalFile;
 
-      // Supabase Storage에 업로드
-      const supabase = createClient();
-      const fileName = `cover_${Date.now()}_${compressedFile.name}`;
+        // 로컬 파일 저장
+        setLocalCoverImage(originalFile);
 
-      const { data, error } = await supabase.storage
-        .from('gallery')
-        .upload(fileName, compressedFile);
-
-      if (error) throw error;
-
-      // 공개 URL 생성
-      const { data: { publicUrl } } = supabase.storage
-        .from('gallery')
-        .getPublicUrl(fileName);
-
-      setCoverImg(publicUrl);
-      setCoverImgPreview(publicUrl);
-
+        // 프리뷰 설정
+        setCoverImgPreview(imageUrl);
+      } else {
+        alert('이미지 처리에 실패했습니다: ' + result.error);
+      }
     } catch (error) {
-      console.error('이미지 업로드 실패:', error);
-      alert('이미지 업로드에 실패했습니다.');
+      console.error('이미지 처리 실패:', error);
+      alert('이미지 처리에 실패했습니다.');
     } finally {
       setIsUploading(false);
     }
@@ -192,12 +198,23 @@ const InterviewForm = ({
         return;
       }
 
+      // 이미지 업로드 처리
+      let coverImgUrl = coverImg;
+      if (localCoverImage) {
+        const result = await uploadImage(localCoverImage);
+        if (result.success) {
+          coverImgUrl = result.file.url;
+        } else {
+          throw new Error('커버 이미지 업로드 실패: ' + result.error);
+        }
+      }
+
       const outputData = await editorRef.current.save();
       const interviewData = {
         store_id: selectedStoreId,
         contents: outputData.blocks,
         intro: intro,
-        cover_img: coverImg,
+        cover_img: coverImgUrl,
         date: date,
         interviewee: interviewee
       };
@@ -260,7 +277,7 @@ const InterviewForm = ({
                 id="cover-img"
                 type="file"
                 accept="image/*"
-                onChange={handleImageUpload}
+                onChange={handleImagePreview}
                 style={{ display: 'none' }}
               />
               <button
