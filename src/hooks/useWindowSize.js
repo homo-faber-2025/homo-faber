@@ -6,6 +6,10 @@ const useWindowSize = () => {
     height: typeof window !== 'undefined' ? window.innerHeight : 0,
   });
 
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== 'undefined' ? window.innerWidth <= 767 : false
+  );
+
   useEffect(() => {
     let lastCall = 0;
     const throttleTime = 500;
@@ -14,10 +18,16 @@ const useWindowSize = () => {
       const now = new Date().getTime();
       if (now - lastCall < throttleTime) return;
       lastCall = now;
+
+      const newWidth = window.innerWidth;
+      const newHeight = window.innerHeight;
+
       setSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
+        width: newWidth,
+        height: newHeight,
       });
+
+      setIsMobile(newWidth <= 767);
     };
 
     window.addEventListener('resize', updateSize);
@@ -25,9 +35,9 @@ const useWindowSize = () => {
     return () => {
       window.removeEventListener('resize', updateSize);
     };
-  }, [size]);
+  }, []);
 
-  return size;
+  return { ...size, isMobile };
 };
 
 export default useWindowSize;
