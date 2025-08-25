@@ -58,7 +58,7 @@ export const TableRow = styled.tr`
   display: flex;
   align-items: center;
   &:hover {
-    background-color: ${(props) => props.theme.color.rowHover || '#f9f9f9'};
+    background-color: ##f9f9f9;
     cursor: pointer;
   }
 `;
