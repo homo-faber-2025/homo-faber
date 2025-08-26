@@ -12,10 +12,22 @@ const Map3D = ({ stores }) => {
   usePOI(stores);
 
   // /store 페이지 또는 개별 스토어 페이지에서 Map3D 클릭 시 홈으로 이동
-  const handleMapClick = () => {
+  const handleMapClick = (e) => {
     if (pathname !== '/') {
       router.push('/');
     }
+  };
+
+  // 터치 이벤트 핸들러 추가
+  const handleTouchStart = (e) => {
+    // e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleTouchEnd = (e) => {
+    // e.preventDefault();
+    e.stopPropagation();
+    handleMapClick(e);
   };
 
   useEffect(() => {
@@ -93,9 +105,13 @@ const Map3D = ({ stores }) => {
       style={{
         width: '100dvw',
         height: '100dvh',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        touchAction: 'manipulation', // 터치 동작 최적화
+        WebkitTapHighlightColor: 'transparent', // iOS 터치 하이라이트 제거
       }}
       onClick={handleMapClick}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     />
   );
 };

@@ -46,7 +46,7 @@ export default function RootLayout({ children }) {
       >
         <Providers>
           <ConditionalLayout />
-          <Navigation />
+          {/* <Navigation /> */}
           {children}
         </Providers>
       </body>

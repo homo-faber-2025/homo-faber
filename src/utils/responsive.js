@@ -37,33 +37,3 @@ export const getDeviceType = (width) => {
   if (isTabletBreakpoint(width)) return 'tablet';
   return 'desktop';
 };
-
-/**
- * 모바일에서 사용할 bottom 위치를 계산하는 함수
- * @param {string} pathname - 현재 경로
- * @returns {string} bottom 위치 값
- */
-export const getMobileBottomPosition = (pathname) => {
-  if (pathname === '/') {
-    return 'calc(-80dvh + 120px)';
-  } else if (pathname.startsWith('/store')) {
-    return '0px';
-  } else {
-    return 'calc(-80dvh + 120px)';
-  }
-};
-
-/**
- * 데스크톱에서 사용할 right 위치를 계산하는 함수
- * @param {string} pathname - 현재 경로
- * @returns {string} right 위치 값
- */
-export const getDesktopRightPosition = (pathname) => {
-  if (pathname === '/') {
-    return 'calc(-80dvw + 120px)';
-  } else if (pathname.startsWith('/store')) {
-    return '0px';
-  } else {
-    return 'calc(-80dvw + 120px)';
-  }
-};

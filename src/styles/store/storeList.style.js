@@ -1,8 +1,9 @@
 import styled from '@emotion/styled';
+import theme from '@/styles/Theme';
 
 export const TableWrapper = styled.article`
-  width: 100vw;
-  overflow-x: visible;
+  width: 100dvw;
+  overflow-x: hidden;
   overflow-y: auto;
   flex: 1;
   display: flex;
@@ -11,6 +12,13 @@ export const TableWrapper = styled.article`
   white-space: nowrap;
   /* Safari sticky support */
   -webkit-overflow-scrolling: touch;
+  padding-left: 30px;
+  margin-left: -30px;
+
+  ${theme.media.mobile} {
+    padding-left: 10px;
+    margin-left: 0;
+  }
 `;
 
 export const StoreTable = styled.table`
@@ -44,6 +52,19 @@ export const TableHeaderCell = styled.th`
   /* Safari sticky support */
   -webkit-transform: scaleX(0.8) translateZ(0);
   transform: scaleX(0.8) translateZ(0);
+
+  ${theme.media.mobile} {
+    padding: 13px 14px 12px 14px;
+    font-size: 1rem;
+  }
+`;
+
+export const TableHeaderCellBookmark = styled.th`
+  width: 15px;
+  padding: unset;
+  margin-left: -14px;
+  background-color: var(--yellow);
+  text-align: center;
 `;
 
 export const TableBody = styled.tbody`
@@ -64,16 +85,24 @@ export const TableRow = styled.tr`
 `;
 
 export const TableCell = styled.td`
-  padding: 12px 0px 10px 0px;
+  padding: 11px 0px 9px 0px;
   vertical-align: middle;
   font-size: 1.1rem;
+
+  ${theme.media.mobile} {
+    padding: 11px 0px 9px 0px;
+  }
 `;
 
 export const BookmarkCell = styled(TableCell)`
-  width: 15px;
+  width: 23px;
   padding: unset;
-  margin-left: -14px;
+  margin-left: -18px;
   text-align: center;
+
+  ${theme.media.mobile} {
+    padding: unset;;
+  }
 `;
 
 export const BookmarkButton = styled.button`
@@ -100,7 +129,7 @@ export const BookmarkIcon = styled.span`
   
   &:hover {
     color: ${props => props.isBookmarked ? '#ff5252' : '#999'};
-    transform: scale(1.1);
+    transform: scale(1.2);
   }
 `;
 
@@ -110,11 +139,26 @@ export const TitleCell = styled(TableCell)`
   padding-left: 10px;
   letter-spacing: 0.18rem;
   width: 201.8px;
+
+  ${theme.media.mobile} {
+    width: 120px;
+    overflow-x: auto;
+    padding-left: 10px;
+    background-color: var(--yellow);
+    -ms-overflow-style: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
 `
 
 export const Name = styled.div`
   font-weight: 700;
   margin-right: 12px;
+
+  ${theme.media.mobile} {
+    margin-right: 10px;
+  }
 `
 export const Industry = styled.div`
   margin-right: 12px;
@@ -130,6 +174,22 @@ export const Line = styled.div`
 export const KeywordCell = styled(TableCell)`
   width: 570px;
   display: block;
+  padding-left: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  ${theme.media.mobile} {
+    width: calc(100dvw - 132px);
+    padding-left: 10px;
+    overflow-x: scroll;
+    text-overflow: unset;
+    white-space: unset;
+    -ms-overflow-style: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
 `;
 
 export const ContactCell = styled(TableCell)`

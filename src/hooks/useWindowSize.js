@@ -1,43 +1,51 @@
-import { useState, useEffect } from 'react';
+import { useState, useLayoutEffect } from 'react';
 
 const useWindowSize = () => {
   const [size, setSize] = useState({
-    width: typeof window !== 'undefined' ? window.innerWidth : 0,
-    height: typeof window !== 'undefined' ? window.innerHeight : 0,
+    width: 0,
+    height: 0,
+    isMobile: false
   });
+  const [isReady, setIsReady] = useState(false);
 
-  const [isMobile, setIsMobile] = useState(
-    typeof window !== 'undefined' ? window.innerWidth <= 767 : false
-  );
+  useLayoutEffect(() => {
+    const updateSize = () => {
+      const newWidth = window.innerWidth;
+      const newHeight = window.innerHeight;
+      const newIsMobile = newWidth <= 767;
 
-  useEffect(() => {
+      const newSize = {
+        width: newWidth,
+        height: newHeight,
+        isMobile: newIsMobile
+      };
+
+      setSize(newSize);
+      setIsReady(true);
+    };
+
+    // 즉시 업데이트
+    updateSize();
+
+    // 리사이즈 이벤트 리스너
     let lastCall = 0;
     const throttleTime = 500;
 
-    const updateSize = () => {
+    const handleResize = () => {
       const now = new Date().getTime();
       if (now - lastCall < throttleTime) return;
       lastCall = now;
-
-      const newWidth = window.innerWidth;
-      const newHeight = window.innerHeight;
-
-      setSize({
-        width: newWidth,
-        height: newHeight,
-      });
-
-      setIsMobile(newWidth <= 767);
+      updateSize();
     };
 
-    window.addEventListener('resize', updateSize);
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      window.removeEventListener('resize', updateSize);
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
-  return { ...size, isMobile };
+  return { ...size, isReady };
 };
 
 export default useWindowSize;

@@ -135,7 +135,7 @@ const globalStyle = css`
   /* Global Font Size Settings */
   html {
     /* Mobile first - 9pt base font size */
-    font-size: 9pt;
+    font-size: 9.6pt;
   }
 
   /* Desktop/Web - 10pt base font size */

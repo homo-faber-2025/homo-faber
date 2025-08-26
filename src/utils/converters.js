@@ -34,6 +34,27 @@ export function convertCapacityNameToKorean(englishName) {
  */
 export function convertMaterialNameToKorean(englishName) {
   const nameMap = {
+    'medical_device': '의료기기',
+    'printing_post-processing': '인쇄 후처리',
+    'culture': '문화',
+    'IT': 'IT',
+    'design': '디자인',
+    'press': '프레스',
+    'clock': '시계',
+    'building_material': '건축 자재',
+    'video': '비디오',
+    'etc': '기타',
+    'F&B': 'F&B',
+    'tool': '도구',
+    'sound': '사운드',
+    'teaching_aids': '교육 자료',
+    'arcade_console': '아케이드 콘솔',
+    'electron': '전자',
+    'chemistry': '화학',
+    'electricity': '전기',
+    'jewelry': '주얼리',
+    'rubber&acrylic': '고무 및 아크릴',
+    'machine': '기계',
     // 재료 타입 매핑을 여기에 추가할 수 있습니다
   };
 

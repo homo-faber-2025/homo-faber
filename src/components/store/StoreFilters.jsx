@@ -1,109 +1,70 @@
 'use client';
 
-import styled from '@emotion/styled';
 import StoreSorting from '@/components/store/StoreSorting';
-import { convertCapacityNameToKorean } from '@/utils/converters';
-
-const FilterWrapper = styled.aside`
-  width: 100vw;
-  background-color: #FAF8DB;
-  padding: 13px 6px 12px;
-  border-top: 1.6px solid #363315;
-  display: flex;
-`;
-
-const TagsContainer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  align-items: flex-start;
-`;
-
-const TagsIndustryContainer = styled(TagsContainer)`
-  width: 123px;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-left: 16px;
-`
-const TagsMaterialContainer = styled(TagsContainer)`
-  width: 200px;
-  margin-right: 200px;
-  align-content: flex-start;
-`
-
-const Tag = styled.button`
-  border:none;
-  background: none;
-  padding: 0px 5px 2px 5px;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.2s;
-  font-size: 1.1rem;
-  font-family: var(--font-gothic);
-  font-weight: 800;
-  transform: scaleX(0.8);
-  transition: all 0.2s;
-  color: ${(props) => (props.active ? 'rgba(0,0,0,1)' : 'rgba(0,0,0,0.3)')};
-
-  &:hover{
-    color: black;
-  }
-`;
+import { convertCapacityNameToKorean, convertMaterialNameToKorean } from '@/utils/converters';
+import * as S from '@/styles/store/storeFillters.style';
 
 const StoreFilters = ({ allTags, selectedTags, onTagClick, sortBy, onSortChange }) => {
   if (!allTags) return null;
 
   return (
-    <FilterWrapper>
+    <S.FilterWrapper>
+
+      <StoreSorting sortBy={sortBy} onSortChange={onSortChange} />
 
       {/* 업종 필터 */}
-      <StoreSorting sortBy={sortBy} onSortChange={onSortChange} />
       {allTags.industry.length > 0 && (
         <>
-          <TagsIndustryContainer>
+          <S.TagsIndustryContainer>
             {allTags.industry.map((tag) => (
-              <Tag
+              <S.Tag
                 key={`industry-${tag}`}
                 active={selectedTags.industry.includes(tag)}
                 onClick={() => onTagClick('industry', tag)}
               >
-                {tag}
-              </Tag>
+                <S.TagTxt>
+                  {tag}
+                </S.TagTxt>
+              </S.Tag>
             ))}
-          </TagsIndustryContainer>
+          </S.TagsIndustryContainer>
         </>
       )}
 
       {/* 재료 필터 */}
       {allTags.material.length > 0 && (
         <>
-          <TagsMaterialContainer>
+          <S.TagsMaterialContainer>
             {allTags.material.map((tag) => (
-              <Tag
+              <S.Tag
                 key={`material-${tag}`}
                 active={selectedTags.material.includes(tag)}
                 onClick={() => onTagClick('material', tag)}
               >
-                {tag}
-              </Tag>
+                <S.TagTxt>
+                  {convertMaterialNameToKorean(tag)}
+                </S.TagTxt>
+              </S.Tag>
             ))}
-          </TagsMaterialContainer>
+          </S.TagsMaterialContainer>
         </>
       )}
 
       {/* 수용 인원 필터 */}
       <>
-        <TagsContainer>
-          <Tag
+        <S.TagsContainer>
+          <S.Tag
             key="capacity-소량 생산"
             active={selectedTags.capacity.includes('소량 생산')}
             onClick={() => onTagClick('capacity', '소량 생산')}
           >
-            {convertCapacityNameToKorean('소량 생산')}
-          </Tag>
-        </TagsContainer>
+            <S.TagTxt>
+              {convertCapacityNameToKorean('소량 생산')}
+            </S.TagTxt>
+          </S.Tag>
+        </S.TagsContainer>
       </>
-    </FilterWrapper>
+    </S.FilterWrapper>
   );
 };
 
