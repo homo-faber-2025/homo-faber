@@ -79,7 +79,7 @@ export const TableRow = styled.tr`
   display: flex;
   align-items: center;
   &:hover {
-    background-color: ##f9f9f9;
+    background-color: #f9f9f9;
     cursor: pointer;
   }
 `;
@@ -95,13 +95,15 @@ export const TableCell = styled.td`
 `;
 
 export const BookmarkCell = styled(TableCell)`
-  width: 23px;
+  width: 28px;
   padding: unset;
-  margin-left: -18px;
+  margin-left: -24px;
   text-align: center;
 
   ${theme.media.mobile} {
-    padding: unset;;
+    width: 27px;
+    margin-left: -22px;
+    padding: unset;
   }
 `;
 
@@ -123,10 +125,10 @@ export const BookmarkButton = styled.button`
 `;
 
 export const BookmarkIcon = styled.span`
-  font-size: 18px;
+  font-size: 1.3rem;
   color: ${props => props.isBookmarked ? '#ff6b6b' : '#ccc'};
   transition: all 0.2s ease;
-  
+
   &:hover {
     color: ${props => props.isBookmarked ? '#ff5252' : '#999'};
     transform: scale(1.2);
@@ -143,8 +145,7 @@ export const TitleCell = styled(TableCell)`
   ${theme.media.mobile} {
     width: 120px;
     overflow-x: auto;
-    padding-left: 10px;
-    background-color: var(--yellow);
+    padding-left: 7px;
     -ms-overflow-style: none;
     &::-webkit-scrollbar {
       display: none;
