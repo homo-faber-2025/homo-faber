@@ -56,10 +56,9 @@ export const StorePageName = styled.h1`
   ${theme.media.mobile} { 
     transform: rotate(0deg);
     transform-origin: top left;
-    top: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 1.2rem;
+    top: 22px;
+    left:10px;
+    font-size: 1rem;
   }
 `
 
