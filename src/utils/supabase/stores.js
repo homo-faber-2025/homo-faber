@@ -38,6 +38,7 @@ export async function getStoreById(id) {
       *,
       store_contacts(
         phone,
+        telephone,
         fax,
         email,
         website
@@ -96,6 +97,7 @@ export async function createStore(storeData) {
         .insert({
           store_id: storeId,
           phone: storeData.contacts.phone,
+          telephone: storeData.contacts.telephone,
           fax: storeData.contacts.fax,
           email: storeData.contacts.email,
           website: storeData.contacts.website,
@@ -301,6 +303,7 @@ export async function updateStore(storeId, storeData) {
         .insert({
           store_id: storeId,
           phone: storeData.contacts.phone,
+          telephone: storeData.contacts.telephone,
           fax: storeData.contacts.fax,
           email: storeData.contacts.email,
           website: storeData.contacts.website,

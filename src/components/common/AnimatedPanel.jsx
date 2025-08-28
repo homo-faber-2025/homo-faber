@@ -42,7 +42,7 @@ function AnimatedPanel({
   className
 }) {
   const pathname = usePathname();
-  const [right, setRight] = useState(null);
+  const [right, setRight] = useState('-81dvw');
   const [isVisible, setIsVisible] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [shouldAnimate, setShouldAnimate] = useState(false);
@@ -69,6 +69,8 @@ function AnimatedPanel({
       setIsVisible(true);
       // 컴포넌트가 로드되면 상태 업데이트
       setIsLoaded(true);
+      // 직접 URL 접근 시에도 애니메이션 작동하도록 설정
+      setShouldAnimate(true);
     } else {
       // 패널이 비활성화되면 애니메이션 완료 후 렌더링 중지
       const timer = setTimeout(() => {
@@ -84,7 +86,7 @@ function AnimatedPanel({
 
       return () => clearTimeout(timer);
     }
-  }, [isActiveRoute]);
+  }, [isActiveRoute, isClient]);
 
   // baseRoute에 따라 컴포넌트 렌더링 (조건부 렌더링)
   const renderComponent = useCallback(() => {
@@ -131,7 +133,7 @@ function AnimatedPanel({
       <SidePanelWrapper
         onClick={onWrapperClick}
         initial={{ right: '-81dvw' }}
-        animate={{ right: shouldAnimate && isClient ? right : '-81dvw' }}
+        animate={{ right: isClient ? right : '-81dvw' }}
         exit={{ right: '-81dvw' }}
         transition={{ duration: 1, ease: [0.2, 0, 0.4, 1] }}
         right={currentRight}

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import Editor from '@/components/interview/Editor';
 import StoreSelect from '@/components/interview/StoreSelect';
 import { checkAndCompressImage } from '@/utils/imageCompression';
 import { createClient } from '@/utils/supabase/client';
 import { useImageUpload } from '@/hooks/useImageUpload';
+import { useAuth } from '@/contexts/AuthContext';
 import styled from '@emotion/styled';
 
 const FormSection = styled.div`
@@ -128,6 +129,7 @@ const InterviewForm = ({
 
   // 이미지 업로드 훅 사용
   const { uploadImage, processImageForPreview } = useImageUpload({ bucket: 'gallery', maxSizeInMB: 0.5 });
+  const { user } = useAuth();
 
   // 초기 데이터가 있으면 폼에 설정
   useEffect(() => {
@@ -146,7 +148,7 @@ const InterviewForm = ({
     if (onSaveClick) {
       onSaveClick.current = handleSave;
     }
-  }, [onSaveClick, selectedStoreId, intro, coverImg, date, interviewee]);
+  }, [onSaveClick, selectedStoreId, intro, coverImg, date, interviewee, localCoverImage]);
 
   // 컴포넌트 언마운트 시 로컬 URL 정리
   useEffect(() => {
@@ -156,12 +158,6 @@ const InterviewForm = ({
       }
     };
   }, [coverImgPreview]);
-
-  const handleEditorChange = (api, event) => {
-    // onChange 이벤트가 너무 자주 호출되는 것을 방지
-    // 실제로는 Editor 내부에서 데이터를 관리하므로 여기서는 로깅만
-    console.log('Editor onChange:', { api, event });
-  };
 
   const handleImagePreview = async (event) => {
     const file = event.target.files[0];
@@ -175,10 +171,16 @@ const InterviewForm = ({
         const imageUrl = result.file.url;
         const originalFile = result.file.originalFile;
 
-        // 로컬 파일 저장
+        // 로컬 파일 저장 (업로드용)
+        console.log('저장할 원본 파일:', {
+          name: originalFile.name,
+          size: originalFile.size,
+          type: originalFile.type,
+          isFile: originalFile instanceof File
+        });
         setLocalCoverImage(originalFile);
 
-        // 프리뷰 설정
+        // 프리뷰 설정 (blob URL)
         setCoverImgPreview(imageUrl);
       } else {
         alert('이미지 처리에 실패했습니다: ' + result.error);
@@ -191,7 +193,7 @@ const InterviewForm = ({
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     try {
       if (!editorRef.current || !editorRef.current.isReady()) {
         console.error('Editor가 준비되지 않았습니다');
@@ -200,24 +202,44 @@ const InterviewForm = ({
 
       // 이미지 업로드 처리
       let coverImgUrl = coverImg;
+      console.log('=== 이미지 업로드 처리 ===');
+      console.log('기존 coverImg:', coverImg);
+      console.log('localCoverImage 존재:', !!localCoverImage);
+
       if (localCoverImage) {
+        console.log('새 이미지 업로드 시작...');
+
+        // admin 페이지에서는 인증 체크 제거
+        console.log('admin 페이지에서 이미지 업로드 진행');
+
         const result = await uploadImage(localCoverImage);
+        console.log('업로드 결과:', result);
+
         if (result.success) {
           coverImgUrl = result.file.url;
+          console.log('새 이미지 URL:', coverImgUrl);
         } else {
           throw new Error('커버 이미지 업로드 실패: ' + result.error);
         }
+      } else {
+        console.log('이미지 변경 없음, 기존 URL 사용:', coverImgUrl);
       }
 
       const outputData = await editorRef.current.save();
-      const interviewData = {
-        store_id: selectedStoreId,
-        contents: outputData.blocks,
-        intro: intro,
-        cover_img: coverImgUrl,
-        date: date,
-        interviewee: interviewee
-      };
+
+      // 업데이트할 데이터만 포함
+      const updateData = {};
+
+      if (selectedStoreId) updateData.store_id = selectedStoreId;
+      if (outputData.blocks) updateData.contents = outputData.blocks;
+      if (intro !== undefined) updateData.intro = intro;
+      if (coverImgUrl !== undefined) updateData.cover_img = coverImgUrl;
+      if (date) updateData.date = date;
+      if (interviewee) updateData.interviewee = interviewee;
+
+      console.log('=== 최종 저장 데이터 ===');
+      console.log('updateData:', updateData);
+      console.log('cover_img 값:', updateData.cover_img);
 
       if (!outputData) {
         console.error('저장된 데이터가 없습니다');
@@ -241,12 +263,12 @@ const InterviewForm = ({
         console.warn('블록 데이터가 비어있습니다');
       }
 
-      await onSave(interviewData);
+      await onSave(updateData);
     } catch (error) {
       console.error('저장 중 오류 발생:', error);
       alert('저장 중 오류가 발생했습니다.');
     }
-  };
+  }, [selectedStoreId, intro, coverImg, date, interviewee, localCoverImage, uploadImage, onSave]);
 
   if (isLoading) {
     return (
@@ -333,7 +355,7 @@ const InterviewForm = ({
             <h3>인터뷰 내용</h3>
             <Editor
               ref={editorRef}
-              onChange={handleEditorChange}
+
               data={mode === 'edit' && initialData?.contents ? { blocks: initialData.contents } : {}}
             />
           </EditorSection>

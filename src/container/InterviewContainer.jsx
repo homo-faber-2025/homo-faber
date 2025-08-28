@@ -7,11 +7,11 @@ import { motion } from 'motion/react';
 import { useInterviews } from '@/hooks/useInterviews';
 
 const InterviewWrapper = styled(motion.main)`
-  width: 100%
+  width: 100%;
   height: 100%;
   padding-left: 70px;
   padding-top: 27px;
-  z-index:3;
+  z-index: 3;
   background: #7C7C7C;
   background: ${(props) => props.gradientCss};
   background-size: 200% 200%;
@@ -24,6 +24,7 @@ const InterviewWrapper = styled(motion.main)`
   box-shadow: -8px 4px 10px 0 rgba(0,0,0,0.25);
   font-family: var(--font-gothic);
   pointer-events: auto;
+  position: relative;
 
   &::before {
     content: '';

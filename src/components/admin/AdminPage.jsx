@@ -51,7 +51,7 @@ const AdminPage = ({
       <AdminPageWrapper>
         <AdminHeader>
           <h1>{title}</h1>
-          <CreateButton onClick={handleCreateNew}>{createButtonText}</CreateButton>
+          <CreateButton onClick={handleCreateNew}>등록하기</CreateButton>
         </AdminHeader>
         <LoadingMessage>목록을 불러오는 중...</LoadingMessage>
       </AdminPageWrapper>
@@ -63,7 +63,7 @@ const AdminPage = ({
       <AdminPageWrapper>
         <AdminHeader>
           <h1>{title}</h1>
-          <CreateButton onClick={handleCreateNew}>{createButtonText}</CreateButton>
+          <CreateButton onClick={handleCreateNew}>등록하기</CreateButton>
         </AdminHeader>
         <ErrorMessage>
           오류가 발생했습니다: {error.message}

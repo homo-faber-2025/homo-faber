@@ -1,11 +1,5 @@
-import StoreCreateForm from '@/components/admin/StoreCreateForm';
+import StoreForm from '@/components/admin/StoreForm';
 
 export default function AdminCreatePage() {
-  return (
-    <div>
-      <h1>Store 관리</h1>
-
-      <StoreCreateForm />
-    </div>
-  );
+  return <StoreForm mode="create" />;
 }

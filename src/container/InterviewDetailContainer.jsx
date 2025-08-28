@@ -139,9 +139,6 @@ function InterviewDetailContainer({ }) {
   const pathname = usePathname();
   const [right, setRight] = useState('-100dvw');
   const interviewId = pathname.startsWith('/interview/') && pathname !== '/interview' ? pathname.split('/')[2] : null;
-
-
-
   const { interview, isLoading, error } = useInterviewDetail(interviewId);
   const { containerRef, scrollState, scrollToRatio } = useCustomScrollbar();
 

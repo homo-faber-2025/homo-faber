@@ -131,9 +131,15 @@ const InterviewEditPage = () => {
   const handleSave = async (interviewData) => {
     try {
       setIsSaving(true);
-      await updateInterview(interviewId, interviewData);
+      const updatedData = await updateInterview(interviewId, interviewData);
+      console.log('업데이트 완료, 새로운 데이터:', updatedData);
+
+      // 업데이트된 데이터로 상태 업데이트
+      setInterviewData(updatedData);
+
       alert('수정 완료');
-      router.push('/admin/interview');
+      // 목록 페이지로 이동하지 않고 현재 페이지에 머무름
+      // router.push('/admin/interview');
     } catch (error) {
       console.error('수정 중 오류 발생:', error);
       alert('수정 중 오류가 발생했습니다.');
