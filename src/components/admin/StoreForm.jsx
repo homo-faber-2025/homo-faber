@@ -16,17 +16,12 @@ import Button from '@/components/admin/Button';
 import * as S from '@/styles/admin/adminForm.style';
 
 const StoreForm = ({
-  mode,
+  mode = 'create',
   storeId,
-  onSave,
-  onBack,
-  isLoading,
-  onSaveClick // 부모에서 저장 버튼 클릭 시 호출할 함수
 }) => {
   // 기본값 설정
-  const formMode = mode || 'create';
-  const formStoreId = storeId || null;
-  const formIsLoading = isLoading || false;
+  const formMode = mode;
+  const formStoreId = storeId;
   const router = useRouter();
   const [error, setError] = useState(null);
   const [storeData, setStoreData] = useState(null);
@@ -92,12 +87,9 @@ const StoreForm = ({
     name: 'gallery',
   });
 
-  // 부모에서 저장 버튼 클릭 시 폼의 저장 함수를 호출할 수 있도록 ref 설정
   useEffect(() => {
-    if (onSaveClick) {
-      onSaveClick.current = () => handleSubmit(handleSave)();
-    }
-  }, [onSaveClick, handleSubmit]);
+    handleSubmit(handleSave)();
+  }, [handleSubmit]);
 
   // 컴포넌트 언마운트 시 로컬 URL 정리
   useEffect(() => {
@@ -221,11 +213,7 @@ const StoreForm = ({
   }, [formMode, formStoreId, setValue]);
 
   const handleBack = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      router.push('/admin/store');
-    }
+    router.push('/admin/store');
   };
 
   const handleImagePreview = async (file, type, index = null) => {
@@ -381,18 +369,15 @@ const StoreForm = ({
         router.push('/admin/store');
       }
 
-      if (onSave) {
-        onSave(storeData);
-      }
     } catch (error) {
       console.error('저장 중 오류 발생:', error);
       alert('저장 중 오류가 발생했습니다.');
     } finally {
       setIsSaving(false);
     }
-  }, [formMode, formStoreId, selectedIndustryTypes, selectedCapacityTypes, selectedMaterialTypes, localImages, uploadImage, watch, onSave, router]);
+  }, [formMode, formStoreId, selectedIndustryTypes, selectedCapacityTypes, selectedMaterialTypes, localImages, uploadImage, watch, router]);
 
-  if (formIsLoading || isDataLoading) {
+  if (isDataLoading) {
     return (
       <S.AdminFormWrapper>
         <S.Header>
