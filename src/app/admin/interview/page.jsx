@@ -23,13 +23,11 @@ const InterviewAdminPage = () => {
 
   return (
     <AdminPage
-      title="인터뷰"
-      createButtonText="새로 작성"
+      title="인터뷰 관리"
       createPath="/admin/interview"
       isLoading={isLoading}
       error={error}
       items={interviews}
-      emptyMessage="등록된 인터뷰가 없습니다. 새로 작성해보세요!"
       renderItem={renderInterviewItem}
       onDelete={deleteInterview}
     />

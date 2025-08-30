@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import styled from '@emotion/styled';
+import Button from '@/components/admin/Button';
 
 const AdminWrapper = styled.div`
   padding: 2rem;
@@ -52,7 +53,7 @@ const ContentArea = styled.div`
 export default function AdminLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [activeTab, setActiveTab] = useState('store');
+  const [activeTab, setActiveTab] = useState('');
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
@@ -64,24 +65,24 @@ export default function AdminLayout({ children }) {
       <AdminTitle>관리자 페이지</AdminTitle>
 
       <ButtonGroup>
-        <AdminButton
+        <Button
           active={activeTab === 'store'}
           onClick={() => handleTabClick('store')}
         >
           가게 관리
-        </AdminButton>
-        <AdminButton
+        </Button>
+        <Button
           active={activeTab === 'interview'}
           onClick={() => handleTabClick('interview')}
         >
           인터뷰 관리
-        </AdminButton>
-        <AdminButton
+        </Button>
+        <Button
           active={activeTab === 'word'}
           onClick={() => handleTabClick('word')}
         >
           단어 관리
-        </AdminButton>
+        </Button>
       </ButtonGroup>
 
       <ContentArea>

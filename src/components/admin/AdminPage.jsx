@@ -1,16 +1,6 @@
 import { useRouter } from 'next/navigation';
-import {
-  AdminPageWrapper,
-  AdminHeader,
-  CreateButton,
-  AdminList,
-  AdminCard,
-  AdminActions,
-  ActionButton,
-  LoadingMessage,
-  EmptyMessage,
-  ErrorMessage
-} from '@/styles/admin/AdminLayout';
+import * as S from '@/styles/admin/AdminLayout.style';
+import Button from './Button';
 
 const AdminPage = ({
   title,
@@ -18,14 +8,14 @@ const AdminPage = ({
   isLoading,
   error,
   items,
-  emptyMessage,
   renderItem,
   onDelete,
+  emptyMessage,
 }) => {
   const router = useRouter();
 
   const handleCreateNew = () => {
-    router.push(createPath);
+    router.push(`${createPath}/create`);
   };
 
   const handleEdit = (id) => {
@@ -48,63 +38,62 @@ const AdminPage = ({
 
   if (isLoading) {
     return (
-      <AdminPageWrapper>
-        <AdminHeader>
+      <S.AdminPageWrapper>
+        <S.AdminHeader>
           <h1>{title}</h1>
-          <CreateButton onClick={handleCreateNew}>등록하기</CreateButton>
-        </AdminHeader>
-        <LoadingMessage>목록을 불러오는 중...</LoadingMessage>
-      </AdminPageWrapper>
+          <Button className="create" onClick={handleCreateNew}>등록하기</Button>
+          <S.LoadingMessage>목록을 불러오는 중...</S.LoadingMessage>
+        </S.AdminHeader>
+      </S.AdminPageWrapper>
     );
   }
 
   if (error) {
     return (
-      <AdminPageWrapper>
-        <AdminHeader>
+      <S.AdminPageWrapper>
+        <S.AdminHeader>
           <h1>{title}</h1>
-          <CreateButton onClick={handleCreateNew}>등록하기</CreateButton>
-        </AdminHeader>
-        <ErrorMessage>
-          오류가 발생했습니다: {error.message}
-        </ErrorMessage>
-      </AdminPageWrapper>
+          <Button className="create" onClick={handleCreateNew}>등록하기</Button>
+          <S.ErrorMessage>
+            오류가 발생했습니다: {error.message}
+          </S.ErrorMessage>
+        </S.AdminHeader>
+      </S.AdminPageWrapper>
     );
   }
 
   return (
-    <AdminPageWrapper>
-      <AdminHeader>
+    <S.AdminPageWrapper>
+      <S.AdminHeader>
         <h1>{title}</h1>
-        <CreateButton onClick={handleCreateNew}>등록하기</CreateButton>
-      </AdminHeader>
-
+        <Button className="create" onClick={handleCreateNew}>등록하기</Button>
+      </S.AdminHeader>
       {items.length === 0 ? (
-        <EmptyMessage>{emptyMessage}</EmptyMessage>
+        <S.EmptyMessage>{emptyMessage}</S.EmptyMessage>
       ) : (
-        <AdminList>
+        <S.AdminList>
           {items.map((item) => (
-            <AdminCard key={item.id}>
+            <S.AdminCard key={item.id}>
               {renderItem(item)}
-              <AdminActions>
-                <ActionButton
+              <S.AdminActions>
+                <Button
                   className="edit"
                   onClick={() => handleEdit(item.id)}
                 >
                   수정
-                </ActionButton>
-                <ActionButton
+                </Button>
+                <Button
                   className="delete"
                   onClick={() => handleDelete(item.id)}
                 >
                   삭제
-                </ActionButton>
-              </AdminActions>
-            </AdminCard>
+                </Button>
+              </S.AdminActions>
+            </S.AdminCard>
           ))}
-        </AdminList>
+        </S.AdminList>
       )}
-    </AdminPageWrapper>
+    </S.AdminPageWrapper>
   );
 };
 

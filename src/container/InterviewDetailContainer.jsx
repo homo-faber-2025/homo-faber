@@ -86,13 +86,20 @@ const InterviewPerson = styled.h3`
   text-shadow: 3px 4px 5px rgba(245, 245, 245, 0.3), -0.1px -0.1px 6px rgba(100,92,92,0.2), 2px 2px 2px rgba(255,255,255,0.5);
 `
 const InterviewIntro = styled.h4`
-  font-weight: 500;
-  font-size: 1.2rem;
+  font-weight: 600;
+  font-size: 1.3rem;
   line-height: 1.75;
   word-break: keep-all;
-  padding: 0 20px;
+  padding: 0 20px 0 20px;
   text-align: center;
-  color:rgb(94, 94, 94);
+  color:rgb(34, 34, 34);
+  position: absolute;
+  bottom: 30px;
+  width: 80%;
+  // left: 0;
+  margin: 0 auto;
+  mix-blend-mode: multiply;
+  // text-shadow: 0px 0px 7px rgba(255,255,255,1);
 `
 
 const InterviewCoverImg = styled.img`

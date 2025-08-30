@@ -8,11 +8,12 @@ export const DetailWrapper = styled(motion.main)`
   height: 100dvh;
   padding: 0px 10px 20px 50px;
   background-color: #F7F7F7;
-  position: absolute;
+  position: ${(props) => props.isMobile ? 'fixed' : 'absolute'};
   right: ${(props) => props.isMobile ? 'unset' : props.right};
   bottom: ${(props) => props.isMobile ? props.bottom : 'unset'};
   top: ${(props) => props.isMobile ? 'unset' : '0px'};
-  z-index: 7;
+  left: ${(props) => props.isMobile ? '0px' : 'unset'};
+  z-index: 10;
   box-shadow: -2px 0 4px 0 rgba(79,75,31,0.57);
   display: flex;
   overflow: hidden;

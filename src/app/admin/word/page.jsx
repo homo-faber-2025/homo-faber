@@ -7,27 +7,21 @@ import styled from '@emotion/styled';
 
 const WordInfo = styled.div`
   flex: 1;
+  display: flex;
+  gap: 10px;
+  align-items: center;
 `;
 
 const WordName = styled.h3`
-  margin: 0 0 8px 0;
   color: #333;
   font-size: 1.2rem;
   font-weight: 600;
 `;
 
 const WordMeaning = styled.p`
-  margin: 0 0 8px 0;
   color: #666;
   font-size: 0.9rem;
   line-height: 1.4;
-`;
-
-const WordSource = styled.p`
-  margin: 0;
-  color: #888;
-  font-size: 0.8rem;
-  font-style: italic;
 `;
 
 const WordAdminPage = () => {
@@ -39,20 +33,16 @@ const WordAdminPage = () => {
       <WordMeaning>
         {word.meaning || '의미가 없습니다.'}
       </WordMeaning>
-      {word.source && (
-        <WordSource>출처: {word.source}</WordSource>
-      )}
     </WordInfo>
   );
 
   return (
     <AdminPage
-      title="단어"
+      title="단어 관리"
       createPath="/admin/word"
       isLoading={isLoading}
       error={error}
       items={words}
-      emptyMessage="등록된 단어가 없습니다. 새로 만들어보세요!"
       renderItem={renderWordItem}
       onDelete={deleteWord}
     />
