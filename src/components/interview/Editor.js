@@ -33,17 +33,39 @@ const Editor = forwardRef(({ onChange, data }, ref) => {
 
   useImperativeHandle(ref, () => ({
     save: async () => {
-      if (!instanceRef.current) throw new Error('Editor 인스턴스가 없습니다');
-      await instanceRef.current.isReady;
-      return await instanceRef.current.save();
+      if (!instanceRef.current) {
+        throw new Error('Editor 인스턴스가 없습니다');
+      }
+
+      try {
+        // Editor가 준비될 때까지 대기
+        await instanceRef.current.isReady;
+
+        // save 메서드 호출 (공식 문서에 따르면 Promise를 반환)
+        const result = await instanceRef.current.save();
+
+        // 공식 문서 형식에 맞는지 확인
+        if (result && typeof result === 'object' && 'blocks' in result) {
+          return result;
+        } else {
+          throw new Error('Editor save 결과가 올바른 형식이 아닙니다');
+        }
+      } catch (error) {
+        console.error('Editor save 중 오류:', error);
+        throw error;
+      }
     },
     clear: async () => {
       if (instanceRef.current) {
         await instanceRef.current.isReady;
-        instanceRef.current.clear();
+        if (typeof instanceRef.current.clear === 'function') {
+          instanceRef.current.clear();
+        }
       }
     },
-    isReady: () => instanceRef.current !== null
+    isReady: () => {
+      return instanceRef.current !== null && isInitializedRef.current;
+    }
   }));
 
   useEffect(() => {
@@ -64,7 +86,8 @@ const Editor = forwardRef(({ onChange, data }, ref) => {
 
     const initializeEditor = async () => {
       try {
-        console.log('Editor 초기화 데이터:', data);
+        console.log('Editor 초기화 시작, 데이터:', data);
+
         instanceRef.current = new EditorJS({
           holder: editorRef.current,
           autofocus: false,
@@ -95,11 +118,13 @@ const Editor = forwardRef(({ onChange, data }, ref) => {
                 }
               }
             },
-            marker: MarkerTool // 우리가 만든 MarkerTool 등록
+            marker: MarkerTool
           },
           inlineToolbar: ['link', 'marker', 'bold', 'italic'],
-          data: data || {},
+          // data는 이전에 저장된 데이터가 있을 때만 전달
+          data: data || { blocks: [] },
           onChange: (api, event) => {
+            console.log('Editor 내용 변경됨:', event);
             // onChange 이벤트 디바운싱
             if (onChangeTimeoutRef.current) {
               clearTimeout(onChangeTimeoutRef.current);
@@ -109,24 +134,15 @@ const Editor = forwardRef(({ onChange, data }, ref) => {
             }, 300); // 300ms 디바운싱
           },
           onReady: () => {
-            console.log('Editor.js 초기화 완료!');
+            isInitializedRef.current = true;
           }
         });
 
+        // Editor가 준비될 때까지 대기 (공식 문서 방식)
         await instanceRef.current.isReady;
-        console.log('Editor.js 준비 완료');
-        isInitializedRef.current = true;
 
-        // 초기 데이터가 있으면 설정
-        if (data && data.blocks && data.blocks.length > 0) {
-          try {
-            await instanceRef.current.render(data);
-          } catch (error) {
-            console.warn('Editor 초기 데이터 설정 중 오류:', error);
-          }
-        }
       } catch (error) {
-        console.error('Editor 초기화 오류:', error);
+        isInitializedRef.current = false;
       }
     };
 
@@ -150,7 +166,7 @@ const Editor = forwardRef(({ onChange, data }, ref) => {
         isInitializedRef.current = false;
       }
     };
-  }, []); // data 의존성 제거하여 불필요한 재초기화 방지
+  }, [data]); // data 의존성 유지
 
   return (
     <EditorWrapper>

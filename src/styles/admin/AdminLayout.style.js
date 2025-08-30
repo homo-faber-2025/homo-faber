@@ -20,7 +20,7 @@ export const AdminHeader = styled.div`
   h1 {
     margin: 0;
     color: #333;
-    font-size: 2rem;
+    font-size: 1.7rem;
   }
 `;
 

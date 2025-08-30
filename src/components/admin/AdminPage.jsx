@@ -1,5 +1,5 @@
 import { useRouter } from 'next/navigation';
-import * as S from '@/styles/admin/AdminLayout.style';
+import * as S from '@/styles/admin/adminLayout.style';
 import Button from './Button';
 
 const AdminPage = ({

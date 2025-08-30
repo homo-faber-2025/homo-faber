@@ -108,25 +108,14 @@ const InterviewCreatePage = () => {
   };
 
   return (
-    <AdminInterviewCreatePage>
-      <Header>
-        <h1>새 인터뷰 작성</h1>
-        <Actions>
-          <BackBtn onClick={handleBack}>목록으로</BackBtn>
-          <SaveBtn onClick={handleSaveClick} disabled={isSaving}>
-            {isSaving ? '저장 중...' : '저장'}
-          </SaveBtn>
-        </Actions>
-      </Header>
+    <InterviewForm
+      mode="create"
+      onSave={handleSave}
+      onBack={handleBack}
+      isSaving={isSaving}
+      onSaveClick={saveFormRef}
+    />
 
-      <InterviewForm
-        mode="create"
-        onSave={handleSave}
-        onBack={handleBack}
-        isSaving={isSaving}
-        onSaveClick={saveFormRef}
-      />
-    </AdminInterviewCreatePage>
   );
 };
 

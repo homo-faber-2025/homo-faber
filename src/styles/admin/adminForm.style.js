@@ -2,14 +2,8 @@ import styled from '@emotion/styled';
 
 export const AdminFormWrapper = styled.div`
   padding: 20px;
-  // position: absolute;
-  // top: 0;
-  // left: 0;
-  // width: 100dvw;
-  // height: 100dvh;
   background: white;
   z-index: 10;
-  // overflow-y: auto;
   font-family: var(--font-gothic);
 `;
 
@@ -24,8 +18,8 @@ export const Header = styled.div`
   h1 {
     margin: 0;
     color: #333;
-    font-size: 1.8rem;
-    font-weight: 500;
+    font-size: 1.7rem;
+    font-weight: 700;
   }
 `;
 

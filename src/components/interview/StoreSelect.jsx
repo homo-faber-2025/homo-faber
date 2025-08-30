@@ -13,6 +13,12 @@ const Label = styled.label`
   font-weight: 500;
   color: #333;
   font-size: 14px;
+
+  &::after {
+    content: ' *';
+    color: #dc3545;
+    font-weight: bold;
+  }
 `;
 
 const Select = styled.select`

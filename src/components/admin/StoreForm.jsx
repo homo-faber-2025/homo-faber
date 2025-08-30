@@ -13,7 +13,7 @@ import {
 } from '@/utils/supabase/stores';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import Button from '@/components/admin/Button';
-import * as S from '@/styles/admin/storeForm.style';
+import * as S from '@/styles/admin/adminForm.style';
 
 const StoreForm = ({
   mode,
