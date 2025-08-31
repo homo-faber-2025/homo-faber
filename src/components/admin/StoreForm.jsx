@@ -51,7 +51,7 @@ const StoreForm = ({
   const [isDataLoading, setIsDataLoading] = useState(false);
 
   // 이미지 업로드 훅 사용
-  const { uploadImage, processImageForPreview } = useImageUpload({ bucket: 'gallery', maxSizeInMB: 1 });
+  const { uploadImage, processImageForPreview } = useImageUpload({ bucket: 'gallery', maxSizeInMB: 0.5 });
 
   // react-hook-form 설정
   const {
