@@ -9,6 +9,7 @@ import {
   getMaterialTypes,
 } from '@/utils/supabase/stores';
 import { useImageUpload } from '@/hooks/useImageUpload';
+import AddressSearch from '@/components/admin/AddressSearch';
 
 export default function StoreCreateForm() {
   const [loading, setLoading] = useState(false);
@@ -18,6 +19,7 @@ export default function StoreCreateForm() {
   const [cardImgPreview, setCardImgPreview] = useState('');
   const [thumbnailImgPreview, setThumbnailImgPreview] = useState('');
   const [galleryPreviews, setGalleryPreviews] = useState({});
+  const [address, setAddress] = useState('');
 
   // 이미지 업로드 훅 사용
   const { uploadImage } = useImageUpload({ bucket: 'gallery', maxSizeInMB: 1 });
@@ -35,6 +37,8 @@ export default function StoreCreateForm() {
       name: '',
       description: '',
       address: '',
+      latitude: null,
+      longitude: null,
       card_img: '',
       thumbnail_img: '',
       contacts: {
@@ -216,12 +220,27 @@ export default function StoreCreateForm() {
 
           <div>
             <label htmlFor="address">주소 *</label>
-            <input
-              id="address"
-              {...register('address', {
-                required: '주소는 필수 입력 항목입니다.',
-              })}
-            />
+            <div>
+              <AddressSearch
+                setValue={setValue}
+                register={register}
+                setAddress={setAddress}
+              />
+              {errors.address && <span>{errors.address.message}</span>}
+
+              {/* 좌표 정보 표시 */}
+              {/* {watch('latitude') && watch('longitude') && (
+                <div
+                  style={{
+                    fontSize: '12px',
+                    color: '#666',
+                    marginTop: '4px',
+                  }}
+                >
+                  위도: {watch('latitude')}, 경도: {watch('longitude')}
+                </div>
+              )} */}
+            </div>
           </div>
         </div>
 
