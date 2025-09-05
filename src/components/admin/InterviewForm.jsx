@@ -62,13 +62,13 @@ const InterviewForm = ({
   }, [initialData, mode, setValue]);
 
 
-  useEffect(() => {
-    return () => {
-      if (coverImgPreview?.startsWith('blob:')) {
-        URL.revokeObjectURL(coverImgPreview);
-      }
-    };
-  }, [coverImgPreview]);
+  // useEffect(() => {
+  //   return () => {
+  //     if (coverImgPreview?.startsWith('blob:')) {
+  //       URL.revokeObjectURL(coverImgPreview);
+  //     }
+  //   };
+  // }, [coverImgPreview]);
 
   const handleImagePreview = async (event) => {
     const file = event.target.files[0];
@@ -107,7 +107,9 @@ const InterviewForm = ({
         return;
       }
 
-      let coverImgUrl = '';
+      const outputData = await editorRef.current.save();
+
+      let coverImgUrl = coverImgPreview;
       if (localCoverImage) {
         try {
           let coverImg = await uploadImage(localCoverImage);
@@ -119,7 +121,7 @@ const InterviewForm = ({
         }
       }
 
-      const outputData = await editorRef.current.save();
+
 
       const updateData = {
         store_id: selectedStoreId,

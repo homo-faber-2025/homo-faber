@@ -48,14 +48,6 @@ const Editor = forwardRef(({ data }, ref) => {
           holder: 'editorjs',
           placeholder: '내용을 입력하세요...',
           tools: {
-            header: {
-              class: Header,
-              config: {
-                placeholder: '제목을 입력하세요',
-                levels: [1, 2, 3, 4, 5, 6],
-                defaultLevel: 3
-              }
-            },
             image: {
               class: ImageTool,
               config: {
