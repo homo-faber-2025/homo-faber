@@ -11,6 +11,12 @@ export default function AddressSearch({ register, setValue, setAddress, fieldPre
       return;
     }
 
+    // Kakao API 키가 없으면 로드하지 않음
+    if (!process.env.NEXT_PUBLIC_KAKAO_JS_KEY) {
+      console.warn('Kakao API 키가 설정되지 않았습니다. NEXT_PUBLIC_KAKAO_JS_KEY 환경변수를 확인해주세요.');
+      return;
+    }
+
     // 이미 스크립트가 로드 중인지 확인
     const existingScript = document.querySelector('script[src*="dapi.kakao.com"]');
     if (existingScript) {
@@ -26,12 +32,16 @@ export default function AddressSearch({ register, setValue, setAddress, fieldPre
     }
 
     const script = document.createElement('script');
-    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JS_KEY}&libraries=services&autoload=false`;
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JS_KEY}&libraries=services&autoload=false`;
 
     script.onload = () => {
-      window.kakao.maps.load(() => {
-        setKakaoLoaded(!!window.kakao.maps.services);
-      });
+      if (window.kakao?.maps?.load) {
+        window.kakao.maps.load(() => {
+          setKakaoLoaded(!!window.kakao.maps.services);
+        });
+      } else {
+        console.error('Kakao Maps API가 제대로 로드되지 않았습니다.');
+      }
     };
 
     script.onerror = () => {
