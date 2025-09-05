@@ -14,6 +14,7 @@ import {
 import { useImageUpload } from '@/hooks/useImageUpload';
 import Button from '@/components/admin/Button';
 import * as S from '@/styles/admin/adminForm.style';
+import AddressSearch from '@/components/admin/AddressSearch';
 
 const StoreForm = ({
   mode = 'create',
@@ -26,6 +27,7 @@ const StoreForm = ({
   const [error, setError] = useState(null);
   const [storeData, setStoreData] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [address, setAddress] = useState('');
 
   // 이미지 관련 상태
   const [cardImgPreview, setCardImgPreview] = useState('');
@@ -50,6 +52,9 @@ const StoreForm = ({
 
   const [isDataLoading, setIsDataLoading] = useState(false);
 
+  // move 필드 상태 감시
+
+
   // 이미지 업로드 훅 사용
   const { uploadImage, processImageForPreview } = useImageUpload({ bucket: 'gallery', maxSizeInMB: 0.5 });
 
@@ -73,10 +78,19 @@ const StoreForm = ({
       fax: '',
       email: '',
       website: '',
+      latitude: null,
+      longitude: null,
+      close: false,
+      move: false,
+      move_address: '',
+      move_latitude: null,
+      move_longitude: null,
       gallery: [],
     },
     mode: 'onChange', // 실시간 유효성 검사
   });
+
+  const moveValue = watch('move');
 
   const {
     fields: galleryFields,
@@ -121,6 +135,13 @@ const StoreForm = ({
           setValue('name', store.name || '');
           setValue('description', store.description || '');
           setValue('address', store.address || '');
+          setValue('latitude', store.latitude || null);
+          setValue('longitude', store.longitude || null);
+          setValue('close', store.close || false);
+          setValue('move', store.move || false);
+          setValue('move_address', store.move_address || '');
+          setValue('move_latitude', store.move_latitude || null);
+          setValue('move_longitude', store.move_longitude || null);
 
           // keyword를 텍스트로 변환
           if (store.keyword && Array.isArray(store.keyword)) {
@@ -345,6 +366,13 @@ const StoreForm = ({
         name: formData.name,
         description: formData.description,
         address: formData.address,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        close: formData.close,
+        move: formData.move,
+        move_address: formData.move_address,
+        move_latitude: formData.move_latitude,
+        move_longitude: formData.move_longitude,
         keyword: processedKeyword,
         card_img: cardImgUrl || (formMode === 'edit' ? storeData?.card_img : ''),
         thumbnail_img: thumbnailImgUrl || (formMode === 'edit' ? storeData?.thumbnail_img : ''),
@@ -440,14 +468,10 @@ const StoreForm = ({
 
             <S.FormField>
               <label htmlFor="address">주소 <span style={{ color: 'red' }}>*</span></label>
-              <input
-                id="address"
-                type="text"
-                {...register('address', {
-                  required: '주소는 필수 입력값입니다.',
-                  minLength: { value: 1, message: '주소를 입력해주세요.' }
-                })}
-                placeholder="(필수) 가게 주소를 입력하세요"
+              <AddressSearch
+                setValue={setValue}
+                register={register}
+                setAddress={setAddress}
               />
               {errors.address && (
                 <S.ErrorInputMessage>
@@ -455,6 +479,45 @@ const StoreForm = ({
                 </S.ErrorInputMessage>
               )}
             </S.FormField>
+
+            <S.FormField>
+              <label>상태</label>
+              <div style={{ display: 'flex', gap: '20px', marginTop: '8px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    {...register('close')}
+                    style={{ width: '16px', height: '16px' }}
+                  />
+                  <span>폐업</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    {...register('move')}
+                    style={{ width: '16px', height: '16px' }}
+                  />
+                  <span>이전</span>
+                </label>
+              </div>
+            </S.FormField>
+
+            {moveValue && (
+              <S.FormField>
+                <label htmlFor="move_address">이전 주소 <span style={{ color: 'red' }}>*</span></label>
+                <AddressSearch
+                  setValue={setValue}
+                  register={register}
+                  setAddress={(address) => setValue('move_address', address)}
+                  fieldPrefix="move_"
+                />
+                {errors.move_address && (
+                  <S.ErrorInputMessage>
+                    {errors.move_address.message}
+                  </S.ErrorInputMessage>
+                )}
+              </S.FormField>
+            )}
 
             <S.FormField>
               <label htmlFor="keyword">키워드</label>

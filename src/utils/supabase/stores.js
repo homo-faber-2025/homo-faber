@@ -72,13 +72,19 @@ export async function createStore(storeData) {
     console.log('Creating store with data:', storeData);
     console.log('Keyword data:', storeData.keyword);
 
-    // 1. stores 테이블에 기본 정보 삽입
     const { data: store, error: storeError } = await supabase
       .from('stores')
       .insert({
         name: storeData.name,
         description: storeData.description,
         address: storeData.address,
+        latitude: storeData.latitude,
+        longitude: storeData.longitude,
+        close: storeData.close,
+        move: storeData.move,
+        move_address: storeData.move_address,
+        move_latitude: storeData.move_latitude,
+        move_longitude: storeData.move_longitude,
         keyword: storeData.keyword || null,
         card_img: storeData.card_img || null,
         thumbnail_img: storeData.thumbnail_img || null,
@@ -269,13 +275,19 @@ export async function updateStore(storeId, storeData) {
   const supabase = createClient();
 
   try {
-    // 1. stores 테이블 업데이트
     const { data: store, error: storeError } = await supabase
       .from('stores')
       .update({
         name: storeData.name,
         description: storeData.description,
         address: storeData.address,
+        latitude: storeData.latitude,
+        longitude: storeData.longitude,
+        close: storeData.close,
+        move: storeData.move,
+        move_address: storeData.move_address,
+        move_latitude: storeData.move_latitude,
+        move_longitude: storeData.move_longitude,
         keyword: storeData.keyword || null,
         card_img: storeData.card_img || null,
         thumbnail_img: storeData.thumbnail_img || null,
@@ -287,9 +299,7 @@ export async function updateStore(storeId, storeData) {
 
     if (storeError) throw storeError;
 
-    // 2. store_contacts 업데이트 (기존 데이터 삭제 후 새로 삽입)
     if (storeData.contacts) {
-      // 기존 연락처 삭제
       const { error: deleteContactsError } = await supabase
         .from('store_contacts')
         .delete()
@@ -297,7 +307,6 @@ export async function updateStore(storeId, storeData) {
 
       if (deleteContactsError) throw deleteContactsError;
 
-      // 새 연락처 삽입
       const { error: contactsError } = await supabase
         .from('store_contacts')
         .insert({
@@ -312,7 +321,6 @@ export async function updateStore(storeId, storeData) {
       if (contactsError) throw contactsError;
     }
 
-    // 3. store_capacity 업데이트 (기존 데이터 삭제 후 새로 삽입)
     if (storeData.capacities) {
       // 기존 capacity 삭제
       const { error: deleteCapacityError } = await supabase
