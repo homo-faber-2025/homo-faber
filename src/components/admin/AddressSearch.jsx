@@ -34,18 +34,31 @@ export default function AddressSearch({ register, setValue, setAddress, fieldPre
     const script = document.createElement('script');
     script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_JS_KEY}&libraries=services&autoload=false`;
 
+    console.log('Kakao 스크립트 로드 시작:', script.src);
+    console.log('API 키 존재 여부:', !!process.env.NEXT_PUBLIC_KAKAO_JS_KEY);
+
     script.onload = () => {
+      console.log('Kakao 스크립트 로드 완료');
       if (window.kakao?.maps?.load) {
         window.kakao.maps.load(() => {
+          console.log('Kakao Maps API 초기화 완료');
           setKakaoLoaded(!!window.kakao.maps.services);
         });
       } else {
         console.error('Kakao Maps API가 제대로 로드되지 않았습니다.');
+        console.error('window.kakao 상태:', window.kakao);
       }
     };
 
-    script.onerror = () => {
-      console.error('Kakao 스크립트 로드 실패');
+    script.onerror = (error) => {
+      console.error('Kakao 스크립트 로드 실패:', error);
+      console.error('에러 상세 정보:', {
+        message: error.message,
+        filename: error.filename,
+        lineno: error.lineno,
+        colno: error.colno,
+        stack: error.stack
+      });
     };
 
     document.head.appendChild(script);
