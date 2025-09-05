@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, useFieldArray } from 'react-hook-form';
+import Image from 'next/image';
 import {
   createStore,
   updateStore,
@@ -708,7 +709,13 @@ const StoreForm = ({
               </Button>
               {cardImgPreview && (
                 <div className="image-preview">
-                  <img src={cardImgPreview} alt="카드 이미지 미리보기" />
+                  <Image
+                    src={cardImgPreview}
+                    alt="카드 이미지 미리보기"
+                    width={300}
+                    height={200}
+                    style={{ objectFit: 'cover' }}
+                  />
                 </div>
               )}
             </S.FormField>
@@ -730,7 +737,13 @@ const StoreForm = ({
               </Button>
               {thumbnailImgPreview && (
                 <div className="image-preview">
-                  <img src={thumbnailImgPreview} alt="썸네일 이미지 미리보기" />
+                  <Image
+                    src={thumbnailImgPreview}
+                    alt="썸네일 이미지 미리보기"
+                    width={300}
+                    height={200}
+                    style={{ objectFit: 'cover' }}
+                  />
                 </div>
               )}
             </S.FormField>
@@ -853,9 +866,12 @@ const StoreForm = ({
                         </div>
                       ) : (
                         <div className="image-preview-container">
-                          <img
+                          <Image
                             src={galleryPreviews[index]}
                             alt={`갤러리 이미지 ${index + 1}`}
+                            width={200}
+                            height={150}
+                            style={{ objectFit: 'cover' }}
                           />
                         </div>
                       )}
