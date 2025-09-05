@@ -19,8 +19,7 @@ export async function createWord(wordData) {
         name: wordData.name,
         meaning: wordData.meaning,
         source: wordData.source,
-        img: wordData.img || [],
-        created_at: new Date().toISOString()
+        img: wordData.img || []
       }
     ])
     .select()
@@ -111,10 +110,7 @@ export async function updateWord(wordId, updateData) {
 
   const { data, error } = await supabase
     .from('word')
-    .update({
-      ...updateData,
-      updated_at: new Date().toISOString()
-    })
+    .update(updateData)
     .eq('id', wordId)
     .select()
     .single();
@@ -164,8 +160,7 @@ export async function addImageToWord(wordId, imageUrl) {
   const { data, error } = await supabase
     .from('word')
     .update({
-      img: updatedImages,
-      updated_at: new Date().toISOString()
+      img: updatedImages
     })
     .eq('id', wordId)
     .select()
@@ -199,8 +194,7 @@ export async function removeImageFromWord(wordId, imageUrl) {
   const { data, error } = await supabase
     .from('word')
     .update({
-      img: updatedImages,
-      updated_at: new Date().toISOString()
+      img: updatedImages
     })
     .eq('id', wordId)
     .select()
