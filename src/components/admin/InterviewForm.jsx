@@ -19,7 +19,7 @@ const InterviewForm = ({
   isLoading = false,
   onSaveClick
 }) => {
-  const formMode = mode || 'create';
+  const formMode = mode;
   const router = useRouter();
   const [selectedStoreId, setSelectedStoreId] = useState('');
   const [coverImgPreview, setCoverImgPreview] = useState('');
@@ -27,12 +27,10 @@ const InterviewForm = ({
   const [localCoverImage, setLocalCoverImage] = useState(null);
   const editorRef = useRef(null);
 
-  // react-hook-form 설정
   const {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -44,13 +42,15 @@ const InterviewForm = ({
     mode: 'onChange',
   });
 
-  // 이미지 업로드 훅 사용
-  const { uploadImage, processImageForPreview } = useImageUpload({ bucket: 'gallery', maxSizeInMB: 0.5 });
+  const { uploadImage, processImageForPreview } = useImageUpload({
+    bucket: 'gallery',
+    maxSizeInMB: 0.5
+  });
 
-  // 초기 데이터가 있으면 폼에 설정
+  console.log(initialData);
+
   useEffect(() => {
     if (initialData && mode === 'edit') {
-      console.log('Setting initial data:', initialData);
       const storeId = initialData.store_id ? String(initialData.store_id) : '';
       setSelectedStoreId(storeId);
       setValue('intro', initialData.intro || '');
@@ -62,10 +62,9 @@ const InterviewForm = ({
   }, [initialData, mode, setValue]);
 
 
-  // 컴포넌트 언마운트 시 로컬 URL 정리
   useEffect(() => {
     return () => {
-      if (coverImgPreview && coverImgPreview.startsWith('blob:')) {
+      if (coverImgPreview?.startsWith('blob:')) {
         URL.revokeObjectURL(coverImgPreview);
       }
     };
@@ -83,13 +82,10 @@ const InterviewForm = ({
         const imageUrl = result.file.url;
         const originalFile = result.file.originalFile;
 
-        // 로컬 파일 저장 (업로드용)
         setLocalCoverImage(originalFile);
-
-        // 프리뷰 설정 (blob URL)
         setCoverImgPreview(imageUrl);
       } else {
-        alert('이미지 처리에 실패했습니다: ' + result.error);
+        alert(`이미지 처리에 실패했습니다: ${result.error}`);
       }
     } catch (error) {
       console.error('이미지 처리 실패:', error);
@@ -101,23 +97,21 @@ const InterviewForm = ({
 
   const handleSave = useCallback(async (formData) => {
     try {
-      // 필수 필드 검증 - selectedStoreId가 없으면 경고
-      if (!selectedStoreId || selectedStoreId === '' || selectedStoreId === 'undefined') {
+      if (!selectedStoreId) {
         alert('연결할 스토어를 선택해주세요.');
         return;
       }
 
-      if (!editorRef.current || !editorRef.current.isReady()) {
+      if (!editorRef.current?.isReady()) {
         console.error('Editor가 준비되지 않았습니다');
         return;
       }
 
-      // 이미지 업로드 처리
-      let coverImgUrl = formData.coverImg;
+      let coverImgUrl = '';
       if (localCoverImage) {
         try {
-          const uploadedUrl = await uploadImage(localCoverImage);
-          coverImgUrl = uploadedUrl;
+          let coverImg = await uploadImage(localCoverImage);
+          coverImgUrl = coverImg.file.url;
         } catch (error) {
           console.error('이미지 업로드 실패:', error);
           alert('이미지 업로드에 실패했습니다.');
@@ -127,13 +121,12 @@ const InterviewForm = ({
 
       const outputData = await editorRef.current.save();
 
-      // 업데이트할 데이터만 포함
       const updateData = {
         store_id: selectedStoreId,
-        intro: formData.intro || null, // 빈 문자열일 때 null로 변환
-        cover_img: coverImgUrl || null, // 빈 문자열일 때 null로 변환
-        date: formData.date || null, // 빈 문자열일 때 null로 변환
-        interviewee: formData.interviewee || null, // 빈 문자열일 때 null로 변환
+        intro: formData.intro || null,
+        cover_img: coverImgUrl || null,
+        date: formData.date || null,
+        interviewee: formData.interviewee || null,
       };
 
       if (outputData && outputData.blocks) {
@@ -147,7 +140,6 @@ const InterviewForm = ({
     }
   }, [selectedStoreId, localCoverImage, uploadImage, onSave]);
 
-  // 부모에서 저장 버튼 클릭 시 폼의 저장 함수를 호출할 수 있도록 ref 설정
   useEffect(() => {
     if (onSaveClick) {
       onSaveClick.current = () => handleSubmit(handleSave)();
@@ -261,13 +253,11 @@ const InterviewForm = ({
           </div>
 
           <S.FormField>
-            <S.FormField>
-              <h3>인터뷰 내용</h3>
-              <Editor
-                ref={editorRef}
-                data={mode === 'edit' && initialData?.contents ? { blocks: initialData.contents } : { blocks: [] }}
-              />
-            </S.FormField>
+            <h3>인터뷰 내용</h3>
+            <Editor
+              ref={editorRef}
+              data={mode === 'edit' && initialData?.contents ? { blocks: initialData.contents } : { blocks: [] }}
+            />
           </S.FormField>
         </S.FormGrid>
       </S.FormSection>

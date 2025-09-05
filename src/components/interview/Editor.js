@@ -76,11 +76,9 @@ const Editor = forwardRef(({ data }, ref) => {
             marker: MarkerTool
           },
           inlineToolbar: ['link', 'marker', 'bold', 'italic'],
-          // data는 이전에 저장된 데이터가 있을 때만 전달
           data: data || { blocks: [] },
         });
 
-        // Editor가 완전히 초기화될 때까지 기다림
         await editor.isReady;
         editorInstanceRef.current = editor;
       } catch (error) {
@@ -100,7 +98,7 @@ const Editor = forwardRef(({ data }, ref) => {
         editorInstanceRef.current = null;
       }
     };
-  }, [data]); // data 의존성 유지
+  }, [data]);
 
   return (
     <EditorWrapper>
