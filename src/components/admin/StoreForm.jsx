@@ -60,6 +60,7 @@ const StoreForm = ({
     watch,
     register,
     handleSubmit,
+    trigger,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -86,10 +87,6 @@ const StoreForm = ({
     control,
     name: 'gallery',
   });
-
-  useEffect(() => {
-    handleSubmit(handleSave)();
-  }, [handleSubmit]);
 
   // 컴포넌트 언마운트 시 로컬 URL 정리
   useEffect(() => {
@@ -202,6 +199,11 @@ const StoreForm = ({
         setCapacityTypes(capacityData);
         setMaterialTypes(materialData);
 
+        // 폼 유효성 검사 트리거 (edit 모드에서만)
+        if (formMode === 'edit') {
+          await trigger(['name', 'address']);
+        }
+
       } catch (err) {
         setError(err.message);
       } finally {
@@ -292,11 +294,11 @@ const StoreForm = ({
       setIsSaving(true);
 
       // 이미지 업로드 처리
-      let cardImgUrl = '';
-      let thumbnailImgUrl = '';
+      let cardImgUrl = cardImgPreview; // 기존 이미지 URL 유지
+      let thumbnailImgUrl = thumbnailImgPreview; // 기존 이미지 URL 유지
       const galleryUrls = {};
 
-      // 카드 이미지 업로드
+      // 카드 이미지 업로드 (새로 선택된 경우만)
       if (localImages.card_img) {
         const result = await uploadImage(localImages.card_img);
         if (result.success) {
@@ -306,7 +308,7 @@ const StoreForm = ({
         }
       }
 
-      // 썸네일 이미지 업로드
+      // 썸네일 이미지 업로드 (새로 선택된 경우만)
       if (localImages.thumbnail_img) {
         const result = await uploadImage(localImages.thumbnail_img);
         if (result.success) {
@@ -332,20 +334,20 @@ const StoreForm = ({
       const currentGallery = watch('gallery');
       const processedGallery = currentGallery.map((item, index) => ({
         ...item,
-        image_url: galleryUrls[index] || item.image_url || '',
+        image_url: galleryUrls[index] || item.image_url || galleryPreviews[index] || '',
         order_num: index + 1, // 현재 순서에 맞게 order_num 업데이트
       })).filter((item) => item.image_url);
 
       // keyword 처리
       const processedKeyword = formData.keyword ? formData.keyword.split(',').map(k => k.trim()).filter(k => k) : [];
 
-      const storeData = {
+      const updateData = {
         name: formData.name,
         description: formData.description,
         address: formData.address,
         keyword: processedKeyword,
-        card_img: cardImgUrl,
-        thumbnail_img: thumbnailImgUrl,
+        card_img: cardImgUrl || (formMode === 'edit' ? storeData?.card_img : ''),
+        thumbnail_img: thumbnailImgUrl || (formMode === 'edit' ? storeData?.thumbnail_img : ''),
         contacts: {
           phone: formData.phone,
           telephone: formData.telephone,
@@ -360,11 +362,11 @@ const StoreForm = ({
       };
 
       if (formMode === 'create') {
-        await createStore(storeData);
+        await createStore(updateData);
         alert('스토어가 성공적으로 등록되었습니다.');
         router.push('/admin/store');
       } else {
-        await updateStore(formStoreId, storeData);
+        await updateStore(formStoreId, updateData);
         alert('수정 완료');
         router.push('/admin/store');
       }
