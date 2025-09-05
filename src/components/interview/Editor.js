@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
 import EditorJS from '@editorjs/editorjs';
 import Header from '@editorjs/header';
 import ImageTool from '@editorjs/image';
 import styled from '@emotion/styled';
-
 import { useImageUpload } from '@/hooks/useImageUpload';
 import MarkerTool from '@/utils/markerTool';
 
@@ -20,11 +19,8 @@ const EditorWrapper = styled.div`
   }
 `;
 
-const Editor = forwardRef(({ onChange, data }, ref) => {
-  const editorRef = useRef(null);
-  const instanceRef = useRef(null);
-  const isInitializedRef = useRef(false);
-  const onChangeTimeoutRef = useRef(null);
+const Editor = forwardRef(({ data }, ref) => {
+  const editorInstanceRef = useRef(null);
 
   const { uploadImage } = useImageUpload({
     bucket: 'gallery',
@@ -33,64 +29,23 @@ const Editor = forwardRef(({ onChange, data }, ref) => {
 
   useImperativeHandle(ref, () => ({
     save: async () => {
-      if (!instanceRef.current) {
-        throw new Error('Editor 인스턴스가 없습니다');
+      if (editorInstanceRef.current) {
+        return await editorInstanceRef.current.save();
       }
-
-      try {
-        // Editor가 준비될 때까지 대기
-        await instanceRef.current.isReady;
-
-        // save 메서드 호출 (공식 문서에 따르면 Promise를 반환)
-        const result = await instanceRef.current.save();
-
-        // 공식 문서 형식에 맞는지 확인
-        if (result && typeof result === 'object' && 'blocks' in result) {
-          return result;
-        } else {
-          throw new Error('Editor save 결과가 올바른 형식이 아닙니다');
-        }
-      } catch (error) {
-        console.error('Editor save 중 오류:', error);
-        throw error;
-      }
-    },
-    clear: async () => {
-      if (instanceRef.current) {
-        await instanceRef.current.isReady;
-        if (typeof instanceRef.current.clear === 'function') {
-          instanceRef.current.clear();
-        }
-      }
+      throw new Error('Editor is not ready');
     },
     isReady: () => {
-      return instanceRef.current !== null && isInitializedRef.current;
+      return editorInstanceRef.current !== null;
     }
   }));
 
   useEffect(() => {
-    if (!editorRef.current) return;
+    let editor = null;
 
-    // 이미 인스턴스가 있다면 제거
-    if (instanceRef.current) {
+    const initEditor = async () => {
       try {
-        if (typeof instanceRef.current.destroy === 'function') {
-          instanceRef.current.destroy();
-        }
-      } catch (error) {
-        console.warn('Editor destroy 중 오류:', error);
-      }
-      instanceRef.current = null;
-      isInitializedRef.current = false;
-    }
-
-    const initializeEditor = async () => {
-      try {
-        console.log('Editor 초기화 시작, 데이터:', data);
-
-        instanceRef.current = new EditorJS({
-          holder: editorRef.current,
-          autofocus: false,
+        editor = new EditorJS({
+          holder: 'editorjs',
           placeholder: '내용을 입력하세요...',
           tools: {
             header: {
@@ -123,47 +78,26 @@ const Editor = forwardRef(({ onChange, data }, ref) => {
           inlineToolbar: ['link', 'marker', 'bold', 'italic'],
           // data는 이전에 저장된 데이터가 있을 때만 전달
           data: data || { blocks: [] },
-          onChange: (api, event) => {
-            console.log('Editor 내용 변경됨:', event);
-            // onChange 이벤트 디바운싱
-            if (onChangeTimeoutRef.current) {
-              clearTimeout(onChangeTimeoutRef.current);
-            }
-            onChangeTimeoutRef.current = setTimeout(() => {
-              if (typeof onChange === 'function') onChange(api, event);
-            }, 300); // 300ms 디바운싱
-          },
-          onReady: () => {
-            isInitializedRef.current = true;
-          }
         });
 
-        // Editor가 준비될 때까지 대기 (공식 문서 방식)
-        await instanceRef.current.isReady;
-
+        // Editor가 완전히 초기화될 때까지 기다림
+        await editor.isReady;
+        editorInstanceRef.current = editor;
       } catch (error) {
-        isInitializedRef.current = false;
+        console.error('Editor initialization failed:', error);
       }
     };
 
-    initializeEditor();
+    initEditor();
 
     return () => {
-      // 디바운싱 타이머 정리
-      if (onChangeTimeoutRef.current) {
-        clearTimeout(onChangeTimeoutRef.current);
-      }
-
-      if (instanceRef.current) {
+      if (editorInstanceRef.current && typeof editorInstanceRef.current.destroy === 'function') {
         try {
-          if (typeof instanceRef.current.destroy === 'function') {
-            instanceRef.current.destroy();
-          }
+          editorInstanceRef.current.destroy();
         } catch (error) {
-          console.warn('Editor cleanup 중 오류:', error);
+          console.warn('Editor destroy failed:', error);
         }
-        instanceRef.current = null;
-        isInitializedRef.current = false;
+        editorInstanceRef.current = null;
       }
     };
   }, [data]); // data 의존성 유지
@@ -172,7 +106,6 @@ const Editor = forwardRef(({ onChange, data }, ref) => {
     <EditorWrapper>
       <div
         id="editorjs"
-        ref={editorRef}
         style={{
           minHeight: '300px',
           padding: '20px'
@@ -183,4 +116,5 @@ const Editor = forwardRef(({ onChange, data }, ref) => {
 });
 
 Editor.displayName = 'Editor';
+
 export default Editor;

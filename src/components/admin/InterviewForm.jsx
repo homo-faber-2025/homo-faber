@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 import Editor from '@/components/interview/Editor';
 import StoreSelect from '@/components/interview/StoreSelect';
 import { useImageUpload } from '@/hooks/useImageUpload';
@@ -9,24 +11,38 @@ import Button from '@/components/admin/Button';
 
 
 const InterviewForm = ({
-  mode = 'create', // 'create' 또는 'edit'
+  mode = 'create',
   initialData = null,
   onSave,
   onBack,
   isSaving = false,
   isLoading = false,
-  onSaveClick // 부모에서 저장 버튼 클릭 시 호출할 함수
+  onSaveClick
 }) => {
   const formMode = mode || 'create';
+  const router = useRouter();
   const [selectedStoreId, setSelectedStoreId] = useState('');
-  const [intro, setIntro] = useState('');
-  const [coverImg, setCoverImg] = useState('');
   const [coverImgPreview, setCoverImgPreview] = useState('');
-  const [date, setDate] = useState('');
-  const [interviewee, setInterviewee] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [localCoverImage, setLocalCoverImage] = useState(null);
   const editorRef = useRef(null);
+
+  // react-hook-form 설정
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      intro: '',
+      coverImg: '',
+      date: '',
+      interviewee: '',
+    },
+    mode: 'onChange',
+  });
 
   // 이미지 업로드 훅 사용
   const { uploadImage, processImageForPreview } = useImageUpload({ bucket: 'gallery', maxSizeInMB: 0.5 });
@@ -34,21 +50,17 @@ const InterviewForm = ({
   // 초기 데이터가 있으면 폼에 설정
   useEffect(() => {
     if (initialData && mode === 'edit') {
-      setSelectedStoreId(initialData.store_id || '');
-      setIntro(initialData.intro || '');
-      setCoverImg(initialData.cover_img || '');
+      console.log('Setting initial data:', initialData);
+      const storeId = initialData.store_id ? String(initialData.store_id) : '';
+      setSelectedStoreId(storeId);
+      setValue('intro', initialData.intro || '');
+      setValue('coverImg', initialData.cover_img || '');
       setCoverImgPreview(initialData.cover_img || '');
-      setDate(initialData.date || '');
-      setInterviewee(initialData.interviewee || '');
+      setValue('date', initialData.date || '');
+      setValue('interviewee', initialData.interviewee || '');
     }
-  }, [initialData, mode]);
+  }, [initialData, mode, setValue]);
 
-  // 부모에서 저장 버튼 클릭 시 폼의 저장 함수를 호출할 수 있도록 ref 설정
-  useEffect(() => {
-    if (onSaveClick) {
-      onSaveClick.current = handleSave;
-    }
-  }, [onSaveClick, selectedStoreId, intro, coverImg, date, interviewee, localCoverImage]);
 
   // 컴포넌트 언마운트 시 로컬 URL 정리
   useEffect(() => {
@@ -87,10 +99,10 @@ const InterviewForm = ({
     }
   };
 
-  const handleSave = useCallback(async () => {
+  const handleSave = useCallback(async (formData) => {
     try {
-      // 필수 필드 검증
-      if (!selectedStoreId) {
+      // 필수 필드 검증 - selectedStoreId가 없으면 경고
+      if (!selectedStoreId || selectedStoreId === '' || selectedStoreId === 'undefined') {
         alert('연결할 스토어를 선택해주세요.');
         return;
       }
@@ -101,7 +113,7 @@ const InterviewForm = ({
       }
 
       // 이미지 업로드 처리
-      let coverImgUrl = coverImg;
+      let coverImgUrl = formData.coverImg;
       if (localCoverImage) {
         try {
           const uploadedUrl = await uploadImage(localCoverImage);
@@ -116,21 +128,31 @@ const InterviewForm = ({
       const outputData = await editorRef.current.save();
 
       // 업데이트할 데이터만 포함
-      const updateData = {};
+      const updateData = {
+        store_id: selectedStoreId,
+        intro: formData.intro || null, // 빈 문자열일 때 null로 변환
+        cover_img: coverImgUrl || null, // 빈 문자열일 때 null로 변환
+        date: formData.date || null, // 빈 문자열일 때 null로 변환
+        interviewee: formData.interviewee || null, // 빈 문자열일 때 null로 변환
+      };
 
-      if (selectedStoreId) updateData.store_id = selectedStoreId;
-      if (outputData && outputData.blocks) updateData.contents = outputData.blocks;
-      if (intro !== undefined) updateData.intro = intro;
-      if (coverImgUrl !== undefined) updateData.cover_img = coverImgUrl;
-      if (date) updateData.date = date;
-      if (interviewee) updateData.interviewee = interviewee;
+      if (outputData && outputData.blocks) {
+        updateData.contents = outputData.blocks;
+      }
 
       await onSave(updateData);
     } catch (error) {
       console.error('저장 중 오류 발생:', error);
       alert('저장 중 오류가 발생했습니다.');
     }
-  }, [selectedStoreId, intro, coverImg, date, interviewee, localCoverImage, uploadImage, onSave]);
+  }, [selectedStoreId, localCoverImage, uploadImage, onSave]);
+
+  // 부모에서 저장 버튼 클릭 시 폼의 저장 함수를 호출할 수 있도록 ref 설정
+  useEffect(() => {
+    if (onSaveClick) {
+      onSaveClick.current = () => handleSubmit(handleSave)();
+    }
+  }, [onSaveClick, handleSubmit, handleSave]);
 
   const handleBack = () => {
     if (onBack) {
@@ -154,7 +176,7 @@ const InterviewForm = ({
         <h1>{formMode === 'create' ? '인터뷰 등록' : '인터뷰 수정'}</h1>
         <S.Actions>
           <Button onClick={handleBack}>목록으로</Button>
-          <Button className="edit" onClick={handleSave} disabled={isSaving}>
+          <Button className="edit" onClick={handleSubmit(handleSave)} disabled={isSaving}>
             {isSaving ? '저장 중...' : '저장'}
           </Button>
         </S.Actions>
@@ -198,10 +220,14 @@ const InterviewForm = ({
               <label htmlFor="intro">인터뷰 소개</label>
               <textarea
                 id="intro"
-                value={intro}
-                onChange={(e) => setIntro(e.target.value)}
+                {...register('intro')}
                 placeholder="인터뷰에 대한 간단한 소개를 입력하세요"
               />
+              {errors.intro && (
+                <S.ErrorInputMessage>
+                  {errors.intro.message}
+                </S.ErrorInputMessage>
+              )}
             </S.FormField>
 
             <S.FormField>
@@ -209,10 +235,14 @@ const InterviewForm = ({
               <input
                 id="interviewee"
                 type="text"
-                value={interviewee}
-                onChange={(e) => setInterviewee(e.target.value)}
+                {...register('interviewee')}
                 placeholder="인터뷰이 이름을 입력하세요"
               />
+              {errors.interviewee && (
+                <S.ErrorInputMessage>
+                  {errors.interviewee.message}
+                </S.ErrorInputMessage>
+              )}
             </S.FormField>
 
             <S.FormField>
@@ -220,9 +250,13 @@ const InterviewForm = ({
               <input
                 id="date"
                 type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
+                {...register('date')}
               />
+              {errors.date && (
+                <S.ErrorInputMessage>
+                  {errors.date.message}
+                </S.ErrorInputMessage>
+              )}
             </S.FormField>
           </div>
 
