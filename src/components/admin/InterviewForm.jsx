@@ -6,26 +6,31 @@ import { useRouter } from 'next/navigation';
 import Editor from '@/components/interview/Editor';
 import StoreSelect from '@/components/interview/StoreSelect';
 import { useImageUpload } from '@/hooks/useImageUpload';
+import { getInterviewById, updateInterview, createInterview } from '@/utils/supabase/interview';
 import * as S from '@/styles/admin/adminForm.style';
 import Button from '@/components/admin/Button';
 
 
 const InterviewForm = ({
   mode = 'create',
-  initialData = null,
+  interviewId = null,
   onSave,
   onBack,
-  isSaving = false,
   isLoading = false,
   onSaveClick
 }) => {
   const formMode = mode;
+  const formInterviewId = interviewId;
   const router = useRouter();
   const [selectedStoreId, setSelectedStoreId] = useState('');
   const [coverImgPreview, setCoverImgPreview] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [localCoverImage, setLocalCoverImage] = useState(null);
   const editorRef = useRef(null);
+  const [error, setError] = useState(null);
+  const [interviewData, setInterviewData] = useState(null);
+  const [isDataLoading, setIsDataLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const {
     register,
@@ -47,28 +52,37 @@ const InterviewForm = ({
     maxSizeInMB: 0.5
   });
 
-  console.log(initialData);
-
+  // 데이터 로딩 useEffect
   useEffect(() => {
-    if (initialData && mode === 'edit') {
-      const storeId = initialData.store_id ? String(initialData.store_id) : '';
-      setSelectedStoreId(storeId);
-      setValue('intro', initialData.intro || '');
-      setValue('coverImg', initialData.cover_img || '');
-      setCoverImgPreview(initialData.cover_img || '');
-      setValue('date', initialData.date || '');
-      setValue('interviewee', initialData.interviewee || '');
-    }
-  }, [initialData, mode, setValue]);
+    const loadData = async () => {
+      try {
+        if (formMode === 'edit' && formInterviewId) {
+          setIsDataLoading(true);
+          setError(null);
 
+          // 인터뷰 데이터 로드
+          const interview = await getInterviewById(formInterviewId);
+          console.log('Loaded interview data:', interview);
+          setInterviewData(interview);
 
-  // useEffect(() => {
-  //   return () => {
-  //     if (coverImgPreview?.startsWith('blob:')) {
-  //       URL.revokeObjectURL(coverImgPreview);
-  //     }
-  //   };
-  // }, [coverImgPreview]);
+          // 기본 정보 설정
+          const storeId = interview.store_id ? String(interview.store_id) : '';
+          setSelectedStoreId(storeId);
+          setValue('intro', interview.intro || '');
+          setValue('coverImg', interview.cover_img || '');
+          setCoverImgPreview(interview.cover_img || '');
+          setValue('date', interview.date || '');
+          setValue('interviewee', interview.interviewee || '');
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsDataLoading(false);
+      }
+    };
+
+    loadData();
+  }, [formMode, formInterviewId, setValue]);
 
   const handleImagePreview = async (event) => {
     const file = event.target.files[0];
@@ -97,6 +111,8 @@ const InterviewForm = ({
 
   const handleSave = useCallback(async (formData) => {
     try {
+      setIsSaving(true);
+
       if (!selectedStoreId) {
         alert('연결할 스토어를 선택해주세요.');
         return;
@@ -121,8 +137,6 @@ const InterviewForm = ({
         }
       }
 
-
-
       const updateData = {
         store_id: selectedStoreId,
         intro: formData.intro || null,
@@ -135,12 +149,24 @@ const InterviewForm = ({
         updateData.contents = outputData.blocks;
       }
 
-      await onSave(updateData);
+      if (formMode === 'create') {
+        // create 모드에서는 직접 createInterview 호출
+        await createInterview(updateData);
+        alert('인터뷰가 성공적으로 등록되었습니다.');
+        router.push('/admin/interview');
+      } else {
+        // edit 모드에서는 직접 updateInterview 호출
+        await updateInterview(formInterviewId, updateData);
+        alert('수정 완료');
+        router.push('/admin/interview');
+      }
     } catch (error) {
       console.error('저장 중 오류 발생:', error);
       alert('저장 중 오류가 발생했습니다.');
+    } finally {
+      setIsSaving(false);
     }
-  }, [selectedStoreId, localCoverImage, uploadImage, onSave]);
+  }, [selectedStoreId, localCoverImage, uploadImage, formMode, formInterviewId, router, coverImgPreview]);
 
   useEffect(() => {
     if (onSaveClick) {
@@ -155,6 +181,30 @@ const InterviewForm = ({
       router.push('/admin/interview');
     }
   };
+
+  if (isDataLoading) {
+    return (
+      <S.AdminFormWrapper>
+        <S.Header>
+          <h1>{formMode === 'create' ? '인터뷰 등록' : '인터뷰 수정'}</h1>
+          <Button onClick={handleBack}>목록으로</Button>
+        </S.Header>
+        <S.LoadingMessage>인터뷰 데이터를 불러오는 중...</S.LoadingMessage>
+      </S.AdminFormWrapper>
+    );
+  }
+
+  if (error) {
+    return (
+      <S.AdminFormWrapper>
+        <S.Header>
+          <h1>{formMode === 'create' ? '인터뷰 등록' : '인터뷰 수정'}</h1>
+          <Button onClick={handleBack}>목록으로</Button>
+        </S.Header>
+        <S.ErrorMessage>오류가 발생했습니다: {error}</S.ErrorMessage>
+      </S.AdminFormWrapper>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -258,7 +308,7 @@ const InterviewForm = ({
             <h3>인터뷰 내용</h3>
             <Editor
               ref={editorRef}
-              data={mode === 'edit' && initialData?.contents ? { blocks: initialData.contents } : { blocks: [] }}
+              data={mode === 'edit' && interviewData?.contents ? { blocks: interviewData.contents } : { blocks: [] }}
             />
           </S.FormField>
         </S.FormGrid>
