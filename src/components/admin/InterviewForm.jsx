@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Editor from '@/components/interview/Editor';
 import StoreSelect from '@/components/interview/StoreSelect';
 import { useImageUpload } from '@/hooks/useImageUpload';
@@ -255,7 +256,13 @@ const InterviewForm = ({
               </Button>
               {coverImgPreview && (
                 <div className="image-preview">
-                  <img src={coverImgPreview} alt="커버 이미지 미리보기" />
+                  <Image
+                    src={coverImgPreview}
+                    alt="커버 이미지 미리보기"
+                    width={300}
+                    height={200}
+                    style={{ objectFit: 'cover' }}
+                  />
                 </div>
               )}
             </S.FormField>
