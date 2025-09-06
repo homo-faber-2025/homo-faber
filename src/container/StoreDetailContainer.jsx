@@ -4,7 +4,9 @@ import { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStoreDetail } from '@/hooks/useStores';
-import { convertIndustryNameToKorean, convertCapacityNameToKorean } from '@/utils/converters';
+import { convertIndustryNameToKorean } from '@/utils/converters';
+import { getCapacityTypes } from '@/utils/supabase/stores';
+import { getInterviewsByStore } from '@/utils/supabase/interview';
 import { useCustomScrollbar } from '@/hooks/useCustomScrollbar';
 import CustomScrollbar from '@/components/common/CustomScrollbar';
 import { useBookmarks } from '@/hooks/useBookmarks';
@@ -18,12 +20,41 @@ function StoreDetailContainer({ }) {
   const { isMobile, isReady } = useWindowSize();
   const [right, setRight] = useState('-100dvw');
   const [bottom, setBottom] = useState('-100dvh');
+  const [capacityTypes, setCapacityTypes] = useState([]);
+  const [interviews, setInterviews] = useState([]);
   const storeId = pathname.startsWith('/store/') && pathname !== '/store' ? pathname.split('/')[2] : null;
 
   const { user } = useAuth();
   const { toggleBookmark, isStoreBookmarked, loading } = useBookmarks();
   const { store, isLoading, error } = useStoreDetail(storeId);
   const { containerRef, scrollState, scrollToRatio } = useCustomScrollbar();
+
+  // capacity 타입들을 가져오는 useEffect
+  useEffect(() => {
+    const fetchCapacityTypes = async () => {
+      try {
+        const types = await getCapacityTypes();
+        setCapacityTypes(types);
+      } catch (error) {
+        console.error('Capacity types 가져오기 실패:', error);
+      }
+    };
+    fetchCapacityTypes();
+  }, []);
+
+  // store와 연결된 interview들을 가져오는 useEffect
+  useEffect(() => {
+    const fetchInterviews = async () => {
+      if (!storeId) return;
+      try {
+        const interviewData = await getInterviewsByStore(storeId);
+        setInterviews(interviewData);
+      } catch (error) {
+        console.error('Interviews 가져오기 실패:', error);
+      }
+    };
+    fetchInterviews();
+  }, [storeId]);
 
   // pathname 변경 시 위치 업데이트
   useLayoutEffect(() => {
@@ -55,10 +86,6 @@ function StoreDetailContainer({ }) {
     } else {
       return '-100dvw';
     }
-  };
-
-  const handleBackClick = () => {
-    router.back();
   };
 
   const handleBookmarkClick = () => {
@@ -124,23 +151,33 @@ function StoreDetailContainer({ }) {
                         href={`https://map.naver.com/v5/search/${encodeURIComponent(store.address)}`}
                         target="_blank"
                         rel="noopener noreferrer"
+                        style={{
+                          textDecoration: (store.move || store.close) ? 'line-through' : 'none',
+                          color: (store.move || store.close) ? '#9999' : 'inherit',
+                        }}
                       >
                         {store.address}
                       </a>
                     </S.StoreAdress>
                   )}
+                  {store.move && store.move_address && (
+                    <S.StoreAdress>
+                      <a
+                        href={`https://map.naver.com/v5/search/${encodeURIComponent(store.move_address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {store.move_address}
+                      </a>
+                    </S.StoreAdress>
+                  )}
 
-                  {store.store_tags?.length > 0 && (
-                    <S.StoreTagList>
-                      {store.store_tags
-                        .map(tag => tag.industry_types?.name)
-                        .filter(Boolean)
-                        .map((industryName, index) => (
-                          <S.StoreTag key={index}>
-                            {convertIndustryNameToKorean(industryName)}
-                          </S.StoreTag>
-                        ))}
-                    </S.StoreTagList>
+                  {interviews.length > 0 && (
+                    <S.InterviewButton
+                      onClick={() => router.push(`/interview/${interviews[0].id}`)}
+                    >
+                      {store.person} 기술자 인터뷰 보러가기 →
+                    </S.InterviewButton>
                   )}
 
                   <S.StoreTagList>
@@ -151,15 +188,23 @@ function StoreDetailContainer({ }) {
                     )}
                   </S.StoreTagList>
 
-                  {store.store_tags?.some(tag => tag.capacity_types?.name) && (
+                  {store.store_capacity?.some(capacity => capacity.capacity_types?.name) && (
                     <S.StoreCapacity>
-                      {store.store_tags
-                        .map(tag => tag.capacity_types?.name)
-                        .filter(Boolean)
-                        .map(convertCapacityNameToKorean)
-                        .join(', ')}
+                      {store.store_capacity
+                        .map(capacity => {
+                          const capacityTypeId = capacity.capacity_types?.id;
+                          if (capacityTypeId === '7346574b-f036-4be2-803b-7614a908b53c') {
+                            return '개인 • 학생 작업 가능';
+                          }
+                        })
+                      }
                     </S.StoreCapacity>
                   )}
+
+                  {store.description && (
+                    <S.StoreDescription>{store.description}</S.StoreDescription>
+                  )}
+
 
                   <S.StoreContactList>
                     {store.store_contacts?.length > 0 &&
@@ -192,9 +237,7 @@ function StoreDetailContainer({ }) {
                     }
                   </S.StoreContactList>
 
-                  {store.description && (
-                    <S.StoreDescription>{store.description}</S.StoreDescription>
-                  )}
+
                 </S.StoreDetailSection>
 
                 <S.StoreImgSection ref={containerRef}>

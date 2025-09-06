@@ -8,7 +8,7 @@ const theme = {
   // 미디어 쿼리 헬퍼
   media: {
     mobile: `@media (max-width: 767px)`,
-    tablet: `@media (min-width: 767px)`,
+    tablet: `@media (max-width: 1023px)`,
     desktop: `@media (min-width: 1024px)`,
   }
 };

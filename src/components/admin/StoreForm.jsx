@@ -52,9 +52,6 @@ const StoreForm = ({
 
   const [isDataLoading, setIsDataLoading] = useState(false);
 
-  // move 필드 상태 감시
-
-
   // 이미지 업로드 훅 사용
   const { uploadImage, processImageForPreview } = useImageUpload({ bucket: 'gallery', maxSizeInMB: 0.5 });
 
@@ -78,13 +75,13 @@ const StoreForm = ({
       fax: '',
       email: '',
       website: '',
-      latitude: null,
-      longitude: null,
+      latitude: '',
+      longitude: '',
       close: false,
       move: false,
       move_address: '',
-      move_latitude: null,
-      move_longitude: null,
+      move_latitude: '',
+      move_longitude: '',
       gallery: [],
     },
     mode: 'onChange', // 실시간 유효성 검사
@@ -135,13 +132,13 @@ const StoreForm = ({
           setValue('name', store.name || '');
           setValue('description', store.description || '');
           setValue('address', store.address || '');
-          setValue('latitude', store.latitude || null);
-          setValue('longitude', store.longitude || null);
+          setValue('latitude', store.latitude || '');
+          setValue('longitude', store.longitude || '');
           setValue('close', store.close || false);
           setValue('move', store.move || false);
           setValue('move_address', store.move_address || '');
-          setValue('move_latitude', store.move_latitude || null);
-          setValue('move_longitude', store.move_longitude || null);
+          setValue('move_latitude', store.move_latitude || '');
+          setValue('move_longitude', store.move_longitude || '');
 
           // keyword를 텍스트로 변환
           if (store.keyword && Array.isArray(store.keyword)) {
@@ -472,6 +469,7 @@ const StoreForm = ({
                 setValue={setValue}
                 register={register}
                 setAddress={setAddress}
+                watch={watch}
               />
               {errors.address && (
                 <S.ErrorInputMessage>
@@ -509,6 +507,7 @@ const StoreForm = ({
                   setValue={setValue}
                   register={register}
                   setAddress={(address) => setValue('move_address', address)}
+                  watch={watch}
                   fieldPrefix="move_"
                 />
                 {errors.move_address && (
@@ -545,7 +544,7 @@ const StoreForm = ({
                 type="tel"
                 {...register('phone', {
                   pattern: {
-                    value: /^01[0-9]-?[0-9]{4}-?[0-9]{4}$/,
+                    value: /^0\d{1,2}-\d{3,4}-\d{4}$/,
                     message: '올바른 핸드폰 번호 형식을 입력해주세요 (예: 010-1234-5678)'
                   }
                 })}
@@ -565,11 +564,11 @@ const StoreForm = ({
                 type="tel"
                 {...register('telephone', {
                   pattern: {
-                    value: /^0[2-9][0-9]-?[0-9]{3,4}-?[0-9]{4}$/,
-                    message: '올바른 전화번호 형식을 입력해주세요 (예: 02-1234-5678)'
+                    value: /^0\d{1,2}-\d{3,4}-\d{4}$/,
+                    message: '올바른 전화번호 형식을 입력해주세요 (예: 02-123-5678)'
                   }
                 })}
-                placeholder="전화번호를 입력하세요 (예: 02-1234-5678)"
+                placeholder="전화번호를 입력하세요 (예: 02-123-5678)"
               />
               {errors.telephone && (
                 <S.ErrorInputMessage>
@@ -585,11 +584,11 @@ const StoreForm = ({
                 type="tel"
                 {...register('fax', {
                   pattern: {
-                    value: /^0[2-9][0-9]-?[0-9]{3,4}-?[0-9]{4}$/,
-                    message: '올바른 팩스번호 형식을 입력해주세요 (예: 02-1234-5678)'
+                    value: /^0\d{1,2}-\d{3,4}-\d{4}$/,
+                    message: '올바른 팩스번호 형식을 입력해주세요 (예: 02-123-5678)'
                   }
                 })}
-                placeholder="팩스번호를 입력하세요 (예: 02-1234-5678)"
+                placeholder="팩스번호를 입력하세요 (예: 02-123-5678)"
               />
               {errors.fax && (
                 <S.ErrorInputMessage>
