@@ -510,7 +510,6 @@ const StoreForm = ({
                   setAddress={(address) => setValue('move_address', address)}
                   watch={watch}
                   fieldPrefix="move_"
-                  watch={watch}
                 />
                 {errors.move_address && (
                   <S.ErrorInputMessage>
