@@ -53,9 +53,6 @@ const StoreForm = ({
 
   const [isDataLoading, setIsDataLoading] = useState(false);
 
-  // move 필드 상태 감시
-
-
   // 이미지 업로드 훅 사용
   const { uploadImage, processImageForPreview } = useImageUpload({ bucket: 'gallery', maxSizeInMB: 0.5 });
 
@@ -511,6 +508,7 @@ const StoreForm = ({
                   setValue={setValue}
                   register={register}
                   setAddress={(address) => setValue('move_address', address)}
+                  watch={watch}
                   fieldPrefix="move_"
                   watch={watch}
                 />
@@ -548,7 +546,7 @@ const StoreForm = ({
                 type="tel"
                 {...register('phone', {
                   pattern: {
-                    value: /^01[0-9]-?[0-9]{4}-?[0-9]{4}$/,
+                    value: /^0\d{1,2}-\d{3,4}-\d{4}$/,
                     message: '올바른 핸드폰 번호 형식을 입력해주세요 (예: 010-1234-5678)'
                   }
                 })}
@@ -568,11 +566,11 @@ const StoreForm = ({
                 type="tel"
                 {...register('telephone', {
                   pattern: {
-                    value: /^0[2-9][0-9]-?[0-9]{3,4}-?[0-9]{4}$/,
-                    message: '올바른 전화번호 형식을 입력해주세요 (예: 02-1234-5678)'
+                    value: /^0\d{1,2}-\d{3,4}-\d{4}$/,
+                    message: '올바른 전화번호 형식을 입력해주세요 (예: 02-123-5678)'
                   }
                 })}
-                placeholder="전화번호를 입력하세요 (예: 02-1234-5678)"
+                placeholder="전화번호를 입력하세요 (예: 02-123-5678)"
               />
               {errors.telephone && (
                 <S.ErrorInputMessage>
@@ -588,11 +586,11 @@ const StoreForm = ({
                 type="tel"
                 {...register('fax', {
                   pattern: {
-                    value: /^0[2-9][0-9]-?[0-9]{3,4}-?[0-9]{4}$/,
-                    message: '올바른 팩스번호 형식을 입력해주세요 (예: 02-1234-5678)'
+                    value: /^0\d{1,2}-\d{3,4}-\d{4}$/,
+                    message: '올바른 팩스번호 형식을 입력해주세요 (예: 02-123-5678)'
                   }
                 })}
-                placeholder="팩스번호를 입력하세요 (예: 02-1234-5678)"
+                placeholder="팩스번호를 입력하세요 (예: 02-123-5678)"
               />
               {errors.fax && (
                 <S.ErrorInputMessage>

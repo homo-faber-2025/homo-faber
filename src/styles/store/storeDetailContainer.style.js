@@ -6,7 +6,7 @@ import theme from '@/styles/Theme';
 export const DetailWrapper = styled(motion.main)`
   width: calc(80vw - 60px);
   height: 100dvh;
-  padding: 0px 10px 20px 50px;
+  padding: 0px 10px 0px 50px;
   background-color: #F7F7F7;
   position: ${(props) => props.isMobile ? 'fixed' : 'absolute'};
   right: ${(props) => props.isMobile ? 'unset' : props.right};
@@ -22,6 +22,7 @@ export const DetailWrapper = styled(motion.main)`
     width: 100dvw;
     height: calc(87dvh - 47px);
     padding: 0px;
+    overflow-y: scroll;
   }
 `;
 
@@ -53,32 +54,39 @@ export const StoreDetailCard = styled.article`
   flex-grow: 1;
   gap: 2%;
 
-  ${theme.media.mobile} {
-    flex-direction: column;
+  ${theme.media.tablet} {
     gap: 0px;
     padding-top: 34px;
+    overflow-y: scroll;
+    display: block;
   }
 `;
 
 export const StoreDetailSection = styled.section`
-  // box-shadow: inset 0 0 10px 10px pink;
-  width: 46%;
+  width: 52%;
   text-align: center;
   overflow-y: auto;
   padding-top: 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-  ${theme.media.mobile} {
+  ${theme.media.tablet} {
     width: 100%;
-    padding-top: 10px;
+    padding-top: 20px 20px 0 20px;
+    overflow-y: unset;
+    position: static;
+    display: block;
   }
 `
 
 export const StoreImgSection = styled(StoreDetailSection)`
   margin-bottom: -20px;
   overflow-x: hidden;
-  width: 52%;
+  width: 46%;
   margin-top: -20px;
-  margin-right: 30px;
+  margin-right: 2dvw;
 
   &::-webkit-scrollbar {
     display: none;
@@ -86,20 +94,17 @@ export const StoreImgSection = styled(StoreDetailSection)`
   -ms-overflow-style: none;
   scrollbar-width: none;
 
-  ${theme.media.mobile} {
-    position: absolute;
-    bottom: 0px;
-    display: flex;
+  ${theme.media.tablet} {
     width: 100%;
-    margin-top: 0px;
+    margin-top: 10px;
     margin-right: 0px;
     margin-bottom: 0px;
-    overflow-x: scroll;
+    overflow-y: unset;
   }
 `
 
 export const StoreName = styled.h2`
-  font-size: 5rem;
+  font-size: 5.4rem;
   letter-spacing: 0.3rem;
   font-weight: 700;
   margin-bottom: 10px;
@@ -115,14 +120,15 @@ export const StoreName = styled.h2`
   position: relative;
   width: fit-content;
   margin: 0 auto;
+  margin-bottom: 8px;
 
   &:hover{
       text-shadow: 0px 2px 3px rgba(221, 221, 221, 0.8), -0.1px -0.1px 5px rgba(100,92,92,0.6), 2px 2px 10px rgba(255,255,255,0.5);
   }
 
-  ${theme.media.mobile} {
-    font-size: 2.5em;
-    margin-bottom: 10px;
+  ${theme.media.tablet} {
+    font-size: 2.8em;
+    margin-bottom: 20px;
   }
 `;
 
@@ -151,7 +157,7 @@ export const BookmarkButton = styled.button`
     opacity: 0.5;
   }
 
-  ${theme.media.mobile} {
+  ${theme.media.tablet} {
     right: -33px;
   }
 `;
@@ -169,35 +175,71 @@ export const BookmarkIcon = styled.span`
 
 export const StoreAdress = styled.h3`
   font-size: 1.2rem;
-  margin-bottom: 50px;
+  margin-bottom: 5px;
   font-weight: 400;
   cursor: pointer;
+  line-height: 1.4;
+  word-break: keep-all;
+  margin-left: auto;
+  text-align: right;
   
   a {
     color: inherit;
     text-decoration: none;
-    
-    &:hover {
-      font-weight: 600;
-    }
   }
 
-  ${theme.media.mobile} {
+  ${theme.media.tablet} {
     font-size: 1rem;
-    margin-bottom: 30px;
+    margin-bottom: 2px;
+    text-align: center;
+    margin-left: unset;
   }
 `
+
+export const InterviewButton = styled.button`
+  margin-top: 0px;
+  padding: 12px 0px;
+  background-color: rgba(0,0,0,0);
+  color: black;
+  border: none;
+  border-radius: 4px;
+  font-family: var(--font-gothic);
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: auto;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+
+  ${theme.media.tablet} {
+    font-size: 0.9rem;
+    padding: 10px 0px;
+    position: absolute;
+    z-index: 10;
+    font-size: 1.1rem;
+    left: 17px;
+    bottom: 6px;
+  }
+`
+
 export const StoreTagList = styled.div`
   font-size: 1.24rem;
   font-weight: 700;
   width: 60%;
   line-height: 1.5;
-  margin: 0 auto 10px;
+  margin: 50px auto 10px;
 
-  ${theme.media.mobile} {
-    font-size: 1rem;
+  ${theme.media.tablet} {
+    font-size: 1.1rem;
     width: 90%;
-    margin: 0 auto 15px;
+    margin: 30px auto 15px;
   }
 `
 
@@ -216,9 +258,16 @@ export const StoreTag = styled.span`
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 `
+
 export const StoreCapacity = styled.div`
   font-weight: 700;
-  margin-top: 25px;
+  margin-top: 45px;
+  font-size: 1.24rem;
+
+  ${theme.media.tablet} {
+    font-size: 1rem;
+    margin-top: 30px;
+  }
 `
 
 export const StoreContactList = styled.div`
@@ -226,18 +275,28 @@ export const StoreContactList = styled.div`
   grid-template-columns: max-content 1fr;
   gap: 8px 2px;
   width: fit-content;
-  margin: 56px auto 0;
+  position:absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
   align-items: center;
   letter-spacing: 0.1rem;
 
-  ${theme.media.mobile} {
-    margin: 30px auto 0;
-    gap: 6px 2px;
+  ${theme.media.tablet} {
+    margin: 60px auto 0;
+    gap: 10px 0px;
+    position: static;
+    left: unset;
+    transform: unset;
   }
 `
 export const StoreContact = styled.div`
   display: contents;
   font-size: 1.1rem;
+
+  ${theme.media.tablet} {
+    font-size: 1.2rem;
+  }
 `
 
 export const StoreContactTxt = styled.div`
@@ -266,13 +325,14 @@ export const StoreContactContent = styled.div`
     }
   }
 
-  ${theme.media.mobile} {
-    font-size: 1rem;
+  ${theme.media.tablet} {
+    font-size: 1.2rem;
     white-space: normal;
     word-break: break-all;
   }
 `
 export const StoreDescription = styled.div`
+  margin-top: 50px;
 `
 
 export const StoreCardImg = styled.img`
@@ -283,6 +343,11 @@ export const StoreCardImg = styled.img`
   &:hover{
     transform: rotate(5deg);
   }
+
+  ${theme.media.tablet} {
+    margin-top: 0px;
+    height: 100%;
+  }
 `
 export const StoreImgList = styled.div`
   width: 100%;
@@ -290,10 +355,9 @@ export const StoreImgList = styled.div`
   padding: 0 40px 10px 40px;
   margin-bottom: 40px;
 
-  ${theme.media.mobile} {
+  ${theme.media.tablet} {
     padding: 0;
-    overflow-x: scroll;
-    margin: 0px;
+    margin-top: -36px;
     width: unset;
   }
 `
@@ -314,10 +378,17 @@ export const StoreImg = styled.img`
     box-shadow: -1px 1px 3px 6px rgba(255,255,255,1), -2px -1px 30px 0.5px rgba(116, 116, 116, 0), 3px 15px 30px 0px rgba(177, 177, 177, 0.36);
   }
 
-  ${theme.media.mobile} {
-    // height: 100%;
-    // width: auto;
-    // margin-bottom: 0px;
+  ${theme.media.tablet} {
+      width: 95%;
+      height: 100%;
+      box-shadow: none;
+      margin-bottom: 1px;
+
+      &:hover{
+        transform: unset;
+        box-shadow: none;
+        z-index:0;
+      }
   }
 `
 
