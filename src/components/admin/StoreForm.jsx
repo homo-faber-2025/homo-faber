@@ -79,13 +79,13 @@ const StoreForm = ({
       fax: '',
       email: '',
       website: '',
-      latitude: null,
-      longitude: null,
+      latitude: '',
+      longitude: '',
       close: false,
       move: false,
       move_address: '',
-      move_latitude: null,
-      move_longitude: null,
+      move_latitude: '',
+      move_longitude: '',
       gallery: [],
     },
     mode: 'onChange', // 실시간 유효성 검사
@@ -136,13 +136,13 @@ const StoreForm = ({
           setValue('name', store.name || '');
           setValue('description', store.description || '');
           setValue('address', store.address || '');
-          setValue('latitude', store.latitude || null);
-          setValue('longitude', store.longitude || null);
+          setValue('latitude', store.latitude || '');
+          setValue('longitude', store.longitude || '');
           setValue('close', store.close || false);
           setValue('move', store.move || false);
           setValue('move_address', store.move_address || '');
-          setValue('move_latitude', store.move_latitude || null);
-          setValue('move_longitude', store.move_longitude || null);
+          setValue('move_latitude', store.move_latitude || '');
+          setValue('move_longitude', store.move_longitude || '');
 
           // keyword를 텍스트로 변환
           if (store.keyword && Array.isArray(store.keyword)) {
@@ -473,6 +473,7 @@ const StoreForm = ({
                 setValue={setValue}
                 register={register}
                 setAddress={setAddress}
+                watch={watch}
               />
               {errors.address && (
                 <S.ErrorInputMessage>
@@ -511,6 +512,7 @@ const StoreForm = ({
                   register={register}
                   setAddress={(address) => setValue('move_address', address)}
                   fieldPrefix="move_"
+                  watch={watch}
                 />
                 {errors.move_address && (
                   <S.ErrorInputMessage>
