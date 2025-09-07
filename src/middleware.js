@@ -51,21 +51,27 @@ export async function middleware(request) {
           });
         },
       },
-    }
+    },
   );
 
   // 세션 확인
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
   // 보호된 라우트들
   const protectedRoutes = ['/mypage'];
   const authRoutes = ['/login', '/signup'];
+  const adminRoutes = ['/admin'];
 
-  const isProtectedRoute = protectedRoutes.some(route =>
-    request.nextUrl.pathname.startsWith(route)
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    request.nextUrl.pathname.startsWith(route),
   );
-  const isAuthRoute = authRoutes.some(route =>
-    request.nextUrl.pathname.startsWith(route)
+  const isAuthRoute = authRoutes.some((route) =>
+    request.nextUrl.pathname.startsWith(route),
+  );
+  const isAdminRoute = adminRoutes.some((route) =>
+    request.nextUrl.pathname.startsWith(route),
   );
 
   // 보호된 라우트에 접근하려는데 로그인되지 않은 경우
@@ -76,6 +82,25 @@ export async function middleware(request) {
   // 이미 로그인된 사용자가 로그인/회원가입 페이지에 접근하는 경우
   if (isAuthRoute && session) {
     return NextResponse.redirect(new URL('/mypage', request.url));
+  }
+
+  // admin 라우트 접근 제어
+  if (isAdminRoute) {
+    let isAdmin = false;
+
+    if (session) {
+      const { data: userData } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+
+      isAdmin = userData?.role === 'admin';
+    }
+
+    if (!isAdmin) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
   }
 
   return response;
