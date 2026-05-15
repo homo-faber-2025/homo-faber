@@ -6,14 +6,18 @@
 /**
  * 모든 스토어를 가져옵니다.
  * @param {string} searchKeyword - 검색 키워드 (선택사항)
- * @returns {Promise<Array>} 스토어 목록
+ * @param {number} limit - 가져올 개수 (기본값: 20)
+ * @param {number} offset - 시작 위치 (기본값: 0)
+ * @returns {Promise<Object>} { data: 스토어 목록, pagination: 페이지네이션 정보 }
  */
-export async function getStores(searchKeyword = '') {
+export async function getStores(searchKeyword = '', limit = 20, offset = 0) {
   try {
     const params = new URLSearchParams();
     if (searchKeyword && searchKeyword.trim() !== '') {
       params.append('search', searchKeyword.trim());
     }
+    params.append('limit', limit.toString());
+    params.append('offset', offset.toString());
 
     const response = await fetch(`/api/stores?${params.toString()}`, {
       method: 'GET',
@@ -29,7 +33,10 @@ export async function getStores(searchKeyword = '') {
     }
 
     const result = await response.json();
-    return result.data || [];
+    return {
+      data: result.data || [],
+      pagination: result.pagination || { total: 0, limit, offset, hasMore: false }
+    };
   } catch (error) {
     console.error('API Error (getStores):', error);
     throw error;

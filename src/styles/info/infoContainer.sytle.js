@@ -327,7 +327,7 @@ export const InfoTimelineTableTdMonth = styled(InfoTimelineTableTd)`
     flex-shrink: 0;
   }
 `
-export const InfoTimelineMobile = styled.div`
+export const InfoTimelineMobile = styled.td`
   display: flex; 
   flex-direction: column;
   gap: 5px;
@@ -335,14 +335,22 @@ export const InfoTimelineMobile = styled.div`
   flex-wrap: wrap;
   width: 10px;
   margin-left: 2px;
+  padding: 0;
+  border: none;
 `
 
-export const InfoTimelineTableTdTitle = styled(InfoTimelineTableTd)`
+export const InfoTimelineTableTdTitle = styled.div`
   flex-grow: 1;
   font-weight: 500;
   line-height: 1.6;
   word-break: keep-all;
   padding-left: 18px;
+  padding: 12px;
+  padding-left: 18px;
+  vertical-align: top;
+  line-height: 1.5;
+  font-size: 1.1rem;
+  border-top: ${(props) => props.isFirstOfYear ? 'none' : '1px dotted rgb(167, 167, 167)'};
 
   ${theme.media.tablet} {
     padding-left: 10px;
@@ -367,7 +375,7 @@ export const InfoTimelineInfo = styled.div`
   }
 `
 
-export const InfoTimelineTableTdImg = styled.td`
+export const InfoTimelineTableTdImg = styled.div`
   width: 24dvw;
   height: 100%;
   object-fit: cover;

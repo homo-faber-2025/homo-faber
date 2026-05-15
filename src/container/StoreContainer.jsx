@@ -5,13 +5,14 @@ import { usePathname, useRouter } from 'next/navigation';
 import Search from '@/components/common/Search';
 import StoreFilters from '@/components/store/StoreFilters';
 import StoreList from '@/components/store/StoreList';
-import { useStores, useStoreFilters, extractAllTags } from '@/hooks/useStores';
+import { useStores, useStoreFilters } from '@/hooks/useStores';
+import { getStoreTypes } from '@/utils/api/stores-api';
 import * as S from '@/styles/store/storeContainer.style';
 
 function StoreContainer() {
   const pathname = usePathname();
   const router = useRouter();
-  const { stores, isLoading, error } = useStores();
+  const { stores, isLoading, isLoadingMore, error, hasMore, loadMore } = useStores();
   const [searchKeyword, setSearchKeyword] = useState('');
   const [isExiting, setIsExiting] = useState(false);
 
@@ -36,7 +37,7 @@ function StoreContainer() {
   // 필터 표시/숨김을 위한 상태
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // 모든 가능한 태그 목록
+  // 모든 가능한 태그 목록 (별도 API로 가져오기)
   const [allTags, setAllTags] = useState({
     industry: [],
     capacity: [],
@@ -46,13 +47,22 @@ function StoreContainer() {
   // 필터링된 스토어 목록
   const filteredStores = useStoreFilters(stores, searchKeyword, selectedTags, sortBy);
 
-  // 모든 가능한 태그 목록 업데이트
+  // 태그 목록을 별도 API로 가져오기 (초기 로딩 속도 개선)
   useEffect(() => {
-    if (stores.length > 0) {
-      const tags = extractAllTags(stores);
-      setAllTags(tags);
-    }
-  }, [stores]);
+    const fetchTags = async () => {
+      try {
+        const types = await getStoreTypes();
+        setAllTags({
+          industry: types.industryTypes?.map(t => t.name) || [],
+          capacity: types.capacityTypes?.map(t => t.name) || [],
+          material: types.materialTypes?.map(t => t.name) || [],
+        });
+      } catch (err) {
+        console.error('태그 목록 가져오기 실패:', err);
+      }
+    };
+    fetchTags();
+  }, []);
 
   // 검색 키워드 처리
   const handleSearch = (keyword) => {
@@ -111,6 +121,12 @@ function StoreContainer() {
     }
   };
 
+  // 필터링이 적용되지 않은 경우에만 무한 스크롤링 활성화
+  const shouldUseInfiniteScroll = !searchKeyword && 
+    selectedTags.industry.length === 0 && 
+    selectedTags.capacity.length === 0 && 
+    selectedTags.material.length === 0;
+
   return (
     <S.StoreWrapper
       onClick={handleStoreWrapperClick}
@@ -141,7 +157,14 @@ function StoreContainer() {
         )}
       </S.StoreFilterWrapper>
 
-      <StoreList stores={filteredStores} isLoading={isLoading} error={error} />
+      <StoreList 
+        stores={filteredStores} 
+        isLoading={isLoading} 
+        isLoadingMore={isLoadingMore}
+        error={error} 
+        hasMore={shouldUseInfiniteScroll ? hasMore : false}
+        onLoadMore={shouldUseInfiniteScroll ? loadMore : undefined}
+      />
     </S.StoreWrapper>
   );
 }

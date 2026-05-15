@@ -2,6 +2,7 @@
 
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import useWindowSize from '@/hooks/useWindowSize';
 import * as S from '@/styles/common/search.style';
 import SearchIcon from './SearchIcon';
@@ -23,12 +24,18 @@ const Search = ({
 }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { isMobile } = useWindowSize();
+  const { isMobile, isReady } = useWindowSize();
   const [searchKeyword, setSearchKeyword] = useState(
     searchParams.get('keyword') || '',
   );
   const [isVisible, setIsVisible] = useState(true);
   const [shouldRender, setShouldRender] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  // 클라이언트 사이드에서만 Portal 사용 (모바일에서만)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // isExiting prop이 변경될 때 애니메이션 처리
   useEffect(() => {
@@ -80,7 +87,7 @@ const Search = ({
     return null;
   }
 
-  return (
+  const searchContent = (
     <S.SearchWrapper
       isMobile={isMobile}
       initial={isMobile ? {
@@ -123,6 +130,17 @@ const Search = ({
       </S.SearchBox>
     </S.SearchWrapper>
   );
+
+  // 모바일에서만 Portal 사용하여 body에 직접 렌더링 (AnimatedPanel의 transform 영향 받지 않음)
+  // 데스크탑에서는 기존처럼 일반 렌더링 (Portal 사용 안 함)
+  const shouldUsePortal = isReady && isMobile === true && mounted;
+  
+  if (shouldUsePortal) {
+    return createPortal(searchContent, document.body);
+  }
+
+  // 데스크탑 또는 아직 준비되지 않은 경우 일반 렌더링
+  return searchContent;
 };
 
 export default Search;

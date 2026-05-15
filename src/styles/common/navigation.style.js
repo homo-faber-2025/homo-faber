@@ -7,7 +7,7 @@ export const NavigationIcon = styled.img`
   object-fit: cover;
   object-position: center;
   position: fixed;
-  top: 18px;
+  top: 10px;
   left: 24px;
   z-index: 1000;
   transition: all 1s ease-in-out; 
@@ -45,6 +45,22 @@ export const NavigationIcon = styled.img`
   }
 `;
 
+export const Title = styled.h1`
+  position: fixed;
+  top: 18px;
+  left: 24px;
+  z-index: 99;
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin-left: -3px;
+  margin-right: 130px;
+
+  ${theme.media.mobile} {
+    font-size: 2.4rem;
+    margin-right: 0px;
+  }
+`
+
 export const NavigationBg = styled.div`
     display: none;
     backdrop-filter: saturate(180%) blur(5px);
@@ -64,7 +80,7 @@ export const NavigationBg = styled.div`
 export const NavigationWrapper = styled.nav`
   position: fixed;
   top: 103px;
-  left: 16px;
+  left: 22px;
   z-index: 5;
   background: rgba(201, 201, 201, 0.63);
   border: 1px solid rgba(109, 109, 109, 0.1);
@@ -98,7 +114,7 @@ export const NavigationWrapper = styled.nav`
     // gap: 3px 4px;
     padding: 6px 6px;
     border-radius: 8px;
-    z-index: 10;
+    z-index: 12;
   }
 `;
 
@@ -129,8 +145,8 @@ export const CloseButton = styled.button`
   font-family: var(--font-gothic);
   cursor: pointer;
   background: none;
-  top: 330px;
-  left: 40px;
+  top: 410px;
+  left: 32px;
   border: none;
   color: #666;
   z-index: 1001;

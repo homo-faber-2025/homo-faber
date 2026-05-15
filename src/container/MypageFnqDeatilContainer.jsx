@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useLayoutEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useFnq } from '@/hooks/useFnq';
 import { useCustomScrollbar } from '@/hooks/useCustomScrollbar';
@@ -18,15 +18,18 @@ function MypageFnqDeatilContainer() {
   const pathname = usePathname();
   const router = useRouter();
   const { isMobile, isReady } = useWindowSize();
-  const [right, setRight] = useState('-100dvw');
-  const [bottom, setBottom] = useState('-100dvh');
+  // 패널 상태: 'hidden' | 'expanded' | 'collapsed'
+  const [panelState, setPanelState] = useState('hidden');
+  const prevFnqIdRef = useRef(null); // 이전 fnqId 추적
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [showProcessingPopup, setShowProcessingPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const fnqId = pathname.startsWith('/mypage/fnq/') && pathname !== '/mypage/fnq' ? pathname.split('/')[3] : null;
+  const fnqId = pathname.startsWith('/mypage/fnq/') && pathname !== '/mypage/fnq' && !pathname.includes('/edit')
+    ? pathname.split('/')[3]
+    : null;
   const { fnq, isLoading, error, loading } = useFnq(fnqId);
   const { containerRef, scrollState, scrollToRatio } = useCustomScrollbar();
 
@@ -34,37 +37,81 @@ function MypageFnqDeatilContainer() {
   const isProcessing = fnq?.fnq_status?.status !== 'pending';
   const canEdit = !isProcessing;
 
-  // 모바일에서 사용할 bottom 위치를 계산하는 함수
-  const getMobileBottomPosition = (pathname) => {
-    if (pathname.startsWith('/mypage/fnq/') && pathname !== '/mypage/fnq') {
-      return '0px';
-    } else {
-      return '-100dvh';
+  // 분기점 1: fnqId 변경 시 - expanded 상태로 변경
+  useEffect(() => {
+    if (fnqId && isReady) {
+      // 새로운 fnqId로 변경되었을 때만 expanded로 설정
+      if (prevFnqIdRef.current !== fnqId) {
+        setPanelState('expanded');
+        prevFnqIdRef.current = fnqId;
+        // MypageContainer도 expanded 되도록 이벤트 발생
+        window.dispatchEvent(new CustomEvent('expandPanel', { detail: { route: 'mypage' } }));
+      }
+    } else if (!fnqId) {
+      setPanelState('hidden');
+      prevFnqIdRef.current = null;
+    }
+  }, [fnqId, isReady]);
+
+  // 분기점 2: 지도 클릭 시 - collapsed 상태로 변경
+  useEffect(() => {
+    if (!fnqId) return;
+
+    const handleCollapsePanel = () => {
+      if (panelState === 'expanded') {
+        setPanelState('collapsed');
+      }
+    };
+
+    window.addEventListener('collapsePanel', handleCollapsePanel);
+    return () => {
+      window.removeEventListener('collapsePanel', handleCollapsePanel);
+    };
+  }, [fnqId, panelState]);
+
+  // 분기점 3: 패널 클릭 시 - expanded 상태로 변경
+  const handlePanelClick = (e) => {
+    const target = e.target;
+    const isInteractive = target.closest('button, a, input, select, textarea, [role="button"], [onClick], img');
+
+    if (!isInteractive) {
+      e.stopPropagation();
+      if (panelState === 'collapsed') {
+        setPanelState('expanded');
+        // MypageContainer도 expanded 되도록 이벤트 발생
+        window.dispatchEvent(new CustomEvent('expandPanel', { detail: { route: 'mypage' } }));
+      }
     }
   };
 
-  // 데스크톱에서 사용할 right 위치를 계산하는 함수
-  const getDesktopRightPosition = (pathname) => {
-    if (pathname.startsWith('/mypage/fnq/') && pathname !== '/mypage/fnq') {
-      return '0px';
-    } else {
-      return '-100dvw';
-    }
-  };
+  // 패널 상태에 따른 initial 위치 계산 (transform 사용)
+  const getInitialPosition = useMemo(() => {
+    const isFirstMount = prevFnqIdRef.current !== fnqId && fnqId !== null;
 
-  // pathname 변경 시 위치 업데이트
-  useLayoutEffect(() => {
-    // isReady가 false면 아직 초기값이 설정되지 않았으므로 실행하지 않음
-    if (!isReady) return;
-
-    if (isMobile) {
-      const newBottom = getMobileBottomPosition(pathname);
-      setBottom(newBottom);
-    } else {
-      const newRight = getDesktopRightPosition(pathname);
-      setRight(newRight);
+    if (panelState === 'hidden') {
+      return isMobile ? { y: '100dvh' } : { x: '100dvw' };
     }
-  }, [pathname, isMobile, isReady]);
+
+    if (panelState === 'expanded') {
+      // 처음 마운트될 때만 화면 밖에서 시작, 이후에는 initial 제거하여 motion이 자동 감지
+      return isFirstMount ? (isMobile ? { y: '100dvh' } : { x: '100dvw' }) : undefined;
+    }
+
+    // collapsed - expanded에서 collapsed로 변경될 때는 현재 위치에서 시작
+    return undefined;
+  }, [panelState, fnqId, isMobile]);
+
+  // motion이 panelState를 직접 추적하도록 animate 값 계산 (transform 사용)
+  const animateValue = useMemo(() => {
+    if (panelState === 'hidden') {
+      return isMobile ? { y: '100dvh' } : { x: '100dvw' };
+    }
+    if (panelState === 'expanded') {
+      return isMobile ? { y: 0 } : { x: 0 };
+    }
+    // collapsed
+    return isMobile ? { y: 'calc(-26px + 80dvh)' } : { x: 'calc(80vw - 200px)' };
+  }, [panelState, isMobile]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -156,18 +203,16 @@ function MypageFnqDeatilContainer() {
   };
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence>
       {fnqId && (
         <S.DetailWrapper
-          key={`detail-${fnqId}-${pathname}`}
-          right={right}
-          bottom={bottom}
+          key={fnqId}
           isMobile={isMobile}
-          initial={isMobile ? { bottom: '-100dvh' } : { right: '-100dvw' }}
-          animate={isMobile ? { bottom: bottom } : { right: right }}
-          exit={isMobile ? { bottom: '-100dvh' } : { right: '-100dvw' }}
-          transition={{ duration: 1, ease: [0.4, 0, 0.2, 1] }}
-
+          initial={getInitialPosition}
+          animate={animateValue}
+          exit={isMobile ? { y: '100dvh' } : { x: '100dvw' }}
+          transition={{ duration: 1, ease: [0.2, 0, 0.4, 1] }}
+          onClick={handlePanelClick}
         >
           <S.DetailPageName>문의 상세</S.DetailPageName>
           <S.ButtonWrapper>

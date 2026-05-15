@@ -1,12 +1,12 @@
 'use client';
 
-import { useStores } from '@/hooks/useStores';
+import { useAllStores } from '@/hooks/useStores';
 import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
 
 export default function Map2D({ onStoreHover, onStoreLeave }) {
-  const { stores } = useStores();
+  const { stores } = useAllStores(); // 지도용으로는 모든 스토어 가져오기
   const pathname = usePathname();
   const router = useRouter();
   const mapRef = useRef(null);
@@ -239,10 +239,13 @@ export default function Map2D({ onStoreHover, onStoreLeave }) {
     });
   }, [stores, handlePOIClick]);
 
-  // Google Maps 초기화
+  // Google Maps 초기화 - Forced reflow 최소화를 위한 최적화
   useEffect(() => {
+    let isMounted = true;
+    let initTimer = null;
+
     const initMap = async () => {
-      if (!mapRef.current) return;
+      if (!mapRef.current || !isMounted) return;
 
       try {
         // API 라우트를 통해 API 키 가져오기
@@ -258,32 +261,37 @@ export default function Map2D({ onStoreHover, onStoreLeave }) {
         }
 
         // @googlemaps/js-api-loader 사용
+        // libraries 최소화하여 초기 로딩 시간 단축
         const loader = new Loader({
           apiKey: apiKey,
           version: "weekly",
-          libraries: ["places"]
+          libraries: [] // places는 필요할 때만 로드
         });
 
         const { Map } = await loader.importLibrary("maps");
 
         // DOM 요소가 존재하는지 확인
-        if (!mapRef.current) {
+        if (!mapRef.current || !isMounted) {
           console.warn('Map container not found');
           return;
         }
 
-        // 모바일 감지
-        const isMobile = window.innerWidth <= 768;
+        // requestAnimationFrame을 사용하여 DOM 조작을 배치 처리 (Forced reflow 최소화)
+        requestAnimationFrame(() => {
+          if (!mapRef.current || !isMounted) return;
 
-        // 모바일/데스크톱에 따른 초기 설정
-        const initialCenter = isMobile
-          ? { lat: 37.567750, lng: 126.996055 } // 모바일 좌표
-          : { lat: 37.567836, lng: 126.997402 }; // 데스크톱 좌표
+          // 모바일 감지 (한 번만 읽어서 reflow 최소화)
+          const isMobile = window.innerWidth <= 768;
 
-        const initialZoom = isMobile ? 18.3 : 18.8; // 모바일: 17, 데스크톱: 18.5
+          // 모바일/데스크톱에 따른 초기 설정
+          const initialCenter = isMobile
+            ? { lat: 37.567750, lng: 126.996055 } // 모바일 좌표
+            : { lat: 37.567836, lng: 126.997402 }; // 데스크톱 좌표
 
-        // 지도 초기화
-        mapInstanceRef.current = new Map(mapRef.current, {
+          const initialZoom = isMobile ? 18.3 : 18.8; // 모바일: 17, 데스크톱: 18.5
+
+          // 지도 초기화
+          mapInstanceRef.current = new Map(mapRef.current, {
           center: initialCenter,
           zoom: initialZoom,
           mapTypeId: 'roadmap',
@@ -485,27 +493,68 @@ export default function Map2D({ onStoreHover, onStoreLeave }) {
               ]
             }
           ]
-        });
+          });
 
-        // POI 마커 추가
-        addMarkers();
+          // POI 마커 추가 (다음 프레임에서 실행하여 reflow 분산)
+          requestAnimationFrame(() => {
+            if (isMounted && mapInstanceRef.current) {
+              addMarkers();
+            }
+          });
+        });
       } catch (error) {
         console.error('Google Maps 로딩 실패:', error);
         // 폴백: 정적 이미지 표시
-        if (mapRef.current) {
-          mapRef.current.style.backgroundImage = 'url(/2Dmap.png)';
-          mapRef.current.style.backgroundSize = 'cover';
-          mapRef.current.style.backgroundPosition = 'center';
+        if (mapRef.current && isMounted) {
+          requestAnimationFrame(() => {
+            if (mapRef.current && isMounted) {
+              mapRef.current.style.backgroundImage = 'url(/2Dmap.png)';
+              mapRef.current.style.backgroundSize = 'cover';
+              mapRef.current.style.backgroundPosition = 'center';
+            }
+          });
         }
       }
     };
 
-    // DOM이 완전히 마운트된 후 실행
-    const timer = setTimeout(() => {
-      initMap();
-    }, 100);
+    // DOM이 완전히 마운트되고 레이아웃이 안정된 후 실행
+    // Intersection Observer를 사용하여 지도가 뷰포트에 들어올 때만 로드 (lazy loading)
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && isMounted) {
+            // 지도가 뷰포트에 보일 때만 초기화
+            // 지연 시간을 줄여서 더 빠르게 로드 (초기 렌더링 완료 후 즉시 로드)
+            initTimer = setTimeout(() => {
+              if (isMounted) {
+                initMap();
+              }
+            }, 100); // 200ms -> 100ms로 단축하여 더 빠른 로드
+            observer.disconnect();
+          }
+        });
+      },
+      { rootMargin: '50px' } // 뷰포트 50px 전에 미리 로드
+    );
 
-    return () => clearTimeout(timer);
+    if (mapRef.current) {
+      observer.observe(mapRef.current);
+    } else {
+      // mapRef가 아직 없는 경우 약간의 지연 후 재시도
+      initTimer = setTimeout(() => {
+        if (mapRef.current && isMounted) {
+          observer.observe(mapRef.current);
+        }
+      }, 100);
+    }
+
+    return () => {
+      isMounted = false;
+      if (initTimer) {
+        clearTimeout(initTimer);
+      }
+      observer.disconnect();
+    };
   }, [addMarkers]);
 
   // stores가 변경될 때마다 마커 업데이트
@@ -515,10 +564,15 @@ export default function Map2D({ onStoreHover, onStoreLeave }) {
     }
   }, [stores, addMarkers]);
 
-  // 지도 크기 조정
+  // 지도 크기 조정 - requestAnimationFrame으로 배치 처리
   useEffect(() => {
     if (mapInstanceRef.current) {
-      google.maps.event.trigger(mapInstanceRef.current, 'resize');
+      // requestAnimationFrame을 사용하여 reflow를 다음 프레임으로 지연
+      requestAnimationFrame(() => {
+        if (mapInstanceRef.current) {
+          google.maps.event.trigger(mapInstanceRef.current, 'resize');
+        }
+      });
     }
   }, []);
 

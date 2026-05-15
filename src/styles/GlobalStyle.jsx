@@ -137,16 +137,16 @@ const globalStyle = css`
     border-spacing: 0;
   }
 
-  /* Global Font Size Settings */
+  /* Global Font Size Settings - globals.css와 일치하도록 설정 */
+  /* 원래 설정: 웹 10px, 모바일 11px */
   html {
-    /* Mobile first - 9pt base font size */
-    font-size: 9.6pt;
+    font-size: 13px; /* 웹 기준 폰트 크기 */
   }
 
-  /* Desktop/Web - 10pt base font size */
-  @media (min-width: 768px) {
+  /* 모바일 기준 폰트 크기 */
+  @media (max-width: 768px) {
     html {
-      font-size: 10pt;
+      font-size: 12px; /* 모바일 기준 폰트 크기 */
     }
   }
 

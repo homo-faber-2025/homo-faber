@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useLayoutEffect } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import { useStoreDetail } from '@/hooks/useStores';
@@ -22,8 +22,9 @@ function StoreDetailContainer({ }) {
   const router = useRouter();
   const pathname = usePathname();
   const { isMobile, isReady } = useWindowSize();
-  const [right, setRight] = useState('-100dvw');
-  const [bottom, setBottom] = useState('-100dvh');
+  // 패널 상태: 'hidden' | 'expanded' | 'collapsed'
+  const [panelState, setPanelState] = useState('hidden');
+  const prevStoreIdRef = useRef(null); // 이전 storeId 추적
   const [capacityTypes, setCapacityTypes] = useState([]);
   const [industryTypes, setIndustryTypes] = useState([]);
   const [interviews, setInterviews] = useState([]);
@@ -90,37 +91,81 @@ function StoreDetailContainer({ }) {
     fetchComments();
   }, [storeId]);
 
-  // pathname 변경 시 위치 업데이트
-  useLayoutEffect(() => {
-    // isReady가 false면 아직 초기값이 설정되지 않았으므로 실행하지 않음
-    if (!isReady) return;
-
-    if (isMobile) {
-      const newBottom = getMobileBottomPosition(pathname);
-      setBottom(newBottom);
-    } else {
-      const newRight = getDesktopRightPosition(pathname);
-      setRight(newRight);
+  // 분기점 1: storeId가 나타날 때 (마운트) - expanded 상태로 시작
+  useEffect(() => {
+    if (storeId && isReady) {
+      // 새로운 storeId로 변경되었을 때만 expanded로 설정
+      if (prevStoreIdRef.current !== storeId) {
+        setPanelState('expanded');
+        prevStoreIdRef.current = storeId;
+        // StoreContainer도 expanded 되도록 이벤트 발생
+        window.dispatchEvent(new CustomEvent('expandPanel', { detail: { route: 'store' } }));
+      }
+    } else if (!storeId) {
+      setPanelState('hidden');
+      prevStoreIdRef.current = null;
     }
-  }, [pathname, isMobile, isReady]);
+  }, [storeId, isReady]);
 
-  // 모바일에서 사용할 bottom 위치를 계산하는 함수
-  const getMobileBottomPosition = (pathname) => {
-    if (pathname.startsWith('/store/') && pathname !== '/store') {
-      return '0px';
-    } else {
-      return '-100dvh';
+  // 분기점 2: 지도 클릭 시 - collapsed 상태로 변경
+  useEffect(() => {
+    if (!storeId) return;
+
+    const handleCollapsePanel = () => {
+      if (panelState === 'expanded') {
+        setPanelState('collapsed');
+      }
+    };
+
+    window.addEventListener('collapsePanel', handleCollapsePanel);
+    return () => {
+      window.removeEventListener('collapsePanel', handleCollapsePanel);
+    };
+  }, [storeId, panelState]);
+
+  // 분기점 3: 패널 클릭 시 - expanded 상태로 변경
+  const handlePanelClick = (e) => {
+    const target = e.target;
+    const isInteractive = target.closest('button, a, input, select, textarea, [role="button"], [onClick], img');
+
+    if (!isInteractive) {
+      e.stopPropagation();
+      if (panelState === 'collapsed') {
+        setPanelState('expanded');
+        // StoreContainer도 expanded 되도록 이벤트 발생
+        window.dispatchEvent(new CustomEvent('expandPanel', { detail: { route: 'store' } }));
+      }
     }
   };
 
-  // 데스크톱에서 사용할 right 위치를 계산하는 함수
-  const getDesktopRightPosition = (pathname) => {
-    if (pathname.startsWith('/store/') && pathname !== '/store') {
-      return '0px';
-    } else {
-      return '-100dvw';
+  // 패널 상태에 따른 initial 위치 계산 (transform 사용)
+  const getInitialPosition = useMemo(() => {
+    const isFirstMount = prevStoreIdRef.current !== storeId && storeId !== null;
+
+    if (panelState === 'hidden') {
+      return isMobile ? { y: '100dvh' } : { x: '100dvw' };
     }
-  };
+
+    if (panelState === 'expanded') {
+      // 처음 마운트될 때만 화면 밖에서 시작, 이후에는 initial 제거하여 motion이 자동 감지
+      return isFirstMount ? (isMobile ? { y: '100dvh' } : { x: '100dvw' }) : undefined;
+    }
+
+    // collapsed - expanded에서 collapsed로 변경될 때는 현재 위치에서 시작
+    return undefined;
+  }, [panelState, storeId, isMobile]);
+
+  // motion이 panelState를 직접 추적하도록 animate 값 계산 (transform 사용)
+  const animateValue = useMemo(() => {
+    if (panelState === 'hidden') {
+      return isMobile ? { y: '100dvh' } : { x: '100dvw' };
+    }
+    if (panelState === 'expanded') {
+      return isMobile ? { y: 0 } : { x: 0 };
+    }
+    // collapsed
+    return isMobile ? { y: 'calc(-26px + 80dvh)' } : { x: 'calc(80vw - 200px)' };
+  }, [panelState, isMobile]);
 
   const handleBookmarkClick = () => {
     if (user && storeId) {
@@ -150,17 +195,16 @@ function StoreDetailContainer({ }) {
 
   return (
     <>
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         {storeId && (
           <S.DetailWrapper
             key={storeId}
-            right={right}
-            bottom={bottom}
             isMobile={isMobile}
-            initial={isMobile ? { bottom: '-100dvh' } : { right: '-100dvw' }}
-            animate={isMobile ? { bottom: bottom } : { right: right }}
-            exit={isMobile ? { bottom: '-100dvh' } : { right: '-100dvw' }}
-            transition={{ duration: 1, ease: [0.4, 0, 0.2, 1] }}
+            initial={getInitialPosition}
+            animate={animateValue}
+            exit={isMobile ? { y: '100dvh' } : { x: '100dvw' }}
+            transition={{ duration: 1, ease: [0.2, 0, 0.4, 1] }}
+            onClick={handlePanelClick}
           >
 
 

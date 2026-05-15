@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { convertIndustryNameToKorean } from '@/utils/converters';
 import { useBookmarks } from '@/hooks/useBookmarks';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,7 +10,8 @@ import useWindowSize from '@/hooks/useWindowSize';
 import Loader from '@/components/common/Loader';
 import Error from '@/components/common/Error';
 
-const StoreList = ({ stores, isLoading, error }) => {
+const StoreList = ({ stores, isLoading, isLoadingMore, error, hasMore, onLoadMore }) => {
+  const sentinelRef = useRef(null);
   const router = useRouter();
   const { user } = useAuth();
   const { toggleBookmark, isStoreBookmarked, loading } = useBookmarks();
@@ -46,6 +47,38 @@ const StoreList = ({ stores, isLoading, error }) => {
       window.removeEventListener('storeLeave', handleStoreLeave);
     };
   }, []);
+
+  // 무한 스크롤링을 위한 Intersection Observer
+  useEffect(() => {
+    if (!onLoadMore || !hasMore || isLoading || isLoadingMore) return;
+
+    const options = {
+      root: null,
+      rootMargin: '100px',
+      threshold: 0.1,
+    };
+
+    const handleIntersect = (entries) => {
+      const [entry] = entries;
+      if (entry.isIntersecting && hasMore && !isLoading && !isLoadingMore && onLoadMore) {
+        onLoadMore();
+      }
+    };
+
+    const observer = new IntersectionObserver(handleIntersect, options);
+    const sentinel = sentinelRef.current;
+
+    if (sentinel) {
+      observer.observe(sentinel);
+    }
+
+    return () => {
+      if (sentinel) {
+        observer.unobserve(sentinel);
+      }
+      observer.disconnect();
+    };
+  }, [hasMore, isLoading, isLoadingMore, onLoadMore]);
 
   return (
     <S.TableWrapper>
@@ -129,6 +162,20 @@ const StoreList = ({ stores, isLoading, error }) => {
                 )}
               </S.TableRow>
             ))
+          )}
+          {isLoadingMore && (
+            <tr>
+              <td colSpan={user ? (isReady && isMobile ? 3 : 5) : (isReady && isMobile ? 2 : 4)}>
+                <Loader baseColor="var(--yellow)" style={{ marginTop: '5px' }} />
+              </td>
+            </tr>
+          )}
+          {hasMore && !isLoading && !isLoadingMore && (
+            <tr>
+              <td colSpan={user ? (isReady && isMobile ? 3 : 5) : (isReady && isMobile ? 2 : 4)}>
+                <div ref={sentinelRef} style={{ height: '1px' }} />
+              </td>
+            </tr>
           )}
         </S.TableBody>
       </S.StoreTable>
