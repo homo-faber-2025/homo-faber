@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useStores } from '@/hooks/useStores';
+import { useAllStores } from '@/hooks/useStores';
 import Loader from '@/components/common/Loader';
 import Error from '@/components/common/Error';
 
@@ -20,18 +20,17 @@ const Map2D = dynamic(() => import('../components/common/Map2D'), {
 });
 
 export default function MapContainer() {
-  const { stores, isLoading, error } = useStores();
+  const { stores, isLoading, error } = useAllStores(); // 지도용으로는 모든 스토어 가져오기
   const [isMap3D, setIsMap3D] = useState(false); // 기본값은 2D
   const [hasMounted3D, setHasMounted3D] = useState(false); // 3D 지도 마운트 여부
   const [hoveredStore, setHoveredStore] = useState(null); // 호버된 store 상태
   const pathname = usePathname();
   const router = useRouter();
 
-  // /store 페이지 또는 개별 스토어 페이지에서 Map3D 클릭 시 홈으로 이동
+  // 지도 클릭 시 패널을 작게 만들기
   const handleMapClick = (e) => {
-    if (pathname !== '/') {
-      router.push('/');
-    }
+    // 패널 축소 이벤트 발생
+    window.dispatchEvent(new CustomEvent('collapsePanel'));
   };
 
   // 지도 전환 함수
@@ -86,16 +85,18 @@ export default function MapContainer() {
   return (
     <>
       {/* Map2D - 처음에는 2D 지도만 렌더링 */}
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100dvw',
-        height: '100dvh',
-        zIndex: isMap3D ? 1 : 2
-      }} onClick={handleMapClick}>
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100dvw',
+          height: '100dvh',
+          zIndex: isMap3D ? 1 : 2
+        }}
+        onClick={handleMapClick}
+      >
         <Map2D
-          stores={stores}
           onStoreHover={handleStoreHover}
           onStoreLeave={handleStoreLeave}
         />
@@ -103,14 +104,16 @@ export default function MapContainer() {
 
       {/* Map3D - 한 번 마운트되면 유지하고 z-index로 전환 */}
       {hasMounted3D && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100dvw',
-          height: '100dvh',
-          zIndex: isMap3D ? 2 : 1
-        }} onClick={handleMapClick}>
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100dvw',
+            height: '100dvh',
+            zIndex: isMap3D ? 2 : 1
+          }}
+        >
           <Map3D
             stores={stores}
             onStoreHover={handleStoreHover}

@@ -17,19 +17,37 @@ const Map3D = ({ stores, onStoreHover, onStoreLeave, onMapClick }) => {
   usePOI(stores, handlePOIClick, onStoreHover, onStoreLeave);
 
 
-  // 터치 이벤트 핸들러 추가
+  // 지도 클릭 핸들러 (마우스 및 터치)
+  const handleMapClickEvent = useCallback((e) => {
+    // POI 클릭이 아닌 경우에만 패널 축소 이벤트 발생
+    // POI 클릭은 usePOI에서 처리되므로 여기서는 빈 공간 클릭만 처리
+    if (onMapClick) {
+      onMapClick(e);
+    }
+  }, [onMapClick]);
+
+  // 터치 이벤트 핸들러
   const handleTouchStart = (e) => {
-    // e.preventDefault();
     e.stopPropagation();
   };
 
   const handleTouchEnd = (e) => {
-    // e.preventDefault();
     e.stopPropagation();
-    if (onMapClick) {
-      onMapClick(e);
-    }
+    handleMapClickEvent(e);
   };
+
+  // 마우스 클릭 이벤트 핸들러
+  const handleMouseClick = useCallback((e) => {
+    // POI가 클릭된 경우가 아니면 패널 축소
+    const target = e.target;
+    // map3D 컨테이너나 그 자식 요소 중 POI가 아닌 경우
+    if (target.id === 'map3D' || target.closest('#map3D')) {
+      // 약간의 지연을 두어 POI 클릭 이벤트가 먼저 처리되도록 함
+      setTimeout(() => {
+        handleMapClickEvent(e);
+      }, 100);
+    }
+  }, [handleMapClickEvent]);
 
   useEffect(() => {
     // 이미 스크립트가 로드되었는지 확인
@@ -128,6 +146,19 @@ const Map3D = ({ stores, onStoreHover, onStoreLeave, onMapClick }) => {
       Module.Resize(width, height);
     }
   }, [width, height]);
+
+  // 지도 클릭 이벤트 리스너 등록
+  useEffect(() => {
+    const mapElement = document.getElementById('map3D');
+    if (!mapElement) return;
+
+    // 마우스 클릭 이벤트 리스너
+    mapElement.addEventListener('click', handleMouseClick);
+
+    return () => {
+      mapElement.removeEventListener('click', handleMouseClick);
+    };
+  }, [handleMouseClick]);
 
   return (
     <div

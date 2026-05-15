@@ -3,7 +3,6 @@
 import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import AnimatedPanel from '@/components/common/AnimatedPanel';
-import LandingPage from '@/components/common/LandingPage';
 import styled from '@emotion/styled';
 import { motion } from 'motion/react';
 import useWindowSize from '@/hooks/useWindowSize';
@@ -41,38 +40,27 @@ export default function ConditionalLayout() {
     return null;
   }
 
-  // 초기 로딩 시 필요한 패널만 렌더링 (홈 페이지는 store만)
-  const isHomePage = pathname === '/';
-  const shouldLoadStore = isHomePage || pathname?.startsWith('/store');
-  const shouldLoadInterview = pathname?.startsWith('/interview');
-  const shouldLoadWord = pathname?.startsWith('/word');
-  const shouldLoadInfo = pathname?.startsWith('/info');
-  const shouldLoadLogin = pathname?.startsWith('/login');
-  const shouldLoadSignup = pathname?.startsWith('/signup');
-  const shouldLoadMypage = pathname?.startsWith('/mypage');
-  const shouldLoadFnq = pathname?.startsWith('/fnq');
-
+  // 모든 패널을 항상 렌더링 (AnimatedPanel 내부에서 활성화/비활성화 제어)
   // isReady가 false면 로딩 상태 표시 (하이드레이션 오류 방지)
   if (!isReady) {
     return (
       <>
-        <LandingPage />
         <MapContainer />
-        {shouldLoadStore && <AnimatedPanel baseRoute='store' />}
-        {shouldLoadInterview && <AnimatedPanel baseRoute='interview' />}
-        {shouldLoadWord && <AnimatedPanel baseRoute='word' />}
-        {shouldLoadInfo && <AnimatedPanel baseRoute='info' />}
-        {shouldLoadLogin && <AnimatedPanel baseRoute='login' />}
-        {shouldLoadSignup && <AnimatedPanel baseRoute='signup' />}
-        {shouldLoadMypage && <AnimatedPanel baseRoute='mypage' />}
-        {shouldLoadFnq && <AnimatedPanel baseRoute='fnq' />}
+        <AnimatedPanel baseRoute='home' />
+        <AnimatedPanel baseRoute='store' />
+        <AnimatedPanel baseRoute='interview' />
+        <AnimatedPanel baseRoute='word' />
+        <AnimatedPanel baseRoute='info' />
+        <AnimatedPanel baseRoute='login' />
+        <AnimatedPanel baseRoute='signup' />
+        <AnimatedPanel baseRoute='mypage' />
+        <AnimatedPanel baseRoute='fnq' />
       </>
     );
   }
 
   return (
     <>
-      <LandingPage />
       <MapContainer />
       {isMobile && (
         <MobileBg
@@ -88,14 +76,15 @@ export default function ConditionalLayout() {
           }}
         />
       )}
-      {shouldLoadStore && <AnimatedPanel baseRoute='store' />}
-      {shouldLoadInterview && <AnimatedPanel baseRoute='interview' />}
-      {shouldLoadWord && <AnimatedPanel baseRoute='word' />}
-      {shouldLoadInfo && <AnimatedPanel baseRoute='info' />}
-      {shouldLoadLogin && <AnimatedPanel baseRoute='login' />}
-      {shouldLoadSignup && <AnimatedPanel baseRoute='signup' />}
-      {shouldLoadMypage && <AnimatedPanel baseRoute='mypage' />}
-      {shouldLoadFnq && <AnimatedPanel baseRoute='fnq' />}
+      <AnimatedPanel baseRoute='home' />
+      <AnimatedPanel baseRoute='store' />
+      <AnimatedPanel baseRoute='interview' />
+      <AnimatedPanel baseRoute='word' />
+      <AnimatedPanel baseRoute='info' />
+      <AnimatedPanel baseRoute='login' />
+      <AnimatedPanel baseRoute='signup' />
+      <AnimatedPanel baseRoute='mypage' />
+      <AnimatedPanel baseRoute='fnq' />
     </>
   );
 }

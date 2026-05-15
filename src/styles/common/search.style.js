@@ -21,6 +21,7 @@ export const SearchWrapper = styled(motion.div, {
     right: 5px;
     width: 70dvw;
     padding-right: 0;
+    z-index: 6; /* AnimatedPanel(z-index: 6)보다 높게 설정 */
   }
 `;
 

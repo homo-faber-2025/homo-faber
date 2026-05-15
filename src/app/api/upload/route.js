@@ -31,14 +31,47 @@ export async function POST(request) {
 
     // 파일 타입 검증 (이미지와 일반 파일 모두 허용)
     const allowedImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-    const allowedDocumentTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+    const allowedDocumentTypes = [
+      'application/pdf', 
+      'application/msword', 
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'text/plain',
+      'application/zip',
+      'application/x-zip-compressed',
+      'application/x-rar-compressed',
+      'application/x-7z-compressed'
+    ];
     const allowedTypes = [...allowedImageTypes, ...allowedDocumentTypes];
-
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { error: '지원하지 않는 파일 형식입니다.' },
-        { status: 400 }
-      );
+    
+    // 파일 확장자 추출
+    const fileExt = file.name.split('.').pop()?.toLowerCase();
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'zip', 'rar', '7z'];
+    
+    // MIME 타입이 없거나 허용되지 않은 경우, 확장자로 검증
+    if (!file.type || file.type === '') {
+      // MIME 타입이 없는 경우 확장자로 검증
+      if (!fileExt || !allowedExtensions.includes(fileExt)) {
+        console.log('파일 타입 검증 실패 (MIME 타입 없음):', { fileName: file.name, fileExt });
+        return NextResponse.json(
+          { error: '지원하지 않는 파일 형식입니다.' },
+          { status: 400 }
+        );
+      }
+    } else if (!allowedTypes.includes(file.type)) {
+      // MIME 타입이 있지만 허용 목록에 없는 경우, 확장자로 재검증
+      if (!fileExt || !allowedExtensions.includes(fileExt)) {
+        console.log('파일 타입 검증 실패:', { fileName: file.name, fileType: file.type, fileExt });
+        return NextResponse.json(
+          { error: '지원하지 않는 파일 형식입니다.' },
+          { status: 400 }
+        );
+      }
+      // 확장자는 허용되지만 MIME 타입이 다른 경우 경고만 출력하고 계속 진행
+      console.warn('MIME 타입과 확장자가 일치하지 않지만 확장자는 허용됨:', { fileName: file.name, fileType: file.type, fileExt });
     }
 
     // 파일 크기 검증 (MB 단위)
@@ -56,8 +89,7 @@ export async function POST(request) {
       processedFile = await checkAndCompressImage(file, maxSizeInMB);
     }
 
-    // 파일명 생성
-    const fileExt = file.name.split('.').pop();
+    // 파일명 생성 (이미 위에서 추출한 fileExt 사용)
     const fileName = `${Date.now()}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
     const filePath = `${fileName}`;
 

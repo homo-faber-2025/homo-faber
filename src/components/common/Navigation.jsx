@@ -87,6 +87,8 @@ export default function Navigation() {
             </Link>
           );
         })}
+        <LanguageToggle isOpen={isMobile && isOpen} />
+
 
         {isClient && isMobile && (
           <S.CloseButton onClick={handleLinkClick}>
@@ -107,7 +109,6 @@ export default function Navigation() {
         </S.SwitchText>
       </S.MapToggleButton>
 
-      <LanguageToggle isOpen={isMobile && isOpen} />
     </>
   );
 }

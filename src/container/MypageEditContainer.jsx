@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useLayoutEffect } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import { updateUserProfile, getUserInfo } from '@/utils/api/user-api';
 import useWindowSize from '@/hooks/useWindowSize';
@@ -16,8 +16,9 @@ function MypageEditContainer({ }) {
   const router = useRouter();
   const pathname = usePathname();
   const { isMobile, isReady } = useWindowSize();
-  const [right, setRight] = useState('-100dvw');
-  const [bottom, setBottom] = useState('-100dvh');
+  // 패널 상태: 'hidden' | 'expanded' | 'collapsed'
+  const [panelState, setPanelState] = useState('hidden');
+  const prevEditIdRef = useRef(null); // 이전 edit 경로 추적
   const [formData, setFormData] = useState({
     name: '',
     password: '',
@@ -28,37 +29,83 @@ function MypageEditContainer({ }) {
   const [success, setSuccess] = useState('');
   const [userInfo, setUserInfo] = useState(null);
 
-  // 모바일에서 사용할 bottom 위치를 계산하는 함수
-  const getMobileBottomPosition = (pathname) => {
-    if (pathname.startsWith('/mypage/edit')) {
-      return '0px';
-    } else {
-      return '-100dvh';
+  const isEditPage = pathname.startsWith('/mypage/edit');
+
+  // 분기점 1: edit 페이지 진입 시 - expanded 상태로 변경
+  useEffect(() => {
+    if (isEditPage && isReady) {
+      // 새로운 edit 페이지로 변경되었을 때만 expanded로 설정
+      if (prevEditIdRef.current !== pathname) {
+        setPanelState('expanded');
+        prevEditIdRef.current = pathname;
+        // MypageContainer도 expanded 되도록 이벤트 발생
+        window.dispatchEvent(new CustomEvent('expandPanel', { detail: { route: 'mypage' } }));
+      }
+    } else if (!isEditPage) {
+      setPanelState('hidden');
+      prevEditIdRef.current = null;
+    }
+  }, [isEditPage, pathname, isReady]);
+
+  // 분기점 2: 지도 클릭 시 - collapsed 상태로 변경
+  useEffect(() => {
+    if (!isEditPage) return;
+
+    const handleCollapsePanel = () => {
+      if (panelState === 'expanded') {
+        setPanelState('collapsed');
+      }
+    };
+
+    window.addEventListener('collapsePanel', handleCollapsePanel);
+    return () => {
+      window.removeEventListener('collapsePanel', handleCollapsePanel);
+    };
+  }, [isEditPage, panelState]);
+
+  // 분기점 3: 패널 클릭 시 - expanded 상태로 변경
+  const handlePanelClick = (e) => {
+    const target = e.target;
+    const isInteractive = target.closest('button, a, input, select, textarea, [role="button"], [onClick], img');
+
+    if (!isInteractive) {
+      e.stopPropagation();
+      if (panelState === 'collapsed') {
+        setPanelState('expanded');
+        // MypageContainer도 expanded 되도록 이벤트 발생
+        window.dispatchEvent(new CustomEvent('expandPanel', { detail: { route: 'mypage' } }));
+      }
     }
   };
 
-  // 데스크톱에서 사용할 right 위치를 계산하는 함수
-  const getDesktopRightPosition = (pathname) => {
-    if (pathname.startsWith('/mypage/edit')) {
-      return '0px';
-    } else {
-      return '-100dvw';
-    }
-  };
+  // 패널 상태에 따른 initial 위치 계산 (transform 사용)
+  const getInitialPosition = useMemo(() => {
+    const isFirstMount = prevEditIdRef.current !== pathname && isEditPage;
 
-  // pathname 변경 시 위치 업데이트
-  useLayoutEffect(() => {
-    // isReady가 false면 아직 초기값이 설정되지 않았으므로 실행하지 않음
-    if (!isReady) return;
-
-    if (isMobile) {
-      const newBottom = getMobileBottomPosition(pathname);
-      setBottom(newBottom);
-    } else {
-      const newRight = getDesktopRightPosition(pathname);
-      setRight(newRight);
+    if (panelState === 'hidden') {
+      return isMobile ? { y: '100dvh' } : { x: '100dvw' };
     }
-  }, [pathname, isMobile, isReady]);
+
+    if (panelState === 'expanded') {
+      // 처음 마운트될 때만 화면 밖에서 시작, 이후에는 initial 제거하여 motion이 자동 감지
+      return isFirstMount ? (isMobile ? { y: '100dvh' } : { x: '100dvw' }) : undefined;
+    }
+
+    // collapsed - expanded에서 collapsed로 변경될 때는 현재 위치에서 시작
+    return undefined;
+  }, [panelState, pathname, isEditPage, isMobile]);
+
+  // motion이 panelState를 직접 추적하도록 animate 값 계산 (transform 사용)
+  const animateValue = useMemo(() => {
+    if (panelState === 'hidden') {
+      return isMobile ? { y: '100dvh' } : { x: '100dvw' };
+    }
+    if (panelState === 'expanded') {
+      return isMobile ? { y: 0 } : { x: 0 };
+    }
+    // collapsed
+    return isMobile ? { y: 'calc(-26px + 80dvh)' } : { x: 'calc(80vw - 200px)' };
+  }, [panelState, isMobile]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -146,18 +193,16 @@ function MypageEditContainer({ }) {
   };
 
   return (
-    <AnimatePresence mode="wait">
-      {pathname.startsWith('/mypage/edit') && (
+    <AnimatePresence>
+      {isEditPage && (
         <S.EditWrapper
           key="mypage-edit"
-          right={right}
-          bottom={bottom}
           isMobile={isMobile}
-          initial={isMobile ? { bottom: '-100dvh' } : { right: '-100dvw' }}
-          animate={isMobile ? { bottom: bottom } : { right: right }}
-          exit={isMobile ? { bottom: '-100dvh' } : { right: '-100dvw' }}
-          transition={{ duration: 1, ease: [0.4, 0, 0.2, 1] }}
-        // onClick={handleEditWrapperClick}
+          initial={getInitialPosition}
+          animate={animateValue}
+          exit={isMobile ? { y: '100dvh' } : { x: '100dvw' }}
+          transition={{ duration: 1, ease: [0.2, 0, 0.4, 1] }}
+          onClick={handlePanelClick}
         >
           <S.PageName>프로필 수정</S.PageName>
           <S.UserForm

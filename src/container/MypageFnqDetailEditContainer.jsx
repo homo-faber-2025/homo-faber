@@ -8,7 +8,7 @@ import { useImageUpload } from '@/hooks/useImageUpload';
 import { AnimatePresence } from 'motion/react';
 import useWindowSize from '@/hooks/useWindowSize';
 import Loader from '@/components/common/Loader';
-import Error from '@/components/common/Error';
+import ErrorComponent from '@/components/common/Error';
 import * as S from '@/styles/fnq/fnqContainer.style';
 import * as S2 from '@/styles/fnq/fnqDeatilContainer.style';
 import { updateFnq } from '@/utils/api/fnq-api';
@@ -419,7 +419,7 @@ function MypageFnqDetailEditContainer() {
             />
           )}
           {error ? (
-            <Error
+            <ErrorComponent
               key="edit-error-component"
               style={{ marginTop: isMobile ? '20px' : '-4px' }}
             />
@@ -437,7 +437,7 @@ function MypageFnqDetailEditContainer() {
               }}
             />
           ) : !fnq ? (
-            <Error
+            <ErrorComponent
               key="edit-not-found-error"
               style={{ marginTop: isMobile ? '20px' : '-4px' }}
               message="프로젝트를 찾을 수 없습니다."

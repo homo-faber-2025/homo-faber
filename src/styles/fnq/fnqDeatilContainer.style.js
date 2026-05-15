@@ -4,17 +4,17 @@ import { motion } from 'motion/react';
 import theme from '@/styles/Theme';
 
 export const DetailWrapper = styled(motion.main, {
-  shouldForwardProp: (prop) => prop !== 'isMobile' && prop !== 'right' && prop !== 'bottom'
+  shouldForwardProp: (prop) => prop !== 'isMobile'
 })`
   width: ${(props) => props.isMobile ? '100dvw' : 'calc(80vw - 50px)'};
   height: ${(props) => props.isMobile ? 'calc(87dvh - 37px)' : '100dvh'};
   padding: ${(props) => props.isMobile ? '0px 9px' : '0px 0px 0px 60px'};
   background-color:rgb(255, 255, 255);
   position: fixed;
-  right: ${(props) => props.isMobile ? 'unset' : props.right};
-  bottom: ${(props) => props.isMobile ? props.bottom : 'unset'};
+  right: ${(props) => props.isMobile ? 'unset' : '0px'};
+  bottom: ${(props) => props.isMobile ? '0px' : 'unset'};
   top: ${(props) => props.isMobile ? 'unset' : '0px'};
-  z-index: 4;
+  z-index: 7;
   box-shadow: -2px 0 4px 0 rgba(84,84,84,0.57);
   display: flex;
   flex-direction: column;

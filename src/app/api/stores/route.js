@@ -7,6 +7,8 @@ export async function GET(request) {
     const supabase = createServerSupabaseClientSimple();
     const { searchParams } = new URL(request.url);
     const searchKeyword = searchParams.get('search');
+    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    const offset = parseInt(searchParams.get('offset') || '0', 10);
 
     let query = supabase
       .from('stores')
@@ -24,16 +26,17 @@ export async function GET(request) {
         store_material(
           material_types(id, name)
         )
-      `)
+      `, { count: 'exact' })
       .order('priority', { ascending: false })
-      .order('name');
+      .order('name')
+      .range(offset, offset + limit - 1);
 
     // 검색 키워드가 있는 경우
     if (searchKeyword && searchKeyword.trim() !== '') {
       query = query.or(`name.ilike.%${searchKeyword}%,keyword.cs.{${searchKeyword}}`);
     }
 
-    const { data, error } = await query;
+    const { data, error, count } = await query;
 
     if (error) {
       console.error('Supabase error:', error);
@@ -43,7 +46,15 @@ export async function GET(request) {
       );
     }
 
-    return NextResponse.json({ data: data || [] });
+    return NextResponse.json({ 
+      data: data || [],
+      pagination: {
+        total: count || 0,
+        limit,
+        offset,
+        hasMore: count ? offset + limit < count : false
+      }
+    });
   } catch (error) {
     console.error('API error:', error);
     return NextResponse.json(
